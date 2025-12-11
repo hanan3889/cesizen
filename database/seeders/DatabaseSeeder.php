@@ -2,8 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -13,15 +11,38 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        $this->command->info('🌱 Début du seeding de la base de données CesiZen...');
+        $this->command->newLine();
 
-        User::firstOrCreate(
-            ['email' => 'test@example.com'],
+        // 1. Créer les catégories d'information
+        $this->command->info('📁 Insertion des catégories d\'information...');
+        $this->call(CategorieInformationSeeder::class);
+        $this->command->newLine();
+
+        // 2. Créer les 43 événements de vie Holmes-Rahe
+        $this->command->info('📊 Insertion des 43 événements de vie Holmes-Rahe...');
+        $this->call(EvenementVieSeeder::class);
+        $this->command->newLine();
+
+        // 3. Créer l'administrateur et les utilisateurs de test
+        $this->command->info('👥 Création de l\'administrateur et des utilisateurs...');
+        $this->call(AdminUserSeeder::class);
+        $this->command->newLine();
+
+        $this->command->info('✅ Seeding terminé avec succès !');
+        $this->command->newLine();
+        
+        $this->command->info('📝 Récapitulatif :');
+        $this->command->table(
+            ['Élément', 'Quantité'],
             [
-                'name' => 'Test User',
-                'password' => 'password',
-                'email_verified_at' => now(),
+                ['Catégories d\'information', '5'],
+                ['Événements de vie', '43'],
+                ['Utilisateurs', '3 (1 admin + 2 utilisateurs)'],
             ]
         );
+
+        $this->command->newLine();
+        $this->command->warn('⚠️  N\'oubliez pas de changer le mot de passe administrateur !');
     }
 }
