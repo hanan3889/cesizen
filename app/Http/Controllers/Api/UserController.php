@@ -10,7 +10,27 @@ use Illuminate\Support\Facades\Hash;
 class UserController extends Controller
 {
     /**
-     * Liste de tous les utilisateurs
+     * @OA\Get(
+     *     path="/users",
+     *     summary="Liste de tous les utilisateurs",
+     *     tags={"Utilisateurs"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="role",
+     *         in="query",
+     *         description="Filtrer par rôle (utilisateur, administrateur)",
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Liste des utilisateurs",
+     *         @OA\JsonContent(type="array", @OA\Items(type="object"))
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Action non autorisée"
+     *     )
+     * )
      */
     public function index(Request $request)
     {
@@ -33,7 +53,35 @@ class UserController extends Controller
     }
 
     /**
-     * Afficher un utilisateur spécifique
+     * @OA\Get(
+     *     path="/users/{id}",
+     *     summary="Afficher un utilisateur spécifique",
+     *     tags={"Utilisateurs"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID de l'utilisateur",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Détails de l'utilisateur",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="user", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Action non autorisée"
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Utilisateur non trouvé"
+     *     )
+     * )
      */
     public function show(Request $request, $id)
     {
@@ -68,7 +116,46 @@ class UserController extends Controller
     }
 
     /**
-     * Mettre à jour un utilisateur
+     * @OA\Put(
+     *     path="/users/{id}",
+     *     summary="Mettre à jour un utilisateur",
+     *     tags={"Utilisateurs"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID de l'utilisateur",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         @OA\JsonContent(
+     *             @OA\Property(property="name", type="string", example="John Doe"),
+     *             @OA\Property(property="email", type="string", format="email", example="john.doe@example.com"),
+     *             @OA\Property(property="role", type="string", example="utilisateur", enum={"utilisateur", "administrateur"})
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Utilisateur mis à jour",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string"),
+     *             @OA\Property(property="user", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Action non autorisée"
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Utilisateur non trouvé"
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation des données échouée"
+     *     )
+     * )
      */
     public function update(Request $request, $id)
     {
@@ -95,7 +182,38 @@ class UserController extends Controller
     }
 
     /**
-     * Supprimer un utilisateur
+     * @OA\Delete(
+     *     path="/users/{id}",
+     *     summary="Supprimer un utilisateur",
+     *     tags={"Utilisateurs"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID de l'utilisateur",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Utilisateur supprimé avec succès",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Action non autorisée"
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Utilisateur non trouvé"
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Impossible de supprimer son propre compte"
+     *     )
+     * )
      */
     public function destroy(Request $request, $id)
     {
@@ -121,7 +239,46 @@ class UserController extends Controller
     }
 
     /**
-     * Réinitialiser le mot de passe 
+     * @OA\Post(
+     *     path="/users/{id}/reset-password",
+     *     summary="Réinitialiser le mot de passe",
+     *     tags={"Utilisateurs"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID de l'utilisateur",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"password", "password_confirmation"},
+     *             @OA\Property(property="password", type="string", format="password", example="new-password"),
+     *             @OA\Property(property="password_confirmation", type="string", format="password", example="new-password")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Mot de passe réinitialisé avec succès",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Action non autorisée"
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Utilisateur non trouvé"
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation des données échouée"
+     *     )
+     * )
      */
     public function resetPassword(Request $request, $id)
     {
@@ -146,7 +303,24 @@ class UserController extends Controller
     }
 
     /**
-     * Statistiques générales
+     * @OA\Get(
+     *     path="/users/statistiques",
+     *     summary="Statistiques générales",
+     *     tags={"Utilisateurs"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Statistiques générales",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="statistiques", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Action non autorisée"
+     *     )
+     * )
      */
     public function statistiques(Request $request)
     {

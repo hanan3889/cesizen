@@ -9,7 +9,19 @@ use Illuminate\Http\Request;
 class CategorieInformationController extends Controller
 {
     /**
-     * Liste de toutes les catégories
+     * @OA\Get(
+     *     path="/categories",
+     *     summary="Liste de toutes les catégories",
+     *     tags={"Catégories"},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Liste des catégories",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="categories", type="array", @OA\Items(type="object"))
+     *         )
+     *     )
+     * )
      */
     public function index()
     {
@@ -30,7 +42,30 @@ class CategorieInformationController extends Controller
     }
 
     /**
-     * Afficher une catégorie avec ses pages
+     * @OA\Get(
+     *     path="/categories/{id}",
+     *     summary="Afficher une catégorie avec ses pages",
+     *     tags={"Catégories"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID de la catégorie",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Détails de la catégorie",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="categorie", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Catégorie non trouvée"
+     *     )
+     * )
      */
     public function show($id)
     {
@@ -50,7 +85,35 @@ class CategorieInformationController extends Controller
     }
 
     /**
-     * Créer une nouvelle catégorie
+     * @OA\Post(
+     *     path="/categories",
+     *     summary="Créer une nouvelle catégorie",
+     *     tags={"Catégories"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"categorie"},
+     *             @OA\Property(property="categorie", type="string", example="Nouvelle catégorie")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Catégorie créée avec succès",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string"),
+     *             @OA\Property(property="categorie", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Action non autorisée"
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation des données échouée"
+     *     )
+     * )
      */
     public function store(Request $request)
     {
@@ -75,7 +138,46 @@ class CategorieInformationController extends Controller
     }
 
     /**
-     * Mettre à jour une catégorie
+     * @OA\Put(
+     *     path="/categories/{id}",
+     *     summary="Mettre à jour une catégorie",
+     *     tags={"Catégories"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID de la catégorie",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"categorie"},
+     *             @OA\Property(property="categorie", type="string", example="Catégorie mise à jour")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Catégorie mise à jour",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string"),
+     *             @OA\Property(property="categorie", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Action non autorisée"
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Catégorie non trouvée"
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation des données échouée"
+     *     )
+     * )
      */
     public function update(Request $request, $id)
     {
@@ -102,7 +204,38 @@ class CategorieInformationController extends Controller
     }
 
     /**
-     * Supprimer une catégorie
+     * @OA\Delete(
+     *     path="/categories/{id}",
+     *     summary="Supprimer une catégorie",
+     *     tags={"Catégories"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID de la catégorie",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Catégorie supprimée avec succès",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Action non autorisée"
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Catégorie non trouvée"
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Impossible de supprimer la catégorie car elle contient des pages"
+     *     )
+     * )
      */
     public function destroy(Request $request, $id)
     {
