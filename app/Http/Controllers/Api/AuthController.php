@@ -11,7 +11,34 @@ use Illuminate\Validation\ValidationException;
 class AuthController extends Controller
 {
     /**
-     * Inscription d'un nouvel utilisateur
+     * @OA\Post(
+     *     path="/register",
+     *     summary="Inscription d'un nouvel utilisateur",
+     *     tags={"Authentification"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"name", "email", "password", "password_confirmation"},
+     *             @OA\Property(property="name", type="string", example="John Doe"),
+     *             @OA\Property(property="email", type="string", format="email", example="john.doe@example.com"),
+     *             @OA\Property(property="password", type="string", format="password", example="password"),
+     *             @OA\Property(property="password_confirmation", type="string", format="password", example="password")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Inscription réussie",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string"),
+     *             @OA\Property(property="user", type="object"),
+     *             @OA\Property(property="token", type="string")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation des données échouée"
+     *     )
+     * )
      */
     public function register(Request $request)
     {
@@ -25,7 +52,7 @@ class AuthController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => 'utilisateur', 
+            'role' => 'utilisateur',
         ]);
 
         $token = $user->createToken('auth-token')->plainTextToken;
@@ -38,7 +65,32 @@ class AuthController extends Controller
     }
 
     /**
-     * Connexion d'un utilisateur
+     * @OA\Post(
+     *     path="/login",
+     *     summary="Connexion d'un utilisateur",
+     *     tags={"Authentification"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"email", "password"},
+     *             @OA\Property(property="email", type="string", format="email", example="john.doe@example.com"),
+     *             @OA\Property(property="password", type="string", format="password", example="password")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Connexion réussie",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string"),
+     *             @OA\Property(property="user", type="object"),
+     *             @OA\Property(property="token", type="string")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Identifiants incorrects"
+     *     )
+     * )
      */
     public function login(Request $request)
     {
@@ -69,7 +121,23 @@ class AuthController extends Controller
     }
 
     /**
-     * Déconnexion
+     * @OA\Post(
+     *     path="/logout",
+     *     summary="Déconnexion",
+     *     tags={"Authentification"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Déconnexion réussie",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Non authentifié"
+     *     )
+     * )
      */
     public function logout(Request $request)
     {
@@ -82,6 +150,24 @@ class AuthController extends Controller
 
     /**
      * Obtenir l'utilisateur connecté
+     * @OA\Get(
+     *     path="/me",
+     *     summary="Obtenir les informations de l'utilisateur connecté",
+     *     tags={"Authentification"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Informations de l'utilisateur",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="user", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Non authentifié"
+     *     )
+     * )
      */
     public function me(Request $request)
     {
@@ -91,7 +177,30 @@ class AuthController extends Controller
     }
 
     /**
-     * Mettre à jour le profil
+     * @OA\Put(
+     *     path="/profile",
+     *     summary="Mettre à jour le profil",
+     *     tags={"Authentification"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         @OA\JsonContent(
+     *             @OA\Property(property="name", type="string", example="John Doe"),
+     *             @OA\Property(property="email", type="string", format="email", example="john.doe@example.com")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Profil mis à jour",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string"),
+     *             @OA\Property(property="user", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Non authentifié"
+     *     )
+     * )
      */
     public function updateProfile(Request $request)
     {
@@ -110,7 +219,36 @@ class AuthController extends Controller
     }
 
     /**
-     * Changer le mot de passe
+     * @OA\Put(
+     *     path="/password",
+     *     summary="Changer le mot de passe",
+     *     tags={"Authentification"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"current_password", "password", "password_confirmation"},
+     *             @OA\Property(property="current_password", type="string", format="password", example="password"),
+     *             @OA\Property(property="password", type="string", format="password", example="new-password"),
+     *             @OA\Property(property="password_confirmation", type="string", format="password", example="new-password")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Mot de passe changé avec succès",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation des données échouée"
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Non authentifié"
+     *     )
+     * )
      */
     public function changePassword(Request $request)
     {
