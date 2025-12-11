@@ -1,19 +1,18 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
-use Laravel\Fortify\Features;
 
-Route::get('/', function () {
-    return Inertia::render('welcome', [
-        'canRegister' => Features::enabled(Features::registration()),
-    ]);
-})->name('home');
-
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('dashboard', function () {
-        return Inertia::render('dashboard');
-    })->name('dashboard');
+/**
+ * Route de test Tailwind (optionnel - à supprimer en production)
+ */
+Route::get('/test-tailwind', function () {
+    return view('test');
 });
 
-require __DIR__.'/settings.php';
+/**
+ * Route principale pour l'application React
+ * Capture toutes les routes et les renvoie vers React Router
+ */
+Route::get('/{any}', function () {
+    return view('app');
+})->where('any', '^(?!api|test-tailwind).*$');
