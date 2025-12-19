@@ -6,6 +6,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { AuthProvider } from './contexts/AuthContext';
 import { initializeTheme } from './hooks/use-appearance';
+import AppLayout from './layouts/app-layout';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -19,7 +20,15 @@ createInertiaApp({
             path = `./pages/${name}.tsx`;
         }
 
-        return resolvePageComponent(path, pages);
+        const page = resolvePageComponent(path, pages);
+
+        // @ts-expect-error
+        page.then((module) => {
+            // @ts-expect-error
+            module.default.layout = module.default.layout || ((page) => <AppLayout>{page}</AppLayout>);
+        });
+
+        return page;
     },
     setup({ el, App, props }) {
         const root = createRoot(el);
