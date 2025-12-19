@@ -29,7 +29,7 @@ const Home = () => {
                         ) : (
                             <>
                                 <Link href="/register" className="btn-primary text-lg">
-                                    Commencer gratuitement
+                                    Commencer
                                 </Link>
                                 <Link href="/informations" className="btn-outline text-lg">
                                     En savoir plus
