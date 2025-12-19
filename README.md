@@ -1,7 +1,11 @@
 # Cesizen
 
 ## Description
-Application Laravel/React de gestion de stress.
+Application de gestion de stress.
+
+## Technologies
+[Laravel.com]: https://img.shields.io/badge/Laravel-FF2D20?style=for-the-badge&logo=laravel&logoColor=white
+[React.js]: https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB
 
 ## Fonctionnalités
 - Consultation d'information
@@ -21,3 +25,4 @@ npm start
 
 ## Auteur
 Hanan REBAÏA - Promo CDA 25/26 CESI Meylan
+
