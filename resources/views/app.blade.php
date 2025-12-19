@@ -13,9 +13,12 @@
     
     <!-- Vite -->
     @viteReactRefresh
-    @vite(['resources/css/app.css', 'resources/js/app.jsx'])
+    @vite(['resources/css/app.css', 'resources/js/app.tsx'])
+
+    <!-- Inertia -->
+    @inertiaHead
 </head>
 <body class="antialiased">
-    <div id="app"></div>
+    @inertia
 </body>
 </html>

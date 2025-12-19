@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from '@inertiajs/react';
 import { useAuth } from '../contexts/AuthContext';
 
 const Home = () => {
@@ -19,19 +19,19 @@ const Home = () => {
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                         {isAuthenticated ? (
                             <>
-                                <Link to="/diagnostic" className="btn-primary text-lg">
+                                <Link href="/diagnostic" className="btn-primary text-lg">
                                     Faire un test de stress
                                 </Link>
-                                <Link to="/dashboard" className="btn-outline text-lg">
+                                <Link href="/dashboard" className="btn-outline text-lg">
                                     Mon tableau de bord
                                 </Link>
                             </>
                         ) : (
                             <>
-                                <Link to="/register" className="btn-primary text-lg">
+                                <Link href="/register" className="btn-primary text-lg">
                                     Commencer gratuitement
                                 </Link>
-                                <Link to="/informations" className="btn-outline text-lg">
+                                <Link href="/informations" className="btn-outline text-lg">
                                     En savoir plus
                                 </Link>
                             </>
@@ -102,7 +102,7 @@ const Home = () => {
                         Rejoignez des milliers d'utilisateurs qui gèrent leur stress avec CesiZen
                     </p>
                     {!isAuthenticated && (
-                        <Link to="/register" className="bg-white text-cesizen-green px-8 py-4 rounded-lg font-semibold hover:bg-gray-100 transition inline-block">
+                        <Link href="/register" className="bg-white text-cesizen-green px-8 py-4 rounded-lg font-semibold hover:bg-gray-100 transition inline-block">
                             Créer mon compte gratuitement
                         </Link>
                     )}

@@ -1,18 +1,26 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
 
-/**
- * Route de test Tailwind (optionnel - à supprimer en production)
- */
-Route::get('/test-tailwind', function () {
-    return view('test');
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register web routes for your application. These
+| routes are loaded by the RouteServiceProvider and all of them will
+| be assigned to the "web" middleware group. Make something great!
+|
+*/
+
+Route::get('/', function () {
+    return Inertia::render('Home');
 });
 
-/**
- * Route principale pour l'application React
- * Capture toutes les routes et les renvoie vers React Router
- */
-Route::get('/{any}', function () {
-    return view('app');
-})->where('any', '^(?!api|test-tailwind).*$');
+
+
+// Vous pouvez ajouter vos autres routes ici. Par exemple :
+// Route::get('/dashboard', function () {
+//     return Inertia::render('Dashboard');
+// })->middleware(['auth', 'verified'])->name('dashboard');
