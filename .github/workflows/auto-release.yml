@@ -1,0 +1,72 @@
+name: Auto Release on Main
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  auto-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  
+      
+      - name: Get latest tag
+        id: get_tag
+        run: |
+          # Récupère le dernier tag ou commence à v1.0.0
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          echo "latest_tag=$LATEST_TAG" >> $GITHUB_OUTPUT
+          
+          # Extrait le numéro de version
+          VERSION=${LATEST_TAG#v}
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
+          
+          # Incrémente le PATCH
+          PATCH=$((PATCH + 1))
+          NEW_VERSION="v$MAJOR.$MINOR.$PATCH"
+          
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "Nouvelle version: $NEW_VERSION"
+      
+      - name: Create Git Tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a ${{ steps.get_tag.outputs.new_version }} -m "Auto-release ${{ steps.get_tag.outputs.new_version }}"
+          git push origin ${{ steps.get_tag.outputs.new_version }}
+      
+      - name: Generate Release Notes
+        id: release_notes
+        run: |
+          # Récupère les commits depuis le dernier tag
+          PREVIOUS_TAG=${{ steps.get_tag.outputs.latest_tag }}
+          
+          echo "## Changements" > release_notes.md
+          echo "" >> release_notes.md
+          
+          # Liste les commits
+          git log $PREVIOUS_TAG..HEAD --pretty=format:"- %s (%h)" >> release_notes.md
+          
+          echo "" >> release_notes.md
+          echo "" >> release_notes.md
+          echo "**Date de release:** $(date +'%Y-%m-%d %H:%M:%S')" >> release_notes.md
+          
+          cat release_notes.md
+      
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.get_tag.outputs.new_version }}
+          name: Release ${{ steps.get_tag.outputs.new_version }}
+          body_path: release_notes.md
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
