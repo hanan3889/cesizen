@@ -28,3 +28,7 @@ yarn-error.log
 /.zed
 cesizen_db
 /api-docs.json
+/app/tests/
+
+#sonarqube
+.scannerwork/
