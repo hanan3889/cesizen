@@ -22,7 +22,6 @@ import {
     User, 
     Calendar 
 } from 'lucide-react';
-import { register as registerRoute, login as loginRoute } from '@/routes';
 
 // ============================================================================
 // TYPES
@@ -155,7 +154,7 @@ export default function Register() {
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
-        post(registerRoute.url());
+        post(route('register'));
     };
 
     // ============================================================================
@@ -433,7 +432,7 @@ export default function Register() {
                         <div className="text-center text-sm text-gray-600">
                             Déjà inscrit ?{' '}
                             <Link 
-                                href={loginRoute.url()} 
+                                href={route('login')} 
                                 className="text-green-600 font-semibold hover:underline"
                             >
                                 Se connecter

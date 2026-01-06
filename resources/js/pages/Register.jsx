@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, router } from '@inertiajs/react';
 import { useAuth } from '../contexts/AuthContext';
+import Navbar from '../components/Navbar';
 
 const Register = () => {
     const [formData, setFormData] = useState({
@@ -12,7 +13,6 @@ const Register = () => {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const { register } = useAuth();
-    const navigate = useNavigate();
 
     const handleChange = (e) => {
         setFormData({
@@ -45,7 +45,7 @@ const Register = () => {
         );
 
         if (result.success) {
-            navigate('/dashboard');
+            router.visit('/dashboard');
         } else {
             setError(result.error);
         }
@@ -54,123 +54,126 @@ const Register = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-md w-full space-y-8">
-                <div>
-                    <div className="mx-auto h-12 w-12 bg-cesizen-green rounded-full flex items-center justify-center">
-                        <span className="text-white font-bold text-2xl">C</span>
-                    </div>
-                    <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-                        Créer un compte CesiZen
-                    </h2>
-                    <p className="mt-2 text-center text-sm text-gray-600">
-                        Déjà inscrit ?{' '}
-                        <Link to="/login" className="font-medium text-cesizen-green hover:text-cesizen-green-dark">
-                            Connectez-vous
-                        </Link>
-                    </p>
-                </div>
-
-                <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-                    {error && (
-                        <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">
-                            {error}
-                        </div>
-                    )}
-
-                    <div className="space-y-4">
-                        <div>
-                            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                                Nom complet
-                            </label>
-                            <input
-                                id="name"
-                                name="name"
-                                type="text"
-                                required
-                                value={formData.name}
-                                onChange={handleChange}
-                                className="input-field"
-                                placeholder="Jean Dupont"
-                            />
-                        </div>
-
-                        <div>
-                            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                                Adresse email
-                            </label>
-                            <input
-                                id="email"
-                                name="email"
-                                type="email"
-                                autoComplete="email"
-                                required
-                                value={formData.email}
-                                onChange={handleChange}
-                                className="input-field"
-                                placeholder="votre@email.com"
-                            />
-                        </div>
-
-                        <div>
-                            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                                Mot de passe
-                            </label>
-                            <input
-                                id="password"
-                                name="password"
-                                type="password"
-                                autoComplete="new-password"
-                                required
-                                value={formData.password}
-                                onChange={handleChange}
-                                className="input-field"
-                                placeholder="••••••••"
-                            />
-                            <p className="mt-1 text-xs text-gray-500">
-                                Minimum 8 caractères
-                            </p>
-                        </div>
-
-                        <div>
-                            <label htmlFor="password_confirmation" className="block text-sm font-medium text-gray-700 mb-1">
-                                Confirmer le mot de passe
-                            </label>
-                            <input
-                                id="password_confirmation"
-                                name="password_confirmation"
-                                type="password"
-                                autoComplete="new-password"
-                                required
-                                value={formData.password_confirmation}
-                                onChange={handleChange}
-                                className="input-field"
-                                placeholder="••••••••"
-                            />
-                        </div>
-                    </div>
-
+        <div>
+            <Navbar />
+            <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+                <div className="max-w-md w-full space-y-8">
                     <div>
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="w-full btn-primary flex justify-center items-center"
-                        >
-                            {loading ? (
-                                <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                            ) : (
-                                'Créer mon compte'
-                            )}
-                        </button>
+                        <div className="mx-auto h-12 w-12 bg-cesizen-green rounded-full flex items-center justify-center">
+                            <span className="text-white font-bold text-2xl">C</span>
+                        </div>
+                        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+                            Créer un compte CesiZen
+                        </h2>
+                        <p className="mt-2 text-center text-sm text-gray-600">
+                            Déjà inscrit ?{' '}
+                            <Link href="/login" className="font-medium text-cesizen-green hover:text-cesizen-green-dark">
+                                Connectez-vous
+                            </Link>
+                        </p>
                     </div>
 
-                    <p className="text-xs text-center text-gray-500">
-                        En créant un compte, vous acceptez nos conditions d'utilisation et notre politique de confidentialité conforme au RGPD
-                    </p>
-                </form>
+                    <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+                        {error && (
+                            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">
+                                {error}
+                            </div>
+                        )}
+
+                        <div className="space-y-4">
+                            <div>
+                                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                                    Nom complet
+                                </label>
+                                <input
+                                    id="name"
+                                    name="name"
+                                    type="text"
+                                    required
+                                    value={formData.name}
+                                    onChange={handleChange}
+                                    className="input-field"
+                                    placeholder="Jean Dupont"
+                                />
+                            </div>
+
+                            <div>
+                                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                                    Adresse email
+                                </label>
+                                <input
+                                    id="email"
+                                    name="email"
+                                    type="email"
+                                    autoComplete="email"
+                                    required
+                                    value={formData.email}
+                                    onChange={handleChange}
+                                    className="input-field"
+                                    placeholder="votre@email.com"
+                                />
+                            </div>
+
+                            <div>
+                                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                                    Mot de passe
+                                </label>
+                                <input
+                                    id="password"
+                                    name="password"
+                                    type="password"
+                                    autoComplete="new-password"
+                                    required
+                                    value={formData.password}
+                                    onChange={handleChange}
+                                    className="input-field"
+                                    placeholder="••••••••"
+                                />
+                                <p className="mt-1 text-xs text-gray-500">
+                                    Minimum 8 caractères
+                                </p>
+                            </div>
+
+                            <div>
+                                <label htmlFor="password_confirmation" className="block text-sm font-medium text-gray-700 mb-1">
+                                    Confirmer le mot de passe
+                                </label>
+                                <input
+                                    id="password_confirmation"
+                                    name="password_confirmation"
+                                    type="password"
+                                    autoComplete="new-password"
+                                    required
+                                    value={formData.password_confirmation}
+                                    onChange={handleChange}
+                                    className="input-field"
+                                    placeholder="••••••••"
+                                />
+                            </div>
+                        </div>
+
+                        <div>
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                className="w-full btn-primary flex justify-center items-center"
+                            >
+                                {loading ? (
+                                    <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                ) : (
+                                    'Créer mon compte'
+                                )}
+                            </button>
+                        </div>
+
+                        <p className="text-xs text-center text-gray-500">
+                            En créant un compte, vous acceptez nos conditions d'utilisation et notre politique de confidentialité conforme au RGPD
+                        </p>
+                    </form>
+                </div>
             </div>
         </div>
     );
