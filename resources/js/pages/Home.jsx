@@ -38,7 +38,8 @@ const Home = () => {
                             </>
                         )}
                     </div>
-                </section>
+                </div>
+            </section>
 
                 {/* Features Section */}
                 <section className="bg-white py-16">
@@ -129,7 +130,6 @@ const Home = () => {
                     </div>
                 </section>
             </div>
-        </div>
     );
 };
 
