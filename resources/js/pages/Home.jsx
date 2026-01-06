@@ -7,39 +7,36 @@ const Home = () => {
     const { isAuthenticated } = useAuth();
 
     return (
-        <div>
-            <Navbar />
-            <div className="bg-gradient-to-b from-green-50 to-white">
-                {/* Hero Section */}
-                <section className="container mx-auto px-4 py-16 md:py-24">
-                    <div className="max-w-4xl mx-auto text-center">
-                        <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
-                            Bienvenue sur <span className="text-cesizen-green">CesiZen</span>
-                        </h1>
-                        <p className="text-xl text-gray-600 mb-8">
-                            Votre compagnon pour la gestion du stress et le bien-être mental
-                        </p>
-                        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                            {isAuthenticated ? (
-                                <>
-                                    <Link href="/diagnostic" className="btn-primary text-lg">
-                                        Faire un test de stress
-                                    </Link>
-                                    <Link href="/dashboard" className="btn-outline text-lg">
-                                        Mon tableau de bord
-                                    </Link>
-                                </>
-                            ) : (
-                                <>
-                                    <Link href="/register" className="btn-primary text-lg">
-                                        Commencer gratuitement
-                                    </Link>
-                                    <Link href="/informations" className="btn-outline text-lg">
-                                        En savoir plus
-                                    </Link>
-                                </>
-                            )}
-                        </div>
+        <div className="bg-gradient-to-b from-green-50 to-white">
+            {/* Hero Section */}
+            <section className="container mx-auto px-4 py-16 md:py-24">
+                <div className="max-w-4xl mx-auto text-center">
+                    <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
+                        Bienvenue sur <span className="text-cesizen-green">CesiZen</span>
+                    </h1>
+                    <p className="text-xl text-gray-600 mb-8">
+                        Votre compagnon pour la gestion du stress et le bien-être mental
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                        {isAuthenticated ? (
+                            <>
+                                <Link href="/diagnostic" className="btn-primary text-lg">
+                                    Faire un test de stress
+                                </Link>
+                                <Link href="/dashboard" className="btn-outline text-lg">
+                                    Mon tableau de bord
+                                </Link>
+                            </>
+                        ) : (
+                            <>
+                                <Link href="/register" className="btn-primary text-lg">
+                                    Commencer
+                                </Link>
+                                <Link href="/informations" className="btn-outline text-lg">
+                                    En savoir plus
+                                </Link>
+                            </>
+                        )}
                     </div>
                 </section>
 
