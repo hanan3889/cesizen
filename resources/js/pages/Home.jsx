@@ -93,6 +93,55 @@ const Home = () => {
                     </div>
                 </section>
 
+                {/* Articles Section */}
+                <section className="py-16 bg-gray-50">
+                    <div className="container mx-auto px-4">
+                        <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
+                            Conseils pour votre bien-être
+                        </h2>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                            {/* Article 1 */}
+                            <div className="bg-white p-8 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
+                                <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                                    Respirez, vous êtes au contrôle
+                                </h3>
+                                <p className="text-gray-600 mb-5">
+                                    Pratiquez la respiration carrée : inspirez pendant 4s, retenez 4s, expirez 4s, et attendez 4s. Cet exercice simple peut calmer votre système nerveux instantanément.
+                                </p>
+                                <Link href="/informations" className="font-semibold text-cesizen-green hover:text-green-700 transition-colors">
+                                    En savoir plus &rarr;
+                                </Link>
+                            </div>
+
+                            {/* Article 2 */}
+                            <div className="bg-white p-8 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
+                                <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                                    L'importance d'une routine saine
+                                </h3>
+                                <p className="text-gray-600 mb-5">
+                                    Un sommeil régulier, une alimentation équilibrée et une activité physique sont les piliers de la santé mentale. Essayez de fixer des heures de coucher et de lever constantes.
+                                </p>
+                                <Link href="/informations" className="font-semibold text-cesizen-green hover:text-green-700 transition-colors">
+                                    En savoir plus &rarr;
+                                </Link>
+                            </div>
+
+                            {/* Article 3 */}
+                            <div className="bg-white p-8 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
+                                <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                                    Connectez-vous au moment présent
+                                </h3>
+                                <p className="text-gray-600 mb-5">
+                                    La pleine conscience vous aide à vous détacher des pensées anxieuses. Prenez 5 minutes pour vous concentrer sur vos sensations : les sons, l'air sur votre peau, vos pieds sur le sol.
+                                </p>
+                                <Link href="/informations" className="font-semibold text-cesizen-green hover:text-green-700 transition-colors">
+                                    En savoir plus &rarr;
+                                </Link>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
                 {/* CTA Section */}
                 <section className="bg-cesizen-green py-16">
                     <div className="container mx-auto px-4 text-center">
