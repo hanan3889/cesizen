@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\CategorieInformationController;
+use App\Http\Controllers\PageInformationController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -16,9 +18,9 @@ Route::get('/login', function () {
     return Inertia::render('auth/login');
 })->middleware('guest')->name('login');
 
-Route::get('/informations', function () {
-    return Inertia::render('Informations');
-})->name('informations');
+Route::get('/informations', [PageInformationController::class, 'index'])->name('informations');
+
+Route::get('/categories/{category}', [CategorieInformationController::class, 'show'])->name('categories.show');
 
 
 
