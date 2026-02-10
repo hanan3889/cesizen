@@ -1,36 +1,30 @@
-import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
-import AppLayout from '@/layouts/app-layout';
-import { dashboard } from '@/routes';
-import { type BreadcrumbItem } from '@/types';
-import { Head } from '@inertiajs/react';
+import React from 'react';
+import { Head, usePage } from '@inertiajs/react';
+import AdminLayout from '@/layouts/AdminLayout';
+import { type PageProps } from '@/types';
 
-const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Dashboard',
-        href: dashboard().url,
-    },
-];
+const Dashboard = () => {
+    const { auth } = usePage<PageProps>().props;
 
-export default function Dashboard() {
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
+        <>
             <Head title="Dashboard" />
-            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
-                <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-                    <div className="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                        <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-                    </div>
-                    <div className="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                        <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-                    </div>
-                    <div className="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                        <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-                    </div>
-                </div>
-                <div className="relative min-h-[100vh] flex-1 overflow-hidden rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border">
-                    <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-                </div>
+            <div className="bg-white dark:bg-gray-800 shadow-lg rounded-xl p-8">
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+                    Bonjour, {auth.user?.name ?? 'Admin'} !
+                </h1>
+                <p className="mt-4 text-lg text-gray-600 dark:text-gray-400">
+                    Bienvenue sur votre tableau de bord CesiZen.
+                </p>
+                <p className="mt-2 text-gray-500">
+                    Utilisez le menu de gauche pour naviguer entre les différentes sections de l'administration.
+                </p>
             </div>
-        </AppLayout>
+        </>
     );
-}
+};
+
+// Assigne le layout d'administration à cette page
+Dashboard.layout = (page: React.ReactNode) => <AdminLayout>{page}</AdminLayout>;
+
+export default Dashboard;

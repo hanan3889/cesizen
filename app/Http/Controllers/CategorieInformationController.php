@@ -11,15 +11,12 @@ class CategorieInformationController extends Controller
     /**
      * Affiche une catégorie spécifique et ses pages publiées.
      */
-    public function show(string $categoryName)
+    public function show($categoryId)
     {
-        // Récupère la catégorie avec ses pages publiées, ou échoue avec une erreur 404
-        $category = CategorieInformation::with('pagesPubliees')
-                        ->where('categorie', $categoryName)
-                        ->firstOrFail();
-
+        // We just pass the ID to the frontend.
+        // The frontend component will fetch the data from the API.
         return Inertia::render('Categories/Show', [
-            'category' => $category,
+            'categoryId' => $categoryId,
         ]);
     }
 }
