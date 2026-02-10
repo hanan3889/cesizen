@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
@@ -113,6 +114,10 @@ class AuthController extends Controller
         // Créer un nouveau token
         $token = $user->createToken('auth-token')->plainTextToken;
 
+        // Créer la session web
+        Auth::login($user);
+        $request->session()->regenerate();
+
         return response()->json([
             'message' => 'Connexion réussie',
             'user' => $user,
@@ -141,7 +146,17 @@ class AuthController extends Controller
      */
     public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
+        // Révoquer le token Sanctum de l'utilisateur authentifié via l'API
+        if ($request->user('sanctum')) {
+            $request->user('sanctum')->currentAccessToken()->delete();
+        }
+
+        // Déconnecter la session web
+        Auth::guard('web')->logout();
+
+        // Invalider la session et régénérer le token CSRF
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
 
         return response()->json([
             'message' => 'Déconnexion réussie',
