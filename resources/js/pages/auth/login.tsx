@@ -1,5 +1,5 @@
-import { Head, Link, useForm } from '@inertiajs/react';
-import { FormEventHandler, useEffect, useState } from 'react';
+import { Head, Link, router } from '@inertiajs/react';
+import { FormEventHandler, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -12,15 +12,17 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import AuthLayout from '@/layouts/auth-layout';
-import { login, register } from '@/routes';
+import { register } from '@/routes';
 import { 
     Mail, 
     Lock, 
     Eye, 
     EyeOff,
     Check,
-    X
+    X,
+    AlertCircle
 } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 // ============================================================================
 // TYPES
@@ -46,26 +48,21 @@ export default function Login({
     canResetPassword,
     canRegister,
 }: LoginProps) {
-    // Inertia.js Form
-    const { data, setData, post, processing, errors, reset } = useForm({
-        email: '',
-        password: '',
-        remember: false,
-    });
+    const { login } = useAuth();
 
     // States locaux
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [remember, setRemember] = useState(false);
+    const [errors, setErrors] = useState<{ [key: string]: string[] }>({});
+    const [processing, setProcessing] = useState(false);
+    
     const [validation, setValidation] = useState<ValidationState>({
         email: null,
         password: null,
     });
     
     const [showPassword, setShowPassword] = useState<boolean>(false);
-
-    useEffect(() => {
-        return () => {
-            reset('password');
-        };
-    }, []);
 
     // ============================================================================
     // FONCTIONS DE VALIDATION
@@ -84,22 +81,42 @@ export default function Login({
         }
     };
 
-    const handleInputChange = (field: keyof typeof data, value: string | boolean) => {
-        setData(field, value);
-        
-        if (typeof value === 'string' && value.length > 0 && field in validation) {
-            setValidation(prev => ({ 
-                ...prev, 
-                [field]: validateField(field as keyof ValidationState, value) 
-            }));
-        } else if (typeof value === 'string' && field in validation) {
-            setValidation(prev => ({ ...prev, [field]: null }));
+    const handleEmailChange = (value: string) => {
+        setEmail(value);
+        if (value.length > 0) {
+            setValidation(prev => ({ ...prev, email: validateField('email', value) }));
+        } else {
+            setValidation(prev => ({ ...prev, email: null }));
         }
     };
 
-    const submit: FormEventHandler = (e) => {
+    const handlePasswordChange = (value: string) => {
+        setPassword(value);
+        if (value.length > 0) {
+            setValidation(prev => ({ ...prev, password: validateField('password', value) }));
+        } else {
+            setValidation(prev => ({ ...prev, password: null }));
+        }
+    };
+
+    const submit: FormEventHandler = async (e) => {
         e.preventDefault();
-        post(login.url());
+        setProcessing(true);
+        setErrors({});
+
+        const result = await login(email, password);
+
+        setProcessing(false);
+
+        if (result.success) {
+            router.visit('/dashboard');
+        } else {
+            if (result.errors) {
+                setErrors(result.errors);
+            } else if (result.error) {
+                setErrors({ general: [result.error] });
+            }
+        }
     };
 
     // ============================================================================
@@ -144,6 +161,18 @@ export default function Login({
                         </div>
                     )}
 
+                    {/* Erreur générale */}
+                    {errors.general && (
+                        <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 flex items-start space-x-3">
+                            <AlertCircle className="h-5 w-5 text-red-500 mt-0.5" />
+                            <div>
+                                <p className="text-sm text-red-800 font-medium">
+                                    {errors.general[0]}
+                                </p>
+                            </div>
+                        </div>
+                    )}
+
                     <form onSubmit={submit} className="space-y-4">
                         {/* Email */}
                         <div className="space-y-2">
@@ -154,25 +183,26 @@ export default function Login({
                                     id="email"
                                     type="email"
                                     name="email"
-                                    value={data.email}
+                                    value={email}
                                     autoComplete="email"
                                     autoFocus
-                                    onChange={(e) => handleInputChange('email', e.target.value)}
+                                    onChange={(e) => handleEmailChange(e.target.value)}
                                     className={`pl-10 ${
+                                        errors.email ? 'border-red-500 focus:ring-red-500' :
                                         validation.email === false ? 'border-red-500 focus:ring-red-500' :
                                         validation.email === true ? 'border-green-500 focus:ring-green-500' : ''
                                     }`}
                                     placeholder="votre@email.com"
                                     required
                                 />
-                                {validation.email === true && (
+                                {validation.email === true && !errors.email && (
                                     <Check className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-green-500" />
                                 )}
-                                {validation.email === false && (
+                                {(validation.email === false || errors.email) && (
                                     <X className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-red-500" />
                                 )}
                             </div>
-                            {errors.email && <p className="text-xs text-red-500">{errors.email}</p>}
+                            {errors.email && <p className="text-xs text-red-500 mt-1">{errors.email[0]}</p>}
                         </div>
 
                         {/* Mot de passe */}
@@ -194,10 +224,11 @@ export default function Login({
                                     id="password"
                                     type={showPassword ? 'text' : 'password'}
                                     name="password"
-                                    value={data.password}
+                                    value={password}
                                     autoComplete="current-password"
-                                    onChange={(e) => handleInputChange('password', e.target.value)}
+                                    onChange={(e) => handlePasswordChange(e.target.value)}
                                     className={`pl-10 pr-10 ${
+                                        errors.password ? 'border-red-500 focus:ring-red-500' :
                                         validation.password === false ? 'border-red-500 focus:ring-red-500' :
                                         validation.password === true ? 'border-green-500 focus:ring-green-500' : ''
                                     }`}
@@ -212,7 +243,7 @@ export default function Login({
                                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                                 </button>
                             </div>
-                            {errors.password && <p className="text-xs text-red-500">{errors.password}</p>}
+                            {errors.password && <p className="text-xs text-red-500 mt-1">{errors.password[0]}</p>}
                         </div>
 
                         {/* Se souvenir de moi */}
@@ -220,8 +251,8 @@ export default function Login({
                             <Checkbox
                                 id="remember"
                                 name="remember"
-                                checked={data.remember}
-                                onCheckedChange={(checked) => handleInputChange('remember', !!checked)}
+                                checked={remember}
+                                onCheckedChange={(checked) => setRemember(!!checked)}
                                 className="mt-0.5"
                             />
                             <label 
@@ -259,7 +290,7 @@ export default function Login({
             </Card>
 
             {/* Styles pour les animations */}
-            <style jsx global>{`
+            <style>{`
                 @keyframes float {
                     0%, 100% {
                         transform: translate(0, 0) scale(1);

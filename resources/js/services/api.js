@@ -40,7 +40,7 @@ api.interceptors.response.use(
 export const authService = {
     register: (data) => api.post('/register', data),
     login: (data) => api.post('/login', data),
-    logout: () => api.post('/logout'),
+    logout: () => axios.post('/logout'),
     me: () => api.get('/me'),
     updateProfile: (data) => api.put('/profile', data),
     changePassword: (data) => api.post('/change-password', data),

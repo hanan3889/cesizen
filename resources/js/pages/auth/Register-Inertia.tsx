@@ -154,7 +154,7 @@ export default function Register() {
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
-        post(route('register'));
+        post(window.route('register'));
     };
 
     // ============================================================================
@@ -432,7 +432,7 @@ export default function Register() {
                         <div className="text-center text-sm text-gray-600">
                             Déjà inscrit ?{' '}
                             <Link 
-                                href={route('login')} 
+                                href={window.route('login')} 
                                 className="text-green-600 font-semibold hover:underline"
                             >
                                 Se connecter
