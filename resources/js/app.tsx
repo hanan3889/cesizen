@@ -7,6 +7,7 @@ import { createRoot } from 'react-dom/client';
 import { AuthProvider } from './contexts/AuthContext';
 import { initializeTheme } from './hooks/use-appearance';
 import AppLayout from './layouts/app-layout';
+import { route } from 'ziggy-js';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -31,6 +32,9 @@ createInertiaApp({
         return page;
     },
     setup({ el, App, props }) {
+        window.route = (name, params, absolute, config = props.initialPage.props.ziggy) => 
+            route(name, params, absolute, config);
+
         const root = createRoot(el);
 
         root.render(
@@ -45,6 +49,5 @@ createInertiaApp({
         color: '#4B5563',
     },
 });
-
 
 initializeTheme();

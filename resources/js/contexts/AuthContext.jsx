@@ -38,6 +38,13 @@ export const AuthProvider = ({ children }) => {
             
             return { success: true, user };
         } catch (error) {
+            if (error.response && error.response.status === 422) {
+                return {
+                    success: false,
+                    error: error.response.data.message,
+                    errors: error.response.data.errors,
+                }
+            }
             return { 
                 success: false, 
                 error: error.response?.data?.message || 'Erreur de connexion' 
@@ -77,6 +84,7 @@ export const AuthProvider = ({ children }) => {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
             setUser(null);
+            window.location.assign('/');
         }
     };
 
