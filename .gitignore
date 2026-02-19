@@ -37,3 +37,4 @@ cesizen_db
 # SonarQube
 .scannerwork/
 coverage/
+.env
