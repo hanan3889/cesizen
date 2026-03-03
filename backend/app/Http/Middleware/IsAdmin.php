@@ -19,9 +19,7 @@ class IsAdmin
             return $next($request);
         }
 
-        // Si l'utilisateur n'est pas un admin, on le redirige ou on renvoie une erreur 403.
-        // Pour une API, abort(403) est bien. Pour le web, une redirection peut être préférable.
-        // abort(403, 'Accès non autorisé.');
-        return redirect('/')->with('error', 'Accès non autorisé.');
+        // Pour une API, on retourne une réponse JSON avec un statut 403.
+        return response()->json(['message' => 'Accès non autorisé.'], 403);
     }
 }
