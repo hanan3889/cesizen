@@ -1,33 +1,52 @@
 <?php
 
+use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\CategorieInformationController;
+use App\Http\Controllers\PageInformationController;
+use App\Http\Controllers\UserController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-*/
 
-// Route principale
-Route::get('/', function () { return response('OK'); })->name('home');
 
-// Dashboard
-Route::get('/dashboard', function () { return response('OK'); })->name('dashboard');
+Route::get('/', function () {
+    return Inertia::render('Home');
+});
 
-// Profile settings
-Route::get('/settings/profile', function () { return response('OK'); })->name('profile.edit');
-Route::put('/settings/profile', function () { return response('OK'); })->name('profile.update');
-Route::delete('/settings/profile', function () { return response('OK'); })->name('profile.destroy');
+Route::get('/register', [RegisteredUserController::class, 'create'])->middleware('guest')->name('register');
 
-// Password settings
-Route::get('/settings/password', function () { return response('OK'); })->name('user-password.edit');
-Route::put('/settings/password', function () { return response('OK'); })->name('user-password.update');
+Route::get('/login', function () {
+    return Inertia::render('auth/login');
+})->middleware('guest')->name('login');
 
-// Two-factor authentication
-Route::get('/settings/two-factor', function () { return response('OK'); })->name('two-factor.show');
+Route::get('/informations', function () {
+    return Inertia::render('Informations');
+})->name('informations');
 
-// Confirm password
-Route::get('/confirm-password', function () { return response('OK'); })->name('password.confirm');
+Route::get('/categories/{categoryId}', [CategorieInformationController::class, 'show'])->name('categories.show');
 
-// Profile (legacy)
-Route::get('/user/profile', function () { return response('OK'); })->name('profile.show');
+// --- Routes Administration ---
+Route::middleware(['auth', 'verified', 'is_admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/users', function () {
+        return Inertia::render('Admin/Users/Index');
+    })->name('users.index');
+});
+
+Route::post('/logout', function (Request $request) {
+    if (Auth::user()) {
+        Auth::user()->tokens()->delete();
+    }
+
+    Auth::guard('web')->logout();
+
+    $request->session()->invalidate();
+    $request->session()->regenerateToken();
+
+    return response()->json(['message' => 'Logged out successfully']);
+})->name('logout');
+
+Route::get('/dashboard', function () {
+    return Inertia::render('dashboard');
+})->middleware(['auth'])->name('dashboard');
