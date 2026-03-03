@@ -26,7 +26,7 @@ jobs:
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.3' # Assuming PHP 8.3, adjust if needed
+          php-version: '8.4' # Assuming PHP 8.3, adjust if needed
           extensions: dom, curl, libxml, mbstring, zip, pcov # PCOV for code coverage
           tools: composer
           coverage: pcov
