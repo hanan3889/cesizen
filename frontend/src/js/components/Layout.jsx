@@ -12,7 +12,7 @@ const Layout = () => {
             <footer className="bg-white border-t mt-auto">
                 <div className="container mx-auto px-4 py-6">
                     <p className="text-center text-gray-600">
-                        © 2025 CesiZen - Ministère de la Santé et de la Prévention
+                        © {new Date().getFullYear()} CesiZen - Ministère de la Santé et de la Prévention
                     </p>
                 </div>
             </footer>
