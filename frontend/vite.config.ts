@@ -1,4 +1,5 @@
-import { defineConfig } from 'vite';
+/// <reference types="vitest" />
+import { defineConfig } from 'vitest/config';
 import laravel from 'laravel-vite-plugin';
 import react from '@vitejs/plugin-react';
 import path from 'path';
@@ -16,6 +17,11 @@ export default defineConfig({
         }),
         react(),
     ],
+    test: {
+        globals: true,
+        environment: 'jsdom',
+        setupFiles: './src/js/setupTests.ts',
+    },
     resolve: {
         alias: {
             '@': path.resolve(__dirname, './src/js'),

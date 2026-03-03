@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
@@ -15,104 +17,68 @@ class UserController extends Controller
      *     summary="Liste de tous les utilisateurs",
      *     tags={"Utilisateurs"},
      *     security={{"bearerAuth":{}}},
-     *     @OA\Parameter(
-     *         name="role",
-     *         in="query",
-     *         description="Filtrer par rôle (utilisateur, administrateur)",
-     *         @OA\Schema(type="string")
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Liste des utilisateurs",
-     *         @OA\JsonContent(type="array", @OA\Items(type="object"))
-     *     ),
-     *     @OA\Response(
-     *         response=403,
-     *         description="Action non autorisée"
-     *     )
+     *     @OA\Response(response=200, description="Liste des utilisateurs"),
+     *     @OA\Response(response=403, description="Action non autorisée")
      * )
      */
-    public function index(Request $request)
+    public function index()
     {
-        if (!$request->user()->isAdmin()) {
-            return response()->json([
-                'message' => 'Action non autorisée',
-            ], 403);
-        }
+        return response()->json([
+            'data' => User::paginate(15),
+        ]);
+    }
 
-        $query = User::query();
+    /**
+     * @OA\Post(
+     *     path="/users",
+     *     summary="Créer un nouvel utilisateur",
+     *     tags={"Utilisateurs"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"name", "email", "password", "role"},
+     *             @OA\Property(property="name", type="string", example="John Doe"),
+     *             @OA\Property(property="email", type="string", format="email", example="john.doe@example.com"),
+     *             @OA\Property(property="password", type="string", format="password", example="password123"),
+     *             @OA\Property(property="password_confirmation", type="string", format="password", example="password123"),
+     *             @OA\Property(property="role", type="string", enum={"utilisateur", "administrateur"})
+     *         )
+     *     ),
+     *     @OA\Response(response=201, description="Utilisateur créé"),
+     *     @OA\Response(response=403, description="Action non autorisée"),
+     *     @OA\Response(response=422, description="Validation échouée")
+     * )
+     */
+    public function store(Request $request)
+    {
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:8|confirmed',
+            'role' => ['required', Rule::in(['utilisateur', 'administrateur'])],
+        ]);
 
-        // Filtrer par rôle si demandé
-        if ($request->has('role')) {
-            $query->where('role', $request->role);
-        }
+        $user = User::create($validatedData);
 
-        $users = $query->orderBy('created_at', 'desc')->paginate(20);
-
-        return response()->json($users);
+        return response()->json(['user' => $user], 201);
     }
 
     /**
      * @OA\Get(
      *     path="/users/{id}",
-     *     summary="Afficher un utilisateur spécifique",
+     *     summary="Afficher un utilisateur",
      *     tags={"Utilisateurs"},
      *     security={{"bearerAuth":{}}},
-     *     @OA\Parameter(
-     *         name="id",
-     *         in="path",
-     *         required=true,
-     *         description="ID de l'utilisateur",
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Détails de l'utilisateur",
-     *         @OA\JsonContent(
-     *             type="object",
-     *             @OA\Property(property="user", type="object")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=403,
-     *         description="Action non autorisée"
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Utilisateur non trouvé"
-     *     )
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Détails de l'utilisateur"),
+     *     @OA\Response(response=403, description="Action non autorisée"),
+     *     @OA\Response(response=404, description="Utilisateur non trouvé")
      * )
      */
-    public function show(Request $request, $id)
+    public function show(User $user)
     {
-        // Seul l'admin ou l'utilisateur lui-même peut voir le profil
-        if (!$request->user()->isAdmin() && $request->user()->id != $id) {
-            return response()->json([
-                'message' => 'Action non autorisée',
-            ], 403);
-        }
-
-        $user = User::findOrFail($id);
-
-        $userData = [
-            'id' => $user->id,
-            'name' => $user->name,
-            'email' => $user->email,
-            'role' => $user->role,
-            'created_at' => $user->created_at,
-        ];
-
-        // Ajouter les statistiques si c'est l'utilisateur lui-même
-        if ($request->user()->id == $id) {
-            $userData['statistiques'] = [
-                'nombre_diagnostics' => $user->diagnostics()->count(),
-                'dernier_diagnostic' => $user->diagnostics()->latest('date')->first(),
-            ];
-        }
-
-        return response()->json([
-            'user' => $userData,
-        ]);
+        return response()->json(['user' => $user]);
     }
 
     /**
@@ -121,64 +87,30 @@ class UserController extends Controller
      *     summary="Mettre à jour un utilisateur",
      *     tags={"Utilisateurs"},
      *     security={{"bearerAuth":{}}},
-     *     @OA\Parameter(
-     *         name="id",
-     *         in="path",
-     *         required=true,
-     *         description="ID de l'utilisateur",
-     *         @OA\Schema(type="integer")
-     *     ),
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
      *     @OA\RequestBody(
      *         @OA\JsonContent(
-     *             @OA\Property(property="name", type="string", example="John Doe"),
-     *             @OA\Property(property="email", type="string", format="email", example="john.doe@example.com"),
-     *             @OA\Property(property="role", type="string", example="utilisateur", enum={"utilisateur", "administrateur"})
+     *             @OA\Property(property="name", type="string"),
+     *             @OA\Property(property="email", type="string", format="email"),
+     *             @OA\Property(property="role", type="string", enum={"utilisateur", "administrateur"})
      *         )
      *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Utilisateur mis à jour",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string"),
-     *             @OA\Property(property="user", type="object")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=403,
-     *         description="Action non autorisée"
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Utilisateur non trouvé"
-     *     ),
-     *     @OA\Response(
-     *         response=422,
-     *         description="Validation des données échouée"
-     *     )
+     *     @OA\Response(response=200, description="Utilisateur mis à jour"),
+     *     @OA\Response(response=403, description="Action non autorisée"),
+     *     @OA\Response(response=404, description="Utilisateur non trouvé")
      * )
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, User $user)
     {
-        if (!$request->user()->isAdmin()) {
-            return response()->json([
-                'message' => 'Action non autorisée',
-            ], 403);
-        }
-
-        $user = User::findOrFail($id);
-
-        $request->validate([
+        $validatedData = $request->validate([
             'name' => 'sometimes|string|max:255',
-            'email' => 'sometimes|email|unique:users,email,' . $id,
-            'role' => 'sometimes|in:utilisateur,administrateur',
+            'email' => ['sometimes', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
+            'role' => ['sometimes', Rule::in(['utilisateur', 'administrateur'])],
         ]);
 
-        $user->update($request->only(['name', 'email', 'role']));
+        $user->update($validatedData);
 
-        return response()->json([
-            'message' => 'Utilisateur mis à jour',
-            'user' => $user,
-        ]);
+        return response()->json(['user' => $user]);
     }
 
     /**
@@ -187,157 +119,63 @@ class UserController extends Controller
      *     summary="Supprimer un utilisateur",
      *     tags={"Utilisateurs"},
      *     security={{"bearerAuth":{}}},
-     *     @OA\Parameter(
-     *         name="id",
-     *         in="path",
-     *         required=true,
-     *         description="ID de l'utilisateur",
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Utilisateur supprimé avec succès",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=403,
-     *         description="Action non autorisée"
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Utilisateur non trouvé"
-     *     ),
-     *     @OA\Response(
-     *         response=422,
-     *         description="Impossible de supprimer son propre compte"
-     *     )
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Utilisateur supprimé"),
+     *     @OA\Response(response=403, description="Action non autorisée"),
+     *     @OA\Response(response=404, description="Utilisateur non trouvé")
      * )
      */
-    public function destroy(Request $request, $id)
+    public function destroy(User $user)
     {
-        if (!$request->user()->isAdmin()) {
-            return response()->json([
-                'message' => 'Action non autorisée',
-            ], 403);
-        }
-
-        // Empêcher la suppression de son propre compte
-        if ($request->user()->id == $id) {
-            return response()->json([
-                'message' => 'Vous ne pouvez pas supprimer votre propre compte',
-            ], 422);
-        }
-
-        $user = User::findOrFail($id);
         $user->delete();
-
-        return response()->json([
-            'message' => 'Utilisateur supprimé avec succès',
-        ]);
+        return response()->json(['message' => 'Utilisateur supprimé avec succès']);
     }
 
     /**
      * @OA\Post(
      *     path="/users/{id}/reset-password",
-     *     summary="Réinitialiser le mot de passe",
+     *     summary="Réinitialiser le mot de passe d'un utilisateur",
      *     tags={"Utilisateurs"},
      *     security={{"bearerAuth":{}}},
-     *     @OA\Parameter(
-     *         name="id",
-     *         in="path",
-     *         required=true,
-     *         description="ID de l'utilisateur",
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *             required={"password", "password_confirmation"},
-     *             @OA\Property(property="password", type="string", format="password", example="new-password"),
-     *             @OA\Property(property="password_confirmation", type="string", format="password", example="new-password")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Mot de passe réinitialisé avec succès",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=403,
-     *         description="Action non autorisée"
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Utilisateur non trouvé"
-     *     ),
-     *     @OA\Response(
-     *         response=422,
-     *         description="Validation des données échouée"
-     *     )
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Mot de passe réinitialisé"),
+     *     @OA\Response(response=403, description="Action non autorisée"),
+     *     @OA\Response(response=404, description="Utilisateur non trouvé")
      * )
      */
-    public function resetPassword(Request $request, $id)
+    public function resetPassword(User $user)
     {
-        if (!$request->user()->isAdmin()) {
-            return response()->json([
-                'message' => 'Action non autorisée',
-            ], 403);
-        }
+        $newPassword = Str::random(12);
+        $user->forceFill([
+            'password' => Hash::make($newPassword),
+        ])->save();
 
-        $request->validate([
-            'password' => 'required|string|min:8|confirmed',
-        ]);
-
-        $user = User::findOrFail($id);
-        $user->update([
-            'password' => Hash::make($request->password),
-        ]);
-
+        // Idéalement, on enverrait un email à l'utilisateur avec son nouveau mot de passe.
+        // Pour l'API, on peut retourner le nouveau mot de passe pour que l'admin le communique.
         return response()->json([
-            'message' => 'Mot de passe réinitialisé avec succès',
+            'message' => 'Mot de passe réinitialisé avec succès.',
+            'new_password' => $newPassword,
         ]);
     }
 
     /**
      * @OA\Get(
      *     path="/users/statistiques",
-     *     summary="Statistiques générales",
+     *     summary="Statistiques sur les utilisateurs",
      *     tags={"Utilisateurs"},
      *     security={{"bearerAuth":{}}},
-     *     @OA\Response(
-     *         response=200,
-     *         description="Statistiques générales",
-     *         @OA\JsonContent(
-     *             type="object",
-     *             @OA\Property(property="statistiques", type="object")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=403,
-     *         description="Action non autorisée"
-     *     )
+     *     @OA\Response(response=200, description="Statistiques"),
+     *     @OA\Response(response=403, description="Action non autorisée")
      * )
      */
-    public function statistiques(Request $request)
+    public function statistiques()
     {
-        if (!$request->user()->isAdmin()) {
-            return response()->json([
-                'message' => 'Action non autorisée',
-            ], 403);
-        }
-
-        $stats = [
-            'total_utilisateurs' => User::utilisateurs()->count(),
-            'total_administrateurs' => User::administrateurs()->count(),
-            'nouveaux_utilisateurs_mois' => User::where('created_at', '>=', now()->subMonth())->count(),
-        ];
-
         return response()->json([
-            'statistiques' => $stats,
+            'statistiques' => [
+                'total_utilisateurs' => User::utilisateurs()->count(),
+                'total_administrateurs' => User::administrateurs()->count(),
+                'nouveaux_utilisateurs_mois' => User::where('created_at', '>=', now()->subMonth())->count(),
+            ]
         ]);
     }
 }

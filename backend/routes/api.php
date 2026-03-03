@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
-    Route::post('/login', [AuthController::class, 'login'])->middleware('web');
+    Route::post('/login', [AuthController::class, 'login']);
 
     // Public API routes
     Route::apiResource('pages', PageInformationController::class)->only(['index', 'show']);
@@ -22,6 +22,7 @@ Route::prefix('v1')->group(function () {
     Route::apiResource('evenements', EvenementVieController::class)->only(['index', 'show']);
 
     Route::middleware('auth:sanctum')->group(function () {
+        Route::post('/logout', [AuthController::class, 'logout']);
         Route::get('/me', [AuthController::class, 'me']);
         Route::put('/profile', [AuthController::class, 'updateProfile']);
         Route::put('/password', [AuthController::class, 'changePassword']);
@@ -37,11 +38,15 @@ Route::prefix('v1')->group(function () {
         Route::apiResource('diagnostics', DiagnosticStressController::class);
         
         Route::get('historiques/recent', [HistoriqueDiagnosticController::class, 'recent']);
+        Route::delete('historiques', [HistoriqueDiagnosticController::class, 'destroy']); // Route pour la suppression en masse
         Route::apiResource('historiques', HistoriqueDiagnosticController::class)->except(['update', 'show']);
         
-        Route::post('users/{id}/reset-password', [UserController::class, 'resetPassword']);
-        Route::get('users/statistiques', [UserController::class, 'statistiques']);
-        Route::apiResource('users', UserController::class);
+        // --- Admin User Management ---
+        Route::middleware('is_admin')->group(function () {
+            Route::post('users/{id}/reset-password', [UserController::class, 'resetPassword']);
+            Route::get('users/statistiques', [UserController::class, 'statistiques']);
+            Route::apiResource('users', UserController::class);
+        });
 
         // --- Admin API Routes ---
         Route::middleware('is_admin')->prefix('admin')->name('api.admin.')->group(function () {
