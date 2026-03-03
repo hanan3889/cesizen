@@ -88,7 +88,9 @@ jobs:
         run: npm install
 
       - name: Run Vitest tests
-        run: npm run test -- --run 
+        run: npm run test -- --run # Use --run to prevent watch mode in CI
+        env:
+          LARAVEL_BYPASS_ENV_CHECK: 1
 
   sonarqube:
     name: SonarQube Scan
