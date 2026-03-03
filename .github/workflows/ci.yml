@@ -26,24 +26,41 @@ jobs:
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.4' # Assuming PHP 8.3, adjust if needed
-          extensions: dom, curl, libxml, mbstring, zip, pcov # PCOV for code coverage
+          php-version: '8.3'
+          extensions: dom, curl, libxml, mbstring, zip, pcov
           tools: composer
           coverage: pcov
 
       - name: Set Composer platform version
         run: composer config platform.php -- '8.3'
+        working-directory: ./backend
 
       - name: Install Composer Dependencies
         run: composer install --prefer-dist --no-progress
+        working-directory: ./backend
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Frontend Dependencies
+        run: npm install
+        working-directory: ./frontend
+
+      - name: Build Frontend Assets
+        run: npm run build
+        working-directory: ./frontend
 
       - name: Prepare Laravel Environment
         run: |
           cp .env.example .env
           php artisan key:generate
+        working-directory: ./backend
 
       - name: Run PHPUnit tests with coverage
         run: php artisan test --coverage-clover=coverage/clover.xml
+        working-directory: ./backend
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
@@ -65,13 +82,13 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20' # Using a recent LTS version
+          node-version: '20' 
 
       - name: Install NPM Dependencies
         run: npm install
 
       - name: Run Vitest tests
-        run: npm run test -- --run # Use --run to prevent watch mode in CI
+        run: npm run test -- --run 
 
   sonarqube:
     name: SonarQube Scan
