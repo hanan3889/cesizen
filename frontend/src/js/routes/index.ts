@@ -189,3 +189,26 @@ dashboard.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: dashboard.url(options),
     method: 'head',
 })
+
+/**
+ * Route to resend email verification notification.
+ * @see \Illuminate\Foundation\Auth\EmailVerificationRequest
+ */
+export const resendVerification = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+    url: resendVerification.url(options),
+    method: 'post',
+})
+
+resendVerification.definition = {
+    methods: ["post"],
+    url: '/email/verification-notification',
+} satisfies RouteDefinition<["post"]>
+
+resendVerification.url = (options?: RouteQueryOptions) => {
+    return resendVerification.definition.url + queryParams(options)
+}
+
+resendVerification.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+    url: resendVerification.url(options),
+    method: 'post',
+})
