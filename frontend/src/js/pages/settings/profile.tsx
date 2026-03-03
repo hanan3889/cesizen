@@ -1,7 +1,7 @@
 import { resendVerification } from '@/routes';
 import { type BreadcrumbItem, type SharedData } from '@/types';
 import { Transition } from '@headlessui/react';
-import { Form, Head, Link, usePage, useForm } from '@inertiajs/react';
+import { Head, Link, usePage, useForm } from '@inertiajs/react';
 
 import DeleteUser from '@/components/delete-user';
 import HeadingSmall from '@/components/heading-small';
@@ -48,10 +48,7 @@ export default function Profile({
                         description="Update your name and email address"
                     />
 
-                    <Form
-                        onSubmit={submit}
-                        className="space-y-6"
-                    >
+                    <form onSubmit={submit} className="space-y-6">
                         <div className="grid gap-2">
                             <Label htmlFor="name">Name</Label>
 
@@ -98,7 +95,7 @@ export default function Profile({
                                         Your email address is
                                         unverified.{' '}
                                         <Link
-                                            href={resendVerification}
+                                            href={resendVerification().url}
                                             method="post"
                                             as="button"
                                             className="text-foreground underline decoration-neutral-300 underline-offset-4 transition-colors duration-300 ease-out hover:decoration-current! dark:decoration-neutral-500"
@@ -108,8 +105,7 @@ export default function Profile({
                                         </Link>
                                     </p>
 
-                                    {status ===
-                                        'verification-link-sent' && (
+                                    {status === 'verification-link-sent' && (
                                         <div className="mt-2 text-sm font-medium text-green-600">
                                             A new verification link has
                                             been sent to your email
@@ -139,7 +135,7 @@ export default function Profile({
                                 </p>
                             </Transition>
                         </div>
-                    </Form>
+                    </form>
                 </div>
 
                 <DeleteUser />
