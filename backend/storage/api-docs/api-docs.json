@@ -10,7 +10,7 @@
     },
     "servers": [
         {
-            "url": "http://localhost:8000/api/v1",
+            "url": "http://my-default-host.com",
             "description": "Demo API Server"
         }
     ],
@@ -1544,32 +1544,79 @@
                 ],
                 "summary": "Liste de tous les utilisateurs",
                 "operationId": "7208c29037df2b8bb02499ba39ed8a78",
-                "parameters": [
-                    {
-                        "name": "role",
-                        "in": "query",
-                        "description": "Filtrer par rôle (utilisateur, administrateur)",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
                 "responses": {
                     "200": {
-                        "description": "Liste des utilisateurs",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "array",
-                                    "items": {
-                                        "type": "object"
-                                    }
-                                }
-                            }
-                        }
+                        "description": "Liste des utilisateurs"
                     },
                     "403": {
                         "description": "Action non autorisée"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Utilisateurs"
+                ],
+                "summary": "Créer un nouvel utilisateur",
+                "operationId": "262eb5ca1fdea354023c0a8870442c1e",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email",
+                                    "password",
+                                    "role"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "John Doe"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "john.doe@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password123"
+                                    },
+                                    "role": {
+                                        "type": "string",
+                                        "enum": [
+                                            "utilisateur",
+                                            "administrateur"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Utilisateur créé"
+                    },
+                    "403": {
+                        "description": "Action non autorisée"
+                    },
+                    "422": {
+                        "description": "Validation échouée"
                     }
                 },
                 "security": [
@@ -1584,13 +1631,12 @@
                 "tags": [
                     "Utilisateurs"
                 ],
-                "summary": "Afficher un utilisateur spécifique",
+                "summary": "Afficher un utilisateur",
                 "operationId": "6946bbab7898f59a09e3c8e529a38907",
                 "parameters": [
                     {
                         "name": "id",
                         "in": "path",
-                        "description": "ID de l'utilisateur",
                         "required": true,
                         "schema": {
                             "type": "integer"
@@ -1599,19 +1645,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Détails de l'utilisateur",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "user": {
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
+                        "description": "Détails de l'utilisateur"
                     },
                     "403": {
                         "description": "Action non autorisée"
@@ -1636,7 +1670,6 @@
                     {
                         "name": "id",
                         "in": "path",
-                        "description": "ID de l'utilisateur",
                         "required": true,
                         "schema": {
                             "type": "integer"
@@ -1649,21 +1682,18 @@
                             "schema": {
                                 "properties": {
                                     "name": {
-                                        "type": "string",
-                                        "example": "John Doe"
+                                        "type": "string"
                                     },
                                     "email": {
                                         "type": "string",
-                                        "format": "email",
-                                        "example": "john.doe@example.com"
+                                        "format": "email"
                                     },
                                     "role": {
                                         "type": "string",
                                         "enum": [
                                             "utilisateur",
                                             "administrateur"
-                                        ],
-                                        "example": "utilisateur"
+                                        ]
                                     }
                                 },
                                 "type": "object"
@@ -1673,31 +1703,13 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Utilisateur mis à jour",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string"
-                                        },
-                                        "user": {
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
+                        "description": "Utilisateur mis à jour"
                     },
                     "403": {
                         "description": "Action non autorisée"
                     },
                     "404": {
                         "description": "Utilisateur non trouvé"
-                    },
-                    "422": {
-                        "description": "Validation des données échouée"
                     }
                 },
                 "security": [
@@ -1716,7 +1728,6 @@
                     {
                         "name": "id",
                         "in": "path",
-                        "description": "ID de l'utilisateur",
                         "required": true,
                         "schema": {
                             "type": "integer"
@@ -1725,28 +1736,13 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Utilisateur supprimé avec succès",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
+                        "description": "Utilisateur supprimé"
                     },
                     "403": {
                         "description": "Action non autorisée"
                     },
                     "404": {
                         "description": "Utilisateur non trouvé"
-                    },
-                    "422": {
-                        "description": "Impossible de supprimer son propre compte"
                     }
                 },
                 "security": [
@@ -1761,69 +1757,27 @@
                 "tags": [
                     "Utilisateurs"
                 ],
-                "summary": "Réinitialiser le mot de passe",
+                "summary": "Réinitialiser le mot de passe d'un utilisateur",
                 "operationId": "7218fc333d63c42733347318672efc50",
                 "parameters": [
                     {
                         "name": "id",
                         "in": "path",
-                        "description": "ID de l'utilisateur",
                         "required": true,
                         "schema": {
                             "type": "integer"
                         }
                     }
                 ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "password",
-                                    "password_confirmation"
-                                ],
-                                "properties": {
-                                    "password": {
-                                        "type": "string",
-                                        "format": "password",
-                                        "example": "new-password"
-                                    },
-                                    "password_confirmation": {
-                                        "type": "string",
-                                        "format": "password",
-                                        "example": "new-password"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
                 "responses": {
                     "200": {
-                        "description": "Mot de passe réinitialisé avec succès",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
+                        "description": "Mot de passe réinitialisé"
                     },
                     "403": {
                         "description": "Action non autorisée"
                     },
                     "404": {
                         "description": "Utilisateur non trouvé"
-                    },
-                    "422": {
-                        "description": "Validation des données échouée"
                     }
                 },
                 "security": [
@@ -1838,23 +1792,11 @@
                 "tags": [
                     "Utilisateurs"
                 ],
-                "summary": "Statistiques générales",
+                "summary": "Statistiques sur les utilisateurs",
                 "operationId": "bee1a90a5546a3a63819330451123d5d",
                 "responses": {
                     "200": {
-                        "description": "Statistiques générales",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "statistiques": {
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
+                        "description": "Statistiques"
                     },
                     "403": {
                         "description": "Action non autorisée"
