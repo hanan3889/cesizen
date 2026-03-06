@@ -4,11 +4,7 @@ use App\Models\PageInformation;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-*/
+
 
 // Route principale
 Route::get('/', function () {
