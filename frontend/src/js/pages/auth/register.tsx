@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import AuthLayout from '@/layouts/auth-layout';
+import AppLogo from '@/components/app-logo';
 import { 
     Check, 
     X, 
@@ -176,17 +177,12 @@ export default function Register() {
                 <CardHeader className="text-center space-y-4">
                     {/* Logo */}
                     <div className="flex items-center justify-center gap-3 mb-2">
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-500 to-green-400 flex items-center justify-center shadow-lg">
-                            <span className="text-2xl">🧘</span>
-                        </div>
-                        <h1 className="text-4xl font-serif font-bold bg-gradient-to-r from-green-700 to-green-500 bg-clip-text text-transparent">
-                            CesiZen
-                        </h1>
+                        <AppLogo />
                     </div>
                     
                     <CardTitle className="text-2xl">Créer votre espace bien-être</CardTitle>
                     <CardDescription>
-                        Rejoignez CesiZen pour prendre soin de votre santé mentale
+                        Rejoignez-nous pour prendre soin de votre santé mentale
                     </CardDescription>
                 </CardHeader>
 
