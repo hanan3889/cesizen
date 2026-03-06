@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class PageInformation extends Model
 {
@@ -16,12 +17,25 @@ class PageInformation extends Model
      */
     protected $fillable = [
         'titre',
+        'slug',
         'description',
         'statut',
         'categorie_information_id',
         'administrateur_id',
     ];
     protected $table = 'page_informations';
+
+    /**
+     * The "booted" method of the model.
+     */
+    protected static function booted(): void
+    {
+        static::creating(function ($page) {
+            if (empty($page->slug)) {
+                $page->slug = Str::slug($page->titre);
+            }
+        });
+    }
 
     /**
      * Get the attributes that should be cast.

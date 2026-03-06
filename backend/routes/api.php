@@ -16,6 +16,8 @@ Route::prefix('v1')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
 
     // Public API routes
+    Route::get('pages/latest', [PageInformationController::class, 'latest']);
+    Route::get('pages/slug/{slug}', [PageInformationController::class, 'showBySlug']);
     Route::apiResource('pages', PageInformationController::class)->only(['index', 'show']);
     Route::apiResource('categories', CategorieInformationController::class)->only(['index', 'show']);
     Route::get('evenements/search', [EvenementVieController::class, 'search']);
