@@ -1,10 +1,11 @@
 import React from 'react';
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { useAuth } from '../contexts/AuthContext';
 import Navbar from '../components/Navbar';
 
 const Home = () => {
     const { isAuthenticated } = useAuth();
+    const { pages } = usePage().props;
 
     return (
         <div className="bg-gradient-to-b from-green-50 to-white">
@@ -41,144 +42,129 @@ const Home = () => {
                 </div>
             </section>
 
-                {/* Features Section */}
-                <section className="bg-white py-16">
-                    <div className="container mx-auto px-4">
-                        <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
-                            Pourquoi choisir CesiZen ?
-                        </h2>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                            <div className="card text-center">
-                                <div className="w-16 h-16 bg-cesizen-green rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                </div>
-                                <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                                    Test de stress validé
-                                </h3>
-                                <p className="text-gray-600">
-                                    Basé sur l'échelle Holmes-Rahe, reconnue scientifiquement avec 43 événements de vie
-                                </p>
+            {/* Features Section */}
+            <section className="bg-white py-16">
+                <div className="container mx-auto px-4">
+                    <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
+                        Pourquoi choisir CesiZen ?
+                    </h2>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div className="card text-center">
+                            <div className="w-16 h-16 bg-cesizen-green rounded-full flex items-center justify-center mx-auto mb-4">
+                                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
                             </div>
+                            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                                Test de stress validé
+                            </h3>
+                            <p className="text-gray-600">
+                                Basé sur l'échelle Holmes-Rahe, reconnue scientifiquement avec 43 événements de vie
+                            </p>
+                        </div>
 
-                            <div className="card text-center">
-                                <div className="w-16 h-16 bg-cesizen-green rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-                                    </svg>
-                                </div>
-                                <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                                    Suivi personnalisé
-                                </h3>
-                                <p className="text-gray-600">
-                                    Visualisez l'évolution de votre niveau de stress et recevez des recommandations adaptées
-                                </p>
+                        <div className="card text-center">
+                            <div className="w-16 h-16 bg-cesizen-green rounded-full flex items-center justify-center mx-auto mb-4">
+                                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                                </svg>
                             </div>
+                            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                                Suivi personnalisé
+                            </h3>
+                            <p className="text-gray-600">
+                                Visualisez l'évolution de votre niveau de stress et recevez des recommandations adaptées
+                            </p>
+                        </div>
 
-                            <div className="card text-center">
-                                <div className="w-16 h-16 bg-cesizen-green rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                    </svg>
-                                </div>
-                                <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                                    Données sécurisées
-                                </h3>
-                                <p className="text-gray-600">
-                                    Conformité RGPD garantie. Vos données sont cryptées et sécurisées
-                                </p>
+                        <div className="card text-center">
+                            <div className="w-16 h-16 bg-cesizen-green rounded-full flex items-center justify-center mx-auto mb-4">
+                                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                </svg>
                             </div>
+                            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                                Données sécurisées
+                            </h3>
+                            <p className="text-gray-600">
+                                Conformité RGPD garantie. Vos données sont cryptées et sécurisées
+                            </p>
                         </div>
                     </div>
-                </section>
+                </div>
+            </section>
 
-                {/* Articles Section */}
-                <section className="py-16 bg-gray-50">
-                    <div className="container mx-auto px-4">
-                        <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
-                            Conseils pour votre bien-être
-                        </h2>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                            {/* Article 1 */}
-                            <div className="bg-white p-8 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
-                                <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                                    Respirez, vous êtes au contrôle
+            {/* Articles Section */}
+            <section className="py-16 bg-gray-50">
+                <div className="container mx-auto px-4">
+                    <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
+                        Conseils pour votre bien-être
+                    </h2>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        {pages.map((page) => (
+                            <div key={page.id} className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 flex flex-col">
+                                <div className="mb-4">
+                                    <span className="inline-block bg-green-200 text-green-800 text-xs px-2 rounded-full uppercase font-semibold tracking-wide">
+                                        {page.categorie.categorie}
+                                    </span>
+                                </div>
+                                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                                    {page.titre}
                                 </h3>
-                                <p className="text-gray-600 mb-5">
-                                    Pratiquez la respiration carrée : inspirez pendant 4s, retenez 4s, expirez 4s, et attendez 4s. Cet exercice simple peut calmer votre système nerveux instantanément.
+                                <div className="text-sm text-gray-500 mb-3">
+                                    <span>Statut: <span className="font-medium text-gray-700">{page.statut}</span></span>
+                                    <span className="mx-2">|</span>
+                                    <span>Dernière mise à jour: {new Date(page.updated_at).toLocaleDateString('fr-FR')}</span>
+                                </div>
+                                <p className="text-gray-600 mb-5 flex-grow">
+                                    {page.description.substring(0, 120)}...
                                 </p>
-                                <Link href="/informations" className="font-semibold text-cesizen-green hover:text-green-700 transition-colors">
+                                <Link href={`/informations/${page.slug}`} className="font-semibold text-cesizen-green hover:text-green-700 transition-colors self-start mt-auto">
                                     En savoir plus &rarr;
                                 </Link>
                             </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
 
-                            {/* Article 2 */}
-                            <div className="bg-white p-8 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
-                                <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                                    L'importance d'une routine saine
-                                </h3>
-                                <p className="text-gray-600 mb-5">
-                                    Un sommeil régulier, une alimentation équilibrée et une activité physique sont les piliers de la santé mentale. Essayez de fixer des heures de coucher et de lever constantes.
-                                </p>
-                                <Link href="/informations" className="font-semibold text-cesizen-green hover:text-green-700 transition-colors">
-                                    En savoir plus &rarr;
-                                </Link>
-                            </div>
+            {/* CTA Section */}
+            <section className="bg-cesizen-green py-16">
+                <div className="container mx-auto px-4 text-center">
+                    <h2 className="text-3xl font-bold text-white mb-4">
+                        Prêt à prendre soin de votre santé mentale ?
+                    </h2>
+                    <p className="text-white text-lg mb-8">
+                        Rejoignez des milliers d'utilisateurs qui gèrent leur stress avec CesiZen
+                    </p>
+                    {!isAuthenticated && (
+                        <Link href="/register" className="bg-white text-cesizen-green px-8 py-4 rounded-lg font-semibold hover:bg-gray-100 transition inline-block">
+                            Créer mon compte gratuitement
+                        </Link>
+                    )}
+                </div>
+            </section>
 
-                            {/* Article 3 */}
-                            <div className="bg-white p-8 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
-                                <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                                    Connectez-vous au moment présent
-                                </h3>
-                                <p className="text-gray-600 mb-5">
-                                    La pleine conscience vous aide à vous détacher des pensées anxieuses. Prenez 5 minutes pour vous concentrer sur vos sensations : les sons, l'air sur votre peau, vos pieds sur le sol.
-                                </p>
-                                <Link href="/informations" className="font-semibold text-cesizen-green hover:text-green-700 transition-colors">
-                                    En savoir plus &rarr;
-                                </Link>
-                            </div>
+            {/* Stats Section */}
+            <section className="py-16 bg-white">
+                <div className="container mx-auto px-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+                        <div>
+                            <div className="text-4xl font-bold text-cesizen-green mb-2">43</div>
+                            <div className="text-gray-600">Événements de vie analysés</div>
+                        </div>
+                        <div>
+                            <div className="text-4xl font-bold text-cesizen-green mb-2">100%</div>
+                            <div className="text-gray-600">Gratuit et confidentiel</div>
+                        </div>
+                        <div>
+                            <div className="text-4xl font-bold text-cesizen-green mb-2">24/7</div>
+                            <div className="text-gray-600">Accessible à tout moment</div>
                         </div>
                     </div>
-                </section>
-
-                {/* CTA Section */}
-                <section className="bg-cesizen-green py-16">
-                    <div className="container mx-auto px-4 text-center">
-                        <h2 className="text-3xl font-bold text-white mb-4">
-                            Prêt à prendre soin de votre santé mentale ?
-                        </h2>
-                        <p className="text-white text-lg mb-8">
-                            Rejoignez des milliers d'utilisateurs qui gèrent leur stress avec CesiZen
-                        </p>
-                        {!isAuthenticated && (
-                            <Link href="/register" className="bg-white text-cesizen-green px-8 py-4 rounded-lg font-semibold hover:bg-gray-100 transition inline-block">
-                                Créer mon compte gratuitement
-                            </Link>
-                        )}
-                    </div>
-                </section>
-
-                {/* Stats Section */}
-                <section className="py-16 bg-white">
-                    <div className="container mx-auto px-4">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-                            <div>
-                                <div className="text-4xl font-bold text-cesizen-green mb-2">43</div>
-                                <div className="text-gray-600">Événements de vie analysés</div>
-                            </div>
-                            <div>
-                                <div className="text-4xl font-bold text-cesizen-green mb-2">100%</div>
-                                <div className="text-gray-600">Gratuit et confidentiel</div>
-                            </div>
-                            <div>
-                                <div className="text-4xl font-bold text-cesizen-green mb-2">24/7</div>
-                                <div className="text-gray-600">Accessible à tout moment</div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-            </div>
+                </div>
+            </section>
+        </div>
     );
 };
 
