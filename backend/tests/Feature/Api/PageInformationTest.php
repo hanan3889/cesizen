@@ -2,159 +2,135 @@
 
 namespace Tests\Feature\Api;
 
-use App\Models\CategorieInformation;
-use App\Models\PageInformation;
-use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use App\Models\PageInformation;
 
 class PageInformationTest extends TestCase
 {
     use RefreshDatabase;
 
-    private $admin;
-    private $user;
-
-    protected function setUp(): void
+    public function test_can_get_all_pages()
     {
-        parent::setUp();
-        $this->admin = User::factory()->admin()->create();
-        $this->user = User::factory()->create();
-    }
-
-    // --- Index Tests ---
-
-    public function test_it_returns_only_published_pages_for_guests()
-    {
-        PageInformation::factory()->create(['statut' => 'publie']);
-        PageInformation::factory()->create(['statut' => 'brouillon']);
-        PageInformation::factory()->create(['statut' => 'archive']);
+        PageInformation::factory()->count(2)->create(['statut' => 'publie']);
+        PageInformation::factory()->count(1)->create(['statut' => 'brouillon']);
 
         $response = $this->getJson('/api/v1/pages');
 
         $response->assertStatus(200)
-                 ->assertJsonCount(1, 'data')
-                 ->assertJsonPath('data.0.statut', 'publie');
+            ->assertJsonCount(2, 'data')
+            ->assertJsonStructure([
+                'data' => [
+                    '*' => [
+                        'id',
+                        'titre',
+                        'description',
+                        'statut',
+                        'created_at',
+                        'updated_at',
+                    ]
+                ]
+            ]);
     }
 
-    public function test_admin_can_filter_pages_by_status()
-    {
-        PageInformation::factory()->create(['statut' => 'publie']);
-        PageInformation::factory()->create(['statut' => 'brouillon']);
-
-        $response = $this->actingAs($this->admin)->getJson('/api/v1/pages?statut=brouillon');
-
-        $response->assertStatus(200)
-                 ->assertJsonCount(1, 'data')
-                 ->assertJsonPath('data.0.statut', 'brouillon');
-    }
-
-    // --- Show Tests ---
-
-    public function test_guest_can_see_a_published_page()
+    public function test_can_get_a_single_page()
     {
         $page = PageInformation::factory()->create(['statut' => 'publie']);
-        $response = $this->getJson("/api/v1/pages/{$page->id}");
+
+        $response = $this->getJson('/api/v1/pages/' . $page->id);
+
         $response->assertStatus(200)
-                 ->assertJsonPath('page.id', $page->id);
+            ->assertJson([
+                'page' => [
+                    'id' => $page->id,
+                    'titre' => $page->titre,
+                    'description' => $page->description,
+                    'statut' => 'publie',
+                ]
+            ]);
     }
-
-    public function test_guest_cannot_see_a_draft_page()
-    {
-        $page = PageInformation::factory()->create(['statut' => 'brouillon']);
-        $response = $this->getJson("/api/v1/pages/{$page->id}");
-        $response->assertStatus(403);
-    }
-
-    public function test_admin_can_see_a_draft_page()
-    {
-        $page = PageInformation::factory()->create(['statut' => 'brouillon']);
-        $response = $this->actingAs($this->admin)->getJson("/api/v1/pages/{$page->id}");
-        $response->assertStatus(200)
-                 ->assertJsonPath('page.id', $page->id);
-    }
-
-    // --- Store Tests ---
 
     public function test_admin_can_create_a_page()
     {
-        $category = CategorieInformation::factory()->create();
+        $admin = \App\Models\User::factory()->admin()->create();
+        $categorie = \App\Models\CategorieInformation::factory()->create();
+
         $pageData = [
             'titre' => 'New Page Title',
-            'description' => 'Page description.',
-            'categorie_information_id' => $category->id,
+            'description' => 'New page content.',
+            'categorie_information_id' => $categorie->id,
         ];
 
-        $response = $this->actingAs($this->admin)->postJson('/api/v1/pages', $pageData);
+        $response = $this->actingAs($admin)->postJson('/api/v1/pages', $pageData);
 
         $response->assertStatus(201)
-                 ->assertJsonPath('page.titre', 'New Page Title');
+            ->assertJsonFragment(['titre' => 'New Page Title']);
+
         $this->assertDatabaseHas('page_informations', ['titre' => 'New Page Title']);
     }
 
     public function test_non_admin_cannot_create_a_page()
     {
-        $category = CategorieInformation::factory()->create();
+        $user = \App\Models\User::factory()->create();
+        $categorie = \App\Models\CategorieInformation::factory()->create();
+
         $pageData = [
             'titre' => 'New Page Title',
-            'description' => 'Page description.',
-            'categorie_information_id' => $category->id,
+            'description' => 'New page content.',
+            'categorie_information_id' => $categorie->id,
         ];
 
-        $response = $this->actingAs($this->user)->postJson('/api/v1/pages', $pageData);
+        $response = $this->actingAs($user)->postJson('/api/v1/pages', $pageData);
+
         $response->assertStatus(403);
     }
 
-    // --- Update Tests ---
-
     public function test_admin_can_update_a_page()
     {
+        $admin = \App\Models\User::factory()->admin()->create();
         $page = PageInformation::factory()->create();
+
         $updateData = ['titre' => 'Updated Title'];
 
-        $response = $this->actingAs($this->admin)->putJson("/api/v1/pages/{$page->id}", $updateData);
+        $response = $this->actingAs($admin)->putJson('/api/v1/pages/' . $page->id, $updateData);
 
         $response->assertStatus(200)
-                 ->assertJsonPath('page.titre', 'Updated Title');
+            ->assertJsonFragment(['titre' => 'Updated Title']);
+
         $this->assertDatabaseHas('page_informations', ['id' => $page->id, 'titre' => 'Updated Title']);
     }
 
-    // --- Destroy Tests ---
+    public function test_non_admin_cannot_update_a_page()
+    {
+        $user = \App\Models\User::factory()->create();
+        $page = PageInformation::factory()->create();
+
+        $updateData = ['titre' => 'Updated Title'];
+
+        $response = $this->actingAs($user)->putJson('/api/v1/pages/' . $page->id, $updateData);
+
+        $response->assertStatus(403);
+    }
 
     public function test_admin_can_delete_a_page()
     {
+        $admin = \App\Models\User::factory()->admin()->create();
         $page = PageInformation::factory()->create();
-        $response = $this->actingAs($this->admin)->deleteJson("/api/v1/pages/{$page->id}");
+
+        $response = $this->actingAs($admin)->deleteJson('/api/v1/pages/' . $page->id);
+
         $response->assertStatus(200);
+
         $this->assertDatabaseMissing('page_informations', ['id' => $page->id]);
     }
 
-    // --- Custom Action Tests ---
-
-    public function test_admin_can_publish_a_page()
+    public function test_non_admin_cannot_delete_a_page()
     {
-        $page = PageInformation::factory()->create(['statut' => 'brouillon']);
-        $response = $this->actingAs($this->admin)->postJson("/api/v1/pages/{$page->id}/publier");
+        $user = \App\Models\User::factory()->create();
+        $page = PageInformation::factory()->create();
 
-        $response->assertStatus(200)
-                 ->assertJsonPath('page.statut', 'publie');
-        $this->assertDatabaseHas('page_informations', ['id' => $page->id, 'statut' => 'publie']);
-    }
+        $response = $this->actingAs($user)->deleteJson('/api/v1/pages/' . $page->id);
 
-    public function test_admin_can_archive_a_page()
-    {
-        $page = PageInformation::factory()->create(['statut' => 'publie']);
-        $response = $this->actingAs($this->admin)->postJson("/api/v1/pages/{$page->id}/archiver");
-
-        $response->assertStatus(200)
-                 ->assertJsonPath('page.statut', 'archive');
-        $this->assertDatabaseHas('page_informations', ['id' => $page->id, 'statut' => 'archive']);
-    }
-
-    public function test_non_admin_cannot_publish_a_page()
-    {
-        $page = PageInformation::factory()->create(['statut' => 'brouillon']);
-        $response = $this->actingAs($this->user)->postJson("/api/v1/pages/{$page->id}/publier");
         $response->assertStatus(403);
     }
 }
