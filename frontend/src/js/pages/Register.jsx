@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, router } from '@inertiajs/react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Navbar from '../components/Navbar';
 import AppLogo from '../components/app-logo';
@@ -14,6 +14,7 @@ const Register = () => {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const { register } = useAuth();
+    const navigate = useNavigate();
 
     const handleChange = (e) => {
         setFormData({
@@ -46,7 +47,7 @@ const Register = () => {
         );
 
         if (result.success) {
-            router.visit('/dashboard');
+            navigate('/dashboard');
         } else {
             setError(result.error);
         }
@@ -68,7 +69,7 @@ const Register = () => {
                         </h2>
                         <p className="mt-2 text-center text-sm text-gray-600">
                             Déjà inscrit ?{' '}
-                            <Link href="/login" className="font-medium text-cesizen-green hover:text-cesizen-green-dark">
+                            <Link to="/login" className="font-medium text-cesizen-green hover:text-cesizen-green-dark">
                                 Connectez-vous
                             </Link>
                         </p>
