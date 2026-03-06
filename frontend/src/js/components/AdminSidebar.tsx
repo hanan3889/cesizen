@@ -1,11 +1,11 @@
 import React from 'react';
-import { Link } from '@inertiajs/react';
+import { Link } from 'react-router-dom';
 import AppLogo from '@/components/app-logo';
 
 
 // Définition des liens de navigation
 const navLinks = [
-    { href: route('admin.users.index'), label: 'Utilisateurs', icon: '👤' },
+    { href: '/admin/users', label: 'Utilisateurs', icon: '👤' },
     { href: '#', label: 'Pages', icon: '📄' },
     { href: '#', label: 'Catégories', icon: '🏷️' },
     { href: '#', label: 'Diagnostiques', icon: '🩺' },
@@ -14,7 +14,7 @@ const navLinks = [
 
 const NavLink = ({ href, label, icon }) => (
     <Link
-        href={href}
+        to={href}
         className="flex items-center px-4 py-2.5 text-green-100 hover:bg-cesizen-green hover:text-white rounded-md transition-colors duration-200"
     >
         <span className="w-6 mr-2 text-lg">{icon}</span>
@@ -27,7 +27,7 @@ export const AdminSidebar = () => {
         <aside className="w-64 flex-shrink-0 bg-cesizen-green-dark text-white flex flex-col">
             {/* Header du panneau latéral */}
             <div className="h-16 flex items-center justify-center px-4 border-b border-cesizen-green">
-                <Link href="/dashboard" className="flex items-center">
+                <Link to="/dashboard" className="flex items-center">
                     <AppLogo />
                     <span className="ml-3 text-xl font-semibold">Admin</span>
                 </Link>
