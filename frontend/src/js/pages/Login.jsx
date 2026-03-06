@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, router } from '@inertiajs/react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Navbar from '../components/Navbar';
 
@@ -9,6 +9,7 @@ const Login = () => {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const { login } = useAuth();
+    const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -18,7 +19,7 @@ const Login = () => {
         const result = await login(email, password);
 
         if (result.success) {
-            router.visit('/dashboard');
+            navigate('/dashboard');
         } else {
             setError(result.error);
         }
@@ -40,7 +41,7 @@ const Login = () => {
                         </h2>
                         <p className="mt-2 text-center text-sm text-gray-600">
                             Pas encore de compte ?{' '}
-                            <Link href="/register" className="font-medium text-cesizen-green hover:text-cesizen-green-dark">
+                            <Link to="/register" className="font-medium text-cesizen-green hover:text-cesizen-green-dark">
                                 Inscrivez-vous gratuitement
                             </Link>
                         </p>
@@ -104,13 +105,6 @@ const Login = () => {
                                     'Se connecter'
                                 )}
                             </button>
-                        </div>
-
-                        <div className="text-center">
-                            <p className="text-sm text-gray-600">
-                                Compte de test :<br />
-                                <span className="font-mono text-xs">admin@cesizen.fr / Admin@2025</span>
-                            </p>
                         </div>
                     </form>
                 </div>
