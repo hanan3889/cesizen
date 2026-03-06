@@ -1,12 +1,14 @@
 <?php
 
-use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Api\CategorieInformationController;
 use App\Models\PageInformation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use Laravel\Fortify\Http\Controllers\PasswordResetLinkController;
+use Laravel\Fortify\Http\Controllers\NewPasswordController;
 
 // Route principale
 Route::get('/', function () {
@@ -29,12 +31,12 @@ Route::get('/informations/{page:slug}', function (PageInformation $page) {
     return Inertia::render('Information/Show', ['page' => $page]);
 })->name('information.show');
 
-Route::post('/register', [AuthController::class, 'register'])->middleware('guest')->name('register');
+Route::get('/register', [RegisteredUserController::class, 'create'])->middleware('guest')->name('register');
+Route::post('/register', [RegisteredUserController::class, 'store'])->middleware('guest')->name('register.store');
 
 Route::get('/login', function () {
     return Inertia::render('auth/login');
 })->middleware('guest')->name('login');
-Route::post('/login', [AuthController::class, 'login'])->middleware('guest');
 
 
 Route::get('/categories/{categoryId}', [CategorieInformationController::class, 'show'])->name('categories.show');
@@ -46,11 +48,26 @@ Route::middleware(['auth', 'verified', 'is_admin'])->prefix('admin')->name('admi
     })->name('users.index');
 });
 
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-
 Route::get('/dashboard', function () {
     return Inertia::render('dashboard');
 })->middleware(['auth'])->name('dashboard');
+
+// Password Reset Routes...
+Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])
+                ->middleware('guest')
+                ->name('password.request');
+
+Route::post('forgot-password', [PasswordResetLinkController::class, 'store'])
+                ->middleware('guest')
+                ->name('password.email');
+
+Route::get('reset-password/{token}', [NewPasswordController::class, 'create'])
+                ->middleware('guest')
+                ->name('password.reset');
+
+Route::post('reset-password', [NewPasswordController::class, 'store'])
+                ->middleware('guest')
+                ->name('password.update');
 
 // Profile settings
 Route::get('/settings/profile', function () { return Inertia::render('settings/profile'); })->name('profile.edit');
