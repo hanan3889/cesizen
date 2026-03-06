@@ -6,6 +6,7 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\PageInformation;
 use App\Models\CategorieInformation;
+use Illuminate\Support\Str;
 
 class PageInformationSeeder extends Seeder
 {
@@ -52,9 +53,12 @@ class PageInformationSeeder extends Seeder
             ],
         ];
 
-        // Crée chaque page si elle n'existe pas déjà avec le même titre
-        foreach ($pages as $page) {
-            PageInformation::firstOrCreate(['titre' => $page['titre']], $page);
+        // Crée ou met à jour chaque page avec un slug
+        foreach ($pages as $pageData) {
+            PageInformation::updateOrCreate(
+                ['titre' => $pageData['titre']],
+                array_merge($pageData, ['slug' => Str::slug($pageData['titre'])])
+            );
         }
     }
 }
