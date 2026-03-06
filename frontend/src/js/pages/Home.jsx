@@ -1,29 +1,19 @@
-import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import React from 'react';
+import { Link, usePage } from '@inertiajs/react';
 import { useAuth } from '../contexts/AuthContext';
 import Navbar from '../components/Navbar';
-import AppLogo from '../components/app-logo';
-import axios from 'axios';
 
 const Home = () => {
     const { isAuthenticated } = useAuth();
-    const [pages, setPages] = useState([]);
-
-    useEffect(() => {
-        axios.get('/api/v1/pages')
-            .then(res => setPages(res.data.data || []))
-            .catch(() => setPages([]));
-    }, []);
+    const { pages } = usePage().props;
 
     return (
         <div className="bg-gradient-to-b from-green-50 to-white">
-            <Navbar />
-
             {/* Hero Section */}
             <section className="container mx-auto px-4 py-16 md:py-24">
                 <div className="max-w-4xl mx-auto text-center">
                     <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
-                        Bienvenue sur <AppLogo />
+                        Bienvenue sur <span className="text-cesizen-green">CesiZen</span>
                     </h1>
                     <p className="text-xl text-gray-600 mb-8">
                         Votre compagnon pour la gestion du stress et le bien-être mental
@@ -31,19 +21,19 @@ const Home = () => {
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                         {isAuthenticated ? (
                             <>
-                                <Link to="/diagnostic" className="btn-primary text-lg">
+                                <Link href="/diagnostic" className="btn-primary text-lg">
                                     Faire un test de stress
                                 </Link>
-                                <Link to="/dashboard" className="btn-outline text-lg">
+                                <Link href="/dashboard" className="btn-outline text-lg">
                                     Mon tableau de bord
                                 </Link>
                             </>
                         ) : (
                             <>
-                                <Link to="/register" className="btn-primary text-lg">
+                                <Link href="/register" className="btn-primary text-lg">
                                     Commencer
                                 </Link>
-                                <Link to="/informations" className="btn-outline text-lg">
+                                <Link href="/informations" className="btn-outline text-lg">
                                     En savoir plus
                                 </Link>
                             </>
@@ -65,8 +55,12 @@ const Home = () => {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                             </div>
-                            <h3 className="text-xl font-semibold text-gray-900 mb-2">Test de stress validé</h3>
-                            <p className="text-gray-600">Basé sur l'échelle Holmes-Rahe, reconnue scientifiquement avec 43 événements de vie</p>
+                            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                                Test de stress validé
+                            </h3>
+                            <p className="text-gray-600">
+                                Basé sur l'échelle Holmes-Rahe, reconnue scientifiquement avec 43 événements de vie
+                            </p>
                         </div>
 
                         <div className="card text-center">
@@ -75,8 +69,12 @@ const Home = () => {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
                                 </svg>
                             </div>
-                            <h3 className="text-xl font-semibold text-gray-900 mb-2">Suivi personnalisé</h3>
-                            <p className="text-gray-600">Visualisez l'évolution de votre niveau de stress et recevez des recommandations adaptées</p>
+                            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                                Suivi personnalisé
+                            </h3>
+                            <p className="text-gray-600">
+                                Visualisez l'évolution de votre niveau de stress et recevez des recommandations adaptées
+                            </p>
                         </div>
 
                         <div className="card text-center">
@@ -85,41 +83,50 @@ const Home = () => {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                                 </svg>
                             </div>
-                            <h3 className="text-xl font-semibold text-gray-900 mb-2">Données sécurisées</h3>
-                            <p className="text-gray-600">Conformité RGPD garantie. Vos données sont cryptées et sécurisées</p>
+                            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                                Données sécurisées
+                            </h3>
+                            <p className="text-gray-600">
+                                Conformité RGPD garantie. Vos données sont cryptées et sécurisées
+                            </p>
                         </div>
                     </div>
                 </div>
             </section>
 
             {/* Articles Section */}
-            {pages.length > 0 && (
-                <section className="py-16 bg-gray-50">
-                    <div className="container mx-auto px-4">
-                        <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
-                            Conseils pour votre bien-être
-                        </h2>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                            {pages.map((page) => (
-                                <div key={page.id} className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 flex flex-col">
-                                    <div className="mb-4">
-                                        <span className="inline-block bg-green-200 text-green-800 text-xs px-2 rounded-full uppercase font-semibold tracking-wide">
-                                            {page.categorie?.categorie}
-                                        </span>
-                                    </div>
-                                    <h3 className="text-xl font-semibold text-gray-900 mb-2">{page.titre}</h3>
-                                    <p className="text-gray-600 mb-5 flex-grow">
-                                        {page.description?.substring(0, 120)}...
-                                    </p>
-                                    <Link to={`/informations/${page.slug}`} className="font-semibold text-cesizen-green hover:text-green-700 transition-colors self-start mt-auto">
-                                        En savoir plus &rarr;
-                                    </Link>
+            <section className="py-16 bg-gray-50">
+                <div className="container mx-auto px-4">
+                    <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
+                        Conseils pour votre bien-être
+                    </h2>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        {pages.map((page) => (
+                            <div key={page.id} className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 flex flex-col">
+                                <div className="mb-4">
+                                    <span className="inline-block bg-green-200 text-green-800 text-xs px-2 rounded-full uppercase font-semibold tracking-wide">
+                                        {page.categorie.categorie}
+                                    </span>
                                 </div>
-                            ))}
-                        </div>
+                                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                                    {page.titre}
+                                </h3>
+                                <div className="text-sm text-gray-500 mb-3">
+                                    <span>Statut: <span className="font-medium text-gray-700">{page.statut}</span></span>
+                                    <span className="mx-2">|</span>
+                                    <span>Dernière mise à jour: {new Date(page.updated_at).toLocaleDateString('fr-FR')}</span>
+                                </div>
+                                <p className="text-gray-600 mb-5 flex-grow">
+                                    {page.description.substring(0, 120)}...
+                                </p>
+                                <Link href={`/informations/${page.slug}`} className="font-semibold text-cesizen-green hover:text-green-700 transition-colors self-start mt-auto">
+                                    En savoir plus &rarr;
+                                </Link>
+                            </div>
+                        ))}
                     </div>
-                </section>
-            )}
+                </div>
+            </section>
 
             {/* CTA Section */}
             <section className="bg-cesizen-green py-16">
@@ -131,7 +138,7 @@ const Home = () => {
                         Rejoignez des milliers d'utilisateurs qui gèrent leur stress avec CesiZen
                     </p>
                     {!isAuthenticated && (
-                        <Link to="/register" className="bg-white text-cesizen-green px-8 py-4 rounded-lg font-semibold hover:bg-gray-100 transition inline-block">
+                        <Link href="/register" className="bg-white text-cesizen-green px-8 py-4 rounded-lg font-semibold hover:bg-gray-100 transition inline-block">
                             Créer mon compte gratuitement
                         </Link>
                     )}
