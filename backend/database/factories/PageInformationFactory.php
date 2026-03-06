@@ -23,8 +23,10 @@ class PageInformationFactory extends Factory
      */
     public function definition()
     {
+        $titre = $this->faker->sentence;
         return [
-            'titre' => $this->faker->sentence,
+            'titre' => $titre,
+            'slug' => \Illuminate\Support\Str::slug($titre),
             'description' => $this->faker->paragraph,
             'statut' => 'brouillon',
             'categorie_information_id' => CategorieInformation::factory(),

@@ -372,4 +372,72 @@ class PageInformationController extends Controller
             'page' => $page,
         ]);
     }
+
+    /**
+     *
+     * @OA\Get(
+     *     path="/pages/latest",
+     *     summary="Récupérer les 5 dernières pages publiées",
+     *     tags={"Pages"},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Les 5 dernières pages",
+     *         @OA\JsonContent(type="array", @OA\Items(type="object"))
+     *     )
+     * )
+     */
+    public function latest()
+    {
+        $pages = PageInformation::with('categorie')
+            ->publiees()
+            ->latest('updated_at')
+            ->take(5)
+            ->get();
+
+        return response()->json($pages);
+    }
+
+    /**
+     *
+     * @OA\Get(
+     *     path="/pages/slug/{slug}",
+     *     summary="Afficher une page par son slug",
+     *     tags={"Pages"},
+     *     @OA\Parameter(
+     *         name="slug",
+     *         in="path",
+     *         required=true,
+     *         description="Slug de la page",
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Détails de la page",
+     *         @OA\JsonContent(type="object")
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Page non accessible"
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Page non trouvée"
+     *     )
+     * )
+     */
+    public function showBySlug(string $slug)
+    {
+        $page = PageInformation::with(['categorie', 'administrateur'])
+            ->where('slug', $slug)
+            ->firstOrFail();
+
+        // Vérifier si la page est publiée
+        if ($page->statut !== 'publie' && (!auth()->check() || !auth()->user()->isAdmin())) {
+            return response()->json([
+                'message' => 'Cette page n\'est pas accessible',
+            ], 403);
+        }
+
+        return response()->json($page);
+    }
 }
