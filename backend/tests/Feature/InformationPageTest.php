@@ -17,7 +17,7 @@ class InformationPageTest extends TestCase
         $user = User::factory()->create();
         PageInformation::factory()->count(3)->create();
 
-        $response = $this->actingAs($user)->get('/information');
+        $response = $this->actingAs($user)->get('/informations');
 
         $response->assertOk();
 

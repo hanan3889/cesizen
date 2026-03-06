@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('page_informations', function (Blueprint $table) {
             $table->id();
             $table->string('titre');
+            $table->string('slug')->unique();
             $table->text('description');
             $table->enum('statut', ['brouillon', 'publie', 'archive'])
                   ->default('brouillon');
