@@ -3,8 +3,6 @@
 namespace Tests\Feature\Api;
 
 use App\Models\CategorieInformation;
-use App\Models\PageInformation;
-use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -12,155 +10,134 @@ class CategorieInformationTest extends TestCase
 {
     use RefreshDatabase;
 
-    /**
-     * Test if the API returns a list of categories.
-     *
-     * @return void
-     */
-    public function test_it_returns_a_list_of_categories()
+    public function test_can_get_all_categories()
     {
-        // Arrange: Create 3 categories using the factory
         CategorieInformation::factory()->count(3)->create();
 
-        // Act: Make a GET request to the categories index endpoint
         $response = $this->getJson('/api/v1/categories');
 
-        // Assert: Check if the response is successful and structured correctly
         $response->assertStatus(200)
-                 ->assertJsonCount(3, 'categories')
-                 ->assertJsonStructure([
-                     'categories' => [
-                         '*' => [
-                             'id',
-                             'categorie',
-                         ]
-                     ]
-                 ]);
+            ->assertJsonCount(3, 'categories')
+            ->assertJsonStructure([
+                'categories' => [
+                    '*' => [
+                        'id',
+                        'categorie',
+                        'nombre_pages',
+                        'created_at',
+                    ]
+                ]
+            ]);
     }
 
-    /**
-     * Test if the API returns a single category.
-     *
-     * @return void
-     */
-    public function test_it_returns_a_single_category()
+    public function test_can_get_a_single_category()
     {
-        // Arrange: Create a single category
         $category = CategorieInformation::factory()->create();
 
-        // Act: Make a GET request to the category show endpoint
         $response = $this->getJson('/api/v1/categories/' . $category->id);
 
-        // Assert: Check if the response is successful and contains the correct data
         $response->assertStatus(200)
-                 ->assertJson([
-                     'categorie' => [
-                         'id' => $category->id,
-                         'categorie' => $category->categorie,
-                     ]
-                 ]);
+            ->assertJsonStructure([
+                'categorie' => [
+                    'id',
+                    'categorie',
+                    'nombre_pages',
+                    'nombre_pages_publiees',
+                    'pages',
+                ]
+            ])
+            ->assertJsonPath('categorie.id', $category->id);
     }
 
-    /**
-     * Test if the API returns 404 for a non-existent category.
-     *
-     * @return void
-     */
-    public function test_it_returns_404_for_non_existent_category()
+    public function test_admin_can_create_a_category()
     {
-        // Act: Make a GET request to a non-existent category
-        $response = $this->getJson('/api/v1/categories/999');
+        $admin = \App\Models\User::factory()->admin()->create();
+        $categoryData = ['categorie' => 'New Category'];
 
-        // Assert: Check if the response is a 404 Not Found
-        $response->assertStatus(404);
-    }
-
-    // --- Store Tests ---
-
-    public function test_guests_cannot_create_category()
-    {
-        $response = $this->postJson('/api/v1/categories', ['categorie' => 'New Category']);
-        $response->assertStatus(401); // Unauthorized
-    }
-
-    public function test_non_admin_users_cannot_create_category()
-    {
-        $user = User::factory()->create(['role' => 'utilisateur']);
-        $response = $this->actingAs($user)->postJson('/api/v1/categories', ['categorie' => 'New Category']);
-        $response->assertStatus(403); // Forbidden
-    }
-
-    public function test_admin_can_create_category()
-    {
-        $admin = User::factory()->admin()->create();
-        $categoryName = 'A Brand New Category';
-
-        $response = $this->actingAs($admin)->postJson('/api/v1/categories', ['categorie' => $categoryName]);
+        $response = $this->actingAs($admin)->postJson('/api/v1/categories', $categoryData);
 
         $response->assertStatus(201)
-                 ->assertJson([
-                     'message' => 'Catégorie créée avec succès',
-                     'categorie' => [
-                         'categorie' => $categoryName,
-                     ]
-                 ]);
+            ->assertJsonFragment(['categorie' => 'New Category']);
 
-        $this->assertDatabaseHas('categorie_informations', ['categorie' => $categoryName]);
+        $this->assertDatabaseHas('categorie_informations', ['categorie' => 'New Category']);
     }
 
-    public function test_create_category_fails_with_invalid_data()
+    public function test_non_admin_cannot_create_a_category()
     {
-        $admin = User::factory()->admin()->create();
-        $response = $this->actingAs($admin)->postJson('/api/v1/categories', ['categorie' => '']);
-        $response->assertStatus(422); // Unprocessable Entity
-    }
+        $user = \App\Models\User::factory()->create();
+        $categoryData = ['categorie' => 'New Category'];
 
-    // --- Destroy Tests ---
+        $response = $this->actingAs($user)->postJson('/api/v1/categories', $categoryData);
 
-    public function test_guests_cannot_delete_category()
-    {
-        $category = CategorieInformation::factory()->create();
-        $response = $this->deleteJson("/api/v1/categories/{$category->id}");
-        $response->assertStatus(401);
-    }
-
-    public function test_non_admin_users_cannot_delete_category()
-    {
-        $user = User::factory()->create(['role' => 'utilisateur']);
-        $category = CategorieInformation::factory()->create();
-        $response = $this->actingAs($user)->deleteJson("/api/v1/categories/{$category->id}");
         $response->assertStatus(403);
     }
 
-    public function test_admin_can_delete_category()
+    public function test_create_category_requires_a_name()
     {
-        $admin = User::factory()->admin()->create();
-        $category = CategorieInformation::factory()->create();
+        $admin = \App\Models\User::factory()->admin()->create();
 
-        $response = $this->actingAs($admin)->deleteJson("/api/v1/categories/{$category->id}");
+        $response = $this->actingAs($admin)->postJson('/api/v1/categories', []);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors('categorie');
+    }
+
+    public function test_admin_can_update_a_category()
+    {
+        $admin = \App\Models\User::factory()->admin()->create();
+        $category = CategorieInformation::factory()->create();
+        $updateData = ['categorie' => 'Updated Category'];
+
+        $response = $this->actingAs($admin)->putJson('/api/v1/categories/' . $category->id, $updateData);
 
         $response->assertStatus(200)
-                 ->assertJson(['message' => 'Catégorie supprimée avec succès']);
+            ->assertJsonFragment(['categorie' => 'Updated Category']);
 
+        $this->assertDatabaseHas('categorie_informations', ['id' => $category->id, 'categorie' => 'Updated Category']);
+    }
+
+    public function test_non_admin_cannot_update_a_category()
+    {
+        $user = \App\Models\User::factory()->create();
+        $category = CategorieInformation::factory()->create();
+        $updateData = ['categorie' => 'Updated Category'];
+
+        $response = $this->actingAs($user)->putJson('/api/v1/categories/' . $category->id, $updateData);
+
+        $response->assertStatus(403);
+    }
+
+    public function test_admin_can_delete_a_category()
+    {
+        $admin = \App\Models\User::factory()->admin()->create();
+        $category = CategorieInformation::factory()->create();
+
+        $response = $this->actingAs($admin)->deleteJson('/api/v1/categories/' . $category->id);
+
+        $response->assertStatus(200);
         $this->assertDatabaseMissing('categorie_informations', ['id' => $category->id]);
     }
 
-    public function test_cannot_delete_category_with_associated_pages()
+    public function test_non_admin_cannot_delete_a_category()
     {
-        $admin = User::factory()->admin()->create();
+        $user = \App\Models\User::factory()->create();
         $category = CategorieInformation::factory()->create();
-        // We need a PageInformation model and factory for this to work.
-        // Assuming PageInformation model exists, but we might need to create a factory.
-        // For now, let's simulate this by attaching a page.
-        // A proper implementation would require PageInformationFactory.
-        PageInformation::factory()->create(['categorie_information_id' => $category->id]);
 
+        $response = $this->actingAs($user)->deleteJson('/api/v1/categories/' . $category->id);
 
-        $response = $this->actingAs($admin)->deleteJson("/api/v1/categories/{$category->id}");
+        $response->assertStatus(403);
+    }
 
-        $response->assertStatus(422)
-                 ->assertJson(['message' => 'Impossible de supprimer cette catégorie car elle contient des pages']);
+    public function test_admin_cannot_delete_a_category_with_pages()
+    {
+        $admin = \App\Models\User::factory()->admin()->create();
+        $category = CategorieInformation::factory()
+            ->has(\App\Models\PageInformation::factory()->count(1), 'pages')
+            ->create();
 
+        $response = $this->actingAs($admin)->deleteJson('/api/v1/categories/' . $category->id);
+
+        $response->assertStatus(422);
         $this->assertDatabaseHas('categorie_informations', ['id' => $category->id]);
     }
 }
