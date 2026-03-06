@@ -1,5 +1,5 @@
 import React from 'react';
-import { Head, usePage } from '@inertiajs/react';
+import { Head, usePage, Link } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import { Badge } from '@/components/ui/badge';
 
@@ -59,6 +59,14 @@ const InformationShow = () => {
                         dangerouslySetInnerHTML={{ __html: page.description }}
                     />
                 </article>
+                <div className="max-w-4xl mx-auto text-center mt-8">
+                    <Link
+                        href="/informations"
+                        className="inline-flex items-center justify-center rounded-md bg-cesizen-green px-4 py-2 text-sm font-medium text-white shadow transition-colors hover:bg-cesizen-green-dark focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    >
+                        Retour aux informations
+                    </Link>
+                </div>
             </div>
         </>
     );
