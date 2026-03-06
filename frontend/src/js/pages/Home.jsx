@@ -119,7 +119,7 @@ const Home = () => {
                                 <p className="text-gray-600 mb-5 flex-grow">
                                     {page.description.substring(0, 120)}...
                                 </p>
-                                <Link href={`/information/${page.slug}`} className="font-semibold text-cesizen-green hover:text-green-700 transition-colors self-start mt-auto">
+                                <Link href={`/informations/${page.slug}`} className="font-semibold text-cesizen-green hover:text-green-700 transition-colors self-start mt-auto">
                                     En savoir plus &rarr;
                                 </Link>
                             </div>
