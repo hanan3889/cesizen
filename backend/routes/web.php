@@ -32,7 +32,7 @@ Route::get('/informations/{page:slug}', function (PageInformation $page) {
 })->name('information.show');
 
 // Dashboard
-Route::get('/dashboard', function () { return Inertia::render('Dashboard'); })->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', function () { return Inertia::render('Dashboard'); })->name('dashboard');
 
 // Profile settings
 Route::get('/settings/profile', function () { return Inertia::render('settings/profile'); })->name('profile.edit');
