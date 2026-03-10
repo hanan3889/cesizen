@@ -37,7 +37,7 @@ const Home = () => {
                             </>
                         ) : (
                             <>
-                                <Link to="/register" className="btn-primary text-lg">
+                                <Link to="/diagnostic" className="btn-primary text-lg">
                                     Commencer
                                 </Link>
                                 <Link to="/informations" className="btn-outline text-lg">
