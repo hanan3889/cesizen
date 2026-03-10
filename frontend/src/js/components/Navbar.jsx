@@ -33,15 +33,12 @@ const Navbar = () => {
                         
                         {isAuthenticated ? (
                             <>
-                                <Link to="/dashboard" className="text-gray-700 hover:text-cesizen-green transition">
-                                    Tableau de bord
+                                <Link to={isAdmin() ? '/admin/dashboard' : '/dashboard'} className="text-gray-700 hover:text-cesizen-green transition">
+                                    {isAdmin() ? 'Administration' : 'Tableau de bord'}
                                 </Link>
-                                <Link to="/diagnostic" className="text-gray-700 hover:text-cesizen-green transition">
-                                    Test de stress
-                                </Link>
-                                {isAdmin() && (
-                                    <Link to="/admin" className="text-gray-700 hover:text-cesizen-green transition">
-                                        Administration
+                                {!isAdmin() && (
+                                    <Link to="/diagnostic" className="text-gray-700 hover:text-cesizen-green transition">
+                                        Test de stress
                                     </Link>
                                 )}
                                 
@@ -92,15 +89,12 @@ const Navbar = () => {
                         
                         {isAuthenticated ? (
                             <>
-                                <Link to="/dashboard" className="block py-2 text-gray-700 hover:text-cesizen-green">
-                                    Tableau de bord
+                                <Link to={isAdmin() ? '/admin/dashboard' : '/dashboard'} className="block py-2 text-gray-700 hover:text-cesizen-green">
+                                    {isAdmin() ? 'Administration' : 'Tableau de bord'}
                                 </Link>
-                                <Link to="/diagnostic" className="block py-2 text-gray-700 hover:text-cesizen-green">
-                                    Test de stress
-                                </Link>
-                                {isAdmin() && (
-                                    <Link to="/admin" className="block py-2 text-gray-700 hover:text-cesizen-green">
-                                        Administration
+                                {!isAdmin() && (
+                                    <Link to="/diagnostic" className="block py-2 text-gray-700 hover:text-cesizen-green">
+                                        Test de stress
                                     </Link>
                                 )}
                                 <button

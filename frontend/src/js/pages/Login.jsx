@@ -19,7 +19,8 @@ const Login = () => {
         const result = await login(email, password);
 
         if (result.success) {
-            navigate('/dashboard');
+            const destination = result.user?.role === 'administrateur' ? '/admin/dashboard' : '/dashboard';
+            navigate(destination);
         } else {
             setError(result.error);
         }

@@ -44,6 +44,7 @@ export const authService = {
     me: () => api.get('/me'),
     updateProfile: (data) => api.put('/profile', data),
     changePassword: (data) => api.post('/change-password', data),
+    resetPasswordComplete: (data) => api.post('/reset-password', data),
 };
 
 // Diagnostics
@@ -97,6 +98,7 @@ export const userService = {
         return api.get(`/users?${params}`);
     },
     getOne: (id) => api.get(`/users/${id}`),
+    create: (data) => api.post('/users', data),
     update: (id, data) => api.put(`/users/${id}`, data),
     delete: (id) => api.delete(`/users/${id}`),
     resetPassword: (id, data) => api.post(`/users/${id}/reset-password`, data),
