@@ -138,7 +138,7 @@ const Dashboard = () => {
                     <div className="card">
                         <div className="flex items-center justify-between mb-6">
                             <h2 className="text-2xl font-bold text-gray-900">Diagnostics récents</h2>
-                            <Link to="/diagnostics" className="text-cesizen-green hover:text-cesizen-green-dark font-medium">
+                            <Link to="/diagnostic/history" className="text-cesizen-green hover:text-cesizen-green-dark font-medium">
                                 Voir tout →
                             </Link>
                         </div>
@@ -175,7 +175,7 @@ const Dashboard = () => {
                                                         {diagnostic.niveau_stress}
                                                     </span>
                                                 </div>
-                                                <Link to={`/diagnostics/${diagnostic.id}`} className="text-cesizen-green hover:text-cesizen-green-dark">
+                                                <Link to="/diagnostic/history" className="text-cesizen-green hover:text-cesizen-green-dark">
                                                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                                     </svg>
