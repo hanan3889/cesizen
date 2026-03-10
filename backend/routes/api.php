@@ -4,7 +4,6 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CategorieInformationController;
 use App\Http\Controllers\Api\DiagnosticStressController;
 use App\Http\Controllers\Api\EvenementVieController;
-use App\Http\Controllers\Api\HistoriqueDiagnosticController;
 use App\Http\Controllers\Api\PageInformationController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\V1\UserController as AdminUserController;
@@ -40,11 +39,7 @@ Route::prefix('v1')->group(function () {
         Route::get('diagnostics/recents', [DiagnosticStressController::class, 'recents']);
         Route::apiResource('diagnostics', DiagnosticStressController::class);
         
-        Route::get('historiques/recent', [HistoriqueDiagnosticController::class, 'recent']);
-        Route::delete('historiques', [HistoriqueDiagnosticController::class, 'destroy']); // Route pour la suppression en masse
-        Route::apiResource('historiques', HistoriqueDiagnosticController::class)->except(['update', 'show']);
-        
-        // --- Admin User Management ---
+// --- Admin User Management ---
         Route::middleware('is_admin')->group(function () {
             Route::post('users/{user}/reset-password', [UserController::class, 'resetPassword']);
             Route::get('users/statistiques', [UserController::class, 'statistiques']);
