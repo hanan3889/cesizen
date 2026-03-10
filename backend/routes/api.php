@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('v1')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/reset-password', [AuthController::class, 'resetPasswordComplete']);
 
     // Public API routes
     Route::get('pages/latest', [PageInformationController::class, 'latest']);
@@ -45,7 +46,7 @@ Route::prefix('v1')->group(function () {
         
         // --- Admin User Management ---
         Route::middleware('is_admin')->group(function () {
-            Route::post('users/{id}/reset-password', [UserController::class, 'resetPassword']);
+            Route::post('users/{user}/reset-password', [UserController::class, 'resetPassword']);
             Route::get('users/statistiques', [UserController::class, 'statistiques']);
             Route::apiResource('users', UserController::class);
         });

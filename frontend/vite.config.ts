@@ -17,6 +17,9 @@ export default defineConfig({
         }),
         react(),
     ],
+    server: {
+        historyApiFallback: true,  
+    },
     test: {
         globals: true,
         environment: 'jsdom',

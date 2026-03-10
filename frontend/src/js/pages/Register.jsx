@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Link, router } from '@inertiajs/react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import Navbar from '../components/Navbar';
+import AppLogo from '../components/app-logo';
 
 const Register = () => {
     const [formData, setFormData] = useState({
@@ -13,6 +13,7 @@ const Register = () => {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const { register } = useAuth();
+    const navigate = useNavigate();
 
     const handleChange = (e) => {
         setFormData({
@@ -45,7 +46,7 @@ const Register = () => {
         );
 
         if (result.success) {
-            router.visit('/dashboard');
+            navigate('/dashboard');
         } else {
             setError(result.error);
         }
@@ -55,19 +56,18 @@ const Register = () => {
 
     return (
         <div>
-            <Navbar />
             <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-md w-full space-y-8">
                     <div>
-                        <div className="mx-auto h-12 w-12 bg-cesizen-green rounded-full flex items-center justify-center">
-                            <span className="text-white font-bold text-2xl">C</span>
+                        <div className="mx-auto flex justify-center">
+                            <AppLogo />
                         </div>
                         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-                            Créer un compte CesiZen
+                            Créer un compte
                         </h2>
                         <p className="mt-2 text-center text-sm text-gray-600">
                             Déjà inscrit ?{' '}
-                            <Link href="/login" className="font-medium text-cesizen-green hover:text-cesizen-green-dark">
+                            <Link to="/login" className="font-medium text-cesizen-green hover:text-cesizen-green-dark">
                                 Connectez-vous
                             </Link>
                         </p>

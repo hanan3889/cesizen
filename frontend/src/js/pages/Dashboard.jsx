@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from '@inertiajs/react';
+import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { diagnosticService } from '../services/api';
-import Navbar from '../components/Navbar';
 
 const Dashboard = () => {
-    const { user } = useAuth();
+    const { user, isAdmin } = useAuth();
+
+    // Les admins vont sur leur propre dashboard
+    if (isAdmin()) return <Navigate to="/admin/dashboard" replace />;
     const [stats, setStats] = useState(null);
     const [recentDiagnostics, setRecentDiagnostics] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -20,7 +22,6 @@ const Dashboard = () => {
                 diagnosticService.getStats(),
                 diagnosticService.getRecents(),
             ]);
-
             setStats(statsRes.data);
             setRecentDiagnostics(diagsRes.data.diagnostics || []);
         } catch (error) {
@@ -32,34 +33,25 @@ const Dashboard = () => {
 
     const getStressLevelColor = (niveau) => {
         switch (niveau) {
-            case 'Faible':
-                return 'bg-green-100 text-green-800';
-            case 'Modéré':
-                return 'bg-yellow-100 text-yellow-800';
-            case 'Élevé':
-                return 'bg-red-100 text-red-800';
-            default:
-                return 'bg-gray-100 text-gray-800';
+            case 'Faible': return 'bg-green-100 text-green-800';
+            case 'Modéré': return 'bg-yellow-100 text-yellow-800';
+            case 'Élevé': return 'bg-red-100 text-red-800';
+            default: return 'bg-gray-100 text-gray-800';
         }
     };
 
     const getStressIcon = (niveau) => {
         switch (niveau) {
-            case 'Faible':
-                return '😊';
-            case 'Modéré':
-                return '😐';
-            case 'Élevé':
-                return '😰';
-            default:
-                return '❓';
+            case 'Faible': return '😊';
+            case 'Modéré': return '😐';
+            case 'Élevé': return '😰';
+            default: return '❓';
         }
     };
 
     if (loading) {
         return (
             <div>
-                <Navbar />
                 <div className="flex items-center justify-center min-h-screen">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cesizen-green"></div>
                 </div>
@@ -69,17 +61,13 @@ const Dashboard = () => {
 
     return (
         <div>
-            <Navbar />
             <div className="min-h-screen bg-gray-50 py-8">
                 <div className="container mx-auto px-4">
-                    {/* Header */}
                     <div className="mb-8">
                         <h1 className="text-3xl font-bold text-gray-900 mb-2">
                             Bonjour, {user.name} 👋
                         </h1>
-                        <p className="text-gray-600">
-                            Bienvenue sur votre tableau de bord CesiZen
-                        </p>
+                        <p className="text-gray-600">Bienvenue sur votre tableau de bord CesiZen</p>
                     </div>
 
                     {/* Stats Cards */}
@@ -88,9 +76,7 @@ const Dashboard = () => {
                             <div className="flex items-center justify-between">
                                 <div>
                                     <p className="text-gray-600 text-sm">Total diagnostics</p>
-                                    <p className="text-3xl font-bold text-gray-900">
-                                        {stats?.total || 0}
-                                    </p>
+                                    <p className="text-3xl font-bold text-gray-900">{stats?.total || 0}</p>
                                 </div>
                                 <div className="w-12 h-12 bg-cesizen-green rounded-full flex items-center justify-center">
                                     <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -104,9 +90,7 @@ const Dashboard = () => {
                             <div className="flex items-center justify-between">
                                 <div>
                                     <p className="text-gray-600 text-sm">Score moyen</p>
-                                    <p className="text-3xl font-bold text-gray-900">
-                                        {stats?.score_moyen ? Math.round(stats.score_moyen) : 0}
-                                    </p>
+                                    <p className="text-3xl font-bold text-gray-900">{stats?.score_moyen ? Math.round(stats.score_moyen) : 0}</p>
                                 </div>
                                 <div className="w-12 h-12 bg-yellow-500 rounded-full flex items-center justify-center">
                                     <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -120,13 +104,9 @@ const Dashboard = () => {
                             <div className="flex items-center justify-between">
                                 <div>
                                     <p className="text-gray-600 text-sm">Score minimum</p>
-                                    <p className="text-3xl font-bold text-green-600">
-                                        {stats?.score_minimum || 0}
-                                    </p>
+                                    <p className="text-3xl font-bold text-green-600">{stats?.score_minimum || 0}</p>
                                 </div>
-                                <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center text-white text-2xl">
-                                    😊
-                                </div>
+                                <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center text-white text-2xl">😊</div>
                             </div>
                         </div>
 
@@ -134,29 +114,21 @@ const Dashboard = () => {
                             <div className="flex items-center justify-between">
                                 <div>
                                     <p className="text-gray-600 text-sm">Score maximum</p>
-                                    <p className="text-3xl font-bold text-red-600">
-                                        {stats?.score_maximum || 0}
-                                    </p>
+                                    <p className="text-3xl font-bold text-red-600">{stats?.score_maximum || 0}</p>
                                 </div>
-                                <div className="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center text-white text-2xl">
-                                    😰
-                                </div>
+                                <div className="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center text-white text-2xl">😰</div>
                             </div>
                         </div>
                     </div>
 
-                    {/* CTA pour nouveau test */}
+                    {/* CTA */}
                     <div className="bg-gradient-to-r from-cesizen-green to-green-600 rounded-lg p-8 mb-8 text-white">
                         <div className="flex flex-col md:flex-row items-center justify-between">
                             <div className="mb-4 md:mb-0">
-                                <h2 className="text-2xl font-bold mb-2">
-                                    Comment vous sentez-vous aujourd'hui ?
-                                </h2>
-                                <p className="text-green-100">
-                                    Faites un nouveau test pour évaluer votre niveau de stress actuel
-                                </p>
+                                <h2 className="text-2xl font-bold mb-2">Comment vous sentez-vous aujourd'hui ?</h2>
+                                <p className="text-green-100">Faites un nouveau test pour évaluer votre niveau de stress actuel</p>
                             </div>
-                            <Link href="/diagnostic" className="bg-white text-cesizen-green px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition">
+                            <Link to="/diagnostic" className="bg-white text-cesizen-green px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition">
                                 Faire un test maintenant
                             </Link>
                         </div>
@@ -165,10 +137,8 @@ const Dashboard = () => {
                     {/* Diagnostics récents */}
                     <div className="card">
                         <div className="flex items-center justify-between mb-6">
-                            <h2 className="text-2xl font-bold text-gray-900">
-                                Diagnostics récents
-                            </h2>
-                            <Link href="/diagnostics" className="text-cesizen-green hover:text-cesizen-green-dark font-medium">
+                            <h2 className="text-2xl font-bold text-gray-900">Diagnostics récents</h2>
+                            <Link to="/diagnostics" className="text-cesizen-green hover:text-cesizen-green-dark font-medium">
                                 Voir tout →
                             </Link>
                         </div>
@@ -176,56 +146,36 @@ const Dashboard = () => {
                         {recentDiagnostics.length === 0 ? (
                             <div className="text-center py-12">
                                 <div className="text-6xl mb-4">📊</div>
-                                <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                                    Aucun diagnostic pour le moment
-                                </h3>
-                                <p className="text-gray-600 mb-6">
-                                    Commencez par faire votre premier test de stress
-                                </p>
-                                <Link href="/diagnostic" className="btn-primary inline-block">
+                                <h3 className="text-xl font-semibold text-gray-900 mb-2">Aucun diagnostic pour le moment</h3>
+                                <p className="text-gray-600 mb-6">Commencez par faire votre premier test de stress</p>
+                                <Link to="/diagnostic" className="btn-primary inline-block">
                                     Faire mon premier test
                                 </Link>
                             </div>
                         ) : (
                             <div className="space-y-4">
                                 {recentDiagnostics.map((diagnostic) => (
-                                    <div
-                                        key={diagnostic.id}
-                                        className="border border-gray-200 rounded-lg p-4 hover:border-cesizen-green transition"
-                                    >
+                                    <div key={diagnostic.id} className="border border-gray-200 rounded-lg p-4 hover:border-cesizen-green transition">
                                         <div className="flex items-center justify-between">
                                             <div className="flex-1">
                                                 <div className="flex items-center space-x-3 mb-2">
-                                                    <span className="text-2xl">
-                                                        {getStressIcon(diagnostic.niveau_stress)}
-                                                    </span>
+                                                    <span className="text-2xl">{getStressIcon(diagnostic.niveau_stress)}</span>
                                                     <div>
                                                         <p className="font-semibold text-gray-900">
-                                                            {new Date(diagnostic.date).toLocaleDateString('fr-FR', {
-                                                                day: 'numeric',
-                                                                month: 'long',
-                                                                year: 'numeric',
-                                                            })}
+                                                            {new Date(diagnostic.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
                                                         </p>
-                                                        <p className="text-sm text-gray-500">
-                                                            {diagnostic.nombre_evenements} événement(s) sélectionné(s)
-                                                        </p>
+                                                        <p className="text-sm text-gray-500">{diagnostic.nombre_evenements} événement(s) sélectionné(s)</p>
                                                     </div>
                                                 </div>
                                             </div>
                                             <div className="flex items-center space-x-4">
                                                 <div className="text-right">
-                                                    <p className="text-2xl font-bold text-gray-900">
-                                                        {diagnostic.score}
-                                                    </p>
+                                                    <p className="text-2xl font-bold text-gray-900">{diagnostic.score}</p>
                                                     <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${getStressLevelColor(diagnostic.niveau_stress)}`}>
                                                         {diagnostic.niveau_stress}
                                                     </span>
                                                 </div>
-                                                <Link
-                                                    href={`/diagnostics/${diagnostic.id}`}
-                                                    className="text-cesizen-green hover:text-cesizen-green-dark"
-                                                >
+                                                <Link to={`/diagnostics/${diagnostic.id}`} className="text-cesizen-green hover:text-cesizen-green-dark">
                                                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                                     </svg>
@@ -241,13 +191,9 @@ const Dashboard = () => {
                     {/* Recommandations */}
                     {stats?.score_moyen && (
                         <div className="mt-8 card bg-blue-50 border border-blue-200">
-                            <h3 className="text-xl font-semibold text-gray-900 mb-4">
-                                💡 Recommandations
-                            </h3>
+                            <h3 className="text-xl font-semibold text-gray-900 mb-4">💡 Recommandations</h3>
                             <div className="space-y-2 text-gray-700">
-                                {stats.score_moyen < 150 && (
-                                    <p>✓ Votre niveau de stress est faible. Continuez vos bonnes habitudes !</p>
-                                )}
+                                {stats.score_moyen < 150 && <p>✓ Votre niveau de stress est faible. Continuez vos bonnes habitudes !</p>}
                                 {stats.score_moyen >= 150 && stats.score_moyen < 300 && (
                                     <>
                                         <p>⚠️ Votre stress est modéré. Pensez à :</p>

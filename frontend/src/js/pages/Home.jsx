@@ -1,11 +1,18 @@
-import React from 'react';
-import { Link, usePage } from '@inertiajs/react';
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import Navbar from '../components/Navbar';
 
 const Home = () => {
     const { isAuthenticated } = useAuth();
-    const { pages } = usePage().props;
+    const [pages, setPages] = useState([]);
+
+    useEffect(() => {
+        axios.get('/api/v1/pages')
+            .then(res => setPages(res.data.data || []))
+            .catch(() => setPages([]));
+    }, []);
 
     return (
         <div className="bg-gradient-to-b from-green-50 to-white">
@@ -21,19 +28,19 @@ const Home = () => {
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                         {isAuthenticated ? (
                             <>
-                                <Link href="/diagnostic" className="btn-primary text-lg">
+                                <Link to="/diagnostic" className="btn-primary text-lg">
                                     Faire un test de stress
                                 </Link>
-                                <Link href="/dashboard" className="btn-outline text-lg">
+                                <Link to="/dashboard" className="btn-outline text-lg">
                                     Mon tableau de bord
                                 </Link>
                             </>
                         ) : (
                             <>
-                                <Link href="/register" className="btn-primary text-lg">
+                                <Link to="/register" className="btn-primary text-lg">
                                     Commencer
                                 </Link>
-                                <Link href="/informations" className="btn-outline text-lg">
+                                <Link to="/informations" className="btn-outline text-lg">
                                     En savoir plus
                                 </Link>
                             </>
@@ -119,7 +126,7 @@ const Home = () => {
                                 <p className="text-gray-600 mb-5 flex-grow">
                                     {page.description.substring(0, 120)}...
                                 </p>
-                                <Link href={`/informations/${page.slug}`} className="font-semibold text-cesizen-green hover:text-green-700 transition-colors self-start mt-auto">
+                                <Link to={`/informations/${page.slug}`} className="font-semibold text-cesizen-green hover:text-green-700 transition-colors self-start mt-auto">
                                     En savoir plus &rarr;
                                 </Link>
                             </div>
@@ -138,7 +145,7 @@ const Home = () => {
                         Rejoignez des milliers d'utilisateurs qui gèrent leur stress avec CesiZen
                     </p>
                     {!isAuthenticated && (
-                        <Link href="/register" className="bg-white text-cesizen-green px-8 py-4 rounded-lg font-semibold hover:bg-gray-100 transition inline-block">
+                        <Link to="/register" className="bg-white text-cesizen-green px-8 py-4 rounded-lg font-semibold hover:bg-gray-100 transition inline-block">
                             Créer mon compte gratuitement
                         </Link>
                     )}

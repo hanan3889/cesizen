@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
@@ -145,17 +146,24 @@ class UserController extends Controller
      */
     public function resetPassword(User $user)
     {
-        $newPassword = Str::random(12);
-        $user->forceFill([
-            'password' => Hash::make($newPassword),
-        ])->save();
+        $status = Password::sendResetLink(['email' => $user->email]);
 
-        // Idéalement, on enverrait un email à l'utilisateur avec son nouveau mot de passe.
-        // Pour l'API, on peut retourner le nouveau mot de passe pour que l'admin le communique.
-        return response()->json([
-            'message' => 'Mot de passe réinitialisé avec succès.',
-            'new_password' => $newPassword,
-        ]);
+        \Log::info('Password reset status for ' . $user->email . ': ' . $status);
+
+        return match ($status) {
+            Password::RESET_LINK_SENT => response()->json([
+                'message' => 'Email de réinitialisation envoyé à ' . $user->email,
+            ]),
+            Password::RESET_THROTTLED => response()->json([
+                'message' => 'Un email a déjà été envoyé récemment. Veuillez patienter 60 secondes avant de réessayer.',
+            ], 429),
+            Password::INVALID_USER => response()->json([
+                'message' => 'Aucun utilisateur trouvé avec cet email.',
+            ], 404),
+            default => response()->json([
+                'message' => 'Erreur lors de l\'envoi : ' . $status,
+            ], 500),
+        };
     }
 
     /**
