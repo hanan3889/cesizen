@@ -1,8 +1,8 @@
-import { FileText, KeyRound, LogOut, Pencil, Plus, Settings, Tag, Trash2, Users, X } from 'lucide-react';
+import { Eye, EyeOff, FileText, KeyRound, LogOut, Pencil, Plus, Settings, Tag, Trash2, Users, X } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import AppLogo from '@/components/app-logo';
 import { useAuth } from '../../contexts/AuthContext';
-import { categorieService, pageService, userService } from '../../services/api';
+import { authService, categorieService, pageService, userService } from '../../services/api';
 import '../../../css/admin.css';
 
 /* ─────────────────────────────────────────
@@ -667,17 +667,135 @@ const CategoriesPanel = () => {
 };
 
 /* ─────────────────────────────────────────
-   Panneau — Paramètres (placeholder)
+   Panneau — Paramètres
 ───────────────────────────────────────── */
-const SettingsPanel = () => (
-    <div>
-        <h2 className="admin-panel-title" style={{ marginBottom: '1.5rem' }}>Paramètres</h2>
-        <div className="admin-empty">
-            <Settings className="h-12 w-12 mx-auto mb-4 opacity-40" />
-            <p className="admin-empty-title">Paramètres de l'application — bientôt disponible</p>
+const SettingsPanel = ({ user }) => {
+    const [form, setForm] = useState({ current_password: '', password: '', password_confirmation: '' });
+    const [errors, setErrors] = useState({});
+    const [feedback, setFeedback] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [show, setShow] = useState({ current: false, new: false, confirm: false });
+
+    const showFeedback = (type, message) => {
+        setFeedback({ type, message });
+        setTimeout(() => setFeedback(null), 6000);
+    };
+
+    const set = (field) => (e) => setForm(f => ({ ...f, [field]: e.target.value }));
+    const toggleShow = (field) => setShow(s => ({ ...s, [field]: !s[field] }));
+
+    const validate = () => {
+        const e = {};
+        if (!form.current_password)   e.current_password = 'Le mot de passe actuel est requis.';
+        if (form.password.length < 8) e.password = 'Minimum 8 caractères.';
+        if (form.password !== form.password_confirmation) e.password_confirmation = 'Les mots de passe ne correspondent pas.';
+        setErrors(e);
+        return Object.keys(e).length === 0;
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (!validate()) return;
+        setLoading(true);
+        try {
+            await authService.changePassword(form);
+            showFeedback('success', 'Mot de passe modifié avec succès.');
+            setForm({ current_password: '', password: '', password_confirmation: '' });
+            setErrors({});
+        } catch (err) {
+            const apiErrors = err.response?.data?.errors;
+            if (apiErrors?.current_password) {
+                setErrors({ current_password: apiErrors.current_password[0] });
+            } else {
+                showFeedback('error', err.response?.data?.message || 'Impossible de modifier le mot de passe.');
+            }
+        } finally { setLoading(false); }
+    };
+
+    const inputCls = (err) => `admin-input${err ? ' admin-input--error' : ''}`;
+
+    return (
+        <div>
+            <div className="admin-panel-header">
+                <h2 className="admin-panel-title">Paramètres du compte</h2>
+            </div>
+
+            {/* Carte profil */}
+            <div className="bg-white rounded-xl shadow-sm p-6 mb-6 flex items-center gap-4">
+                <div className="w-14 h-14 rounded-full bg-cesizen-green flex items-center justify-center text-white text-xl font-bold flex-shrink-0">
+                    {user?.name?.charAt(0)?.toUpperCase() ?? '?'}
+                </div>
+                <div>
+                    <p className="font-semibold text-gray-900 text-lg">{user?.name}</p>
+                    <p className="text-sm text-gray-500">{user?.email}</p>
+                    <span className="inline-block mt-1 px-2.5 py-0.5 text-xs font-semibold rounded-full bg-green-100 text-green-800">Administrateur</span>
+                </div>
+            </div>
+
+            {/* Formulaire mot de passe */}
+            <div className="bg-white rounded-xl shadow-sm p-6 max-w-md">
+                <h3 className="text-base font-semibold text-gray-800 mb-5">Changer le mot de passe</h3>
+
+                {feedback && (
+                    <div className={`admin-feedback admin-feedback--${feedback.type}`}>{feedback.message}</div>
+                )}
+
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <Field label="Mot de passe actuel" error={errors.current_password}>
+                        <div className="relative">
+                            <input
+                                type={show.current ? 'text' : 'password'}
+                                value={form.current_password}
+                                onChange={set('current_password')}
+                                placeholder="Votre mot de passe actuel"
+                                className={inputCls(errors.current_password)}
+                            />
+                            <button type="button" onClick={() => toggleShow('current')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                                {show.current ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                            </button>
+                        </div>
+                    </Field>
+
+                    <Field label="Nouveau mot de passe" error={errors.password}>
+                        <div className="relative">
+                            <input
+                                type={show.new ? 'text' : 'password'}
+                                value={form.password}
+                                onChange={set('password')}
+                                placeholder="Minimum 8 caractères"
+                                className={inputCls(errors.password)}
+                            />
+                            <button type="button" onClick={() => toggleShow('new')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                                {show.new ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                            </button>
+                        </div>
+                    </Field>
+
+                    <Field label="Confirmer le nouveau mot de passe" error={errors.password_confirmation}>
+                        <div className="relative">
+                            <input
+                                type={show.confirm ? 'text' : 'password'}
+                                value={form.password_confirmation}
+                                onChange={set('password_confirmation')}
+                                placeholder="Répétez le nouveau mot de passe"
+                                className={inputCls(errors.password_confirmation)}
+                            />
+                            <button type="button" onClick={() => toggleShow('confirm')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                                {show.confirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                            </button>
+                        </div>
+                    </Field>
+
+                    <div className="pt-2">
+                        <button type="submit" disabled={loading} className="admin-btn-primary">
+                            {loading ? 'Modification...' : 'Modifier le mot de passe'}
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
-    </div>
-);
+    );
+};
 
 /* ─────────────────────────────────────────
    Sidebar
@@ -735,7 +853,7 @@ const AdminDashboard = () => {
             case 'users':        return <UsersPanel />;
             case 'informations': return <InfoPanel />;
             case 'categories':   return <CategoriesPanel />;
-            case 'settings':     return <SettingsPanel />;
+            case 'settings':     return <SettingsPanel user={user} />;
             default:             return <UsersPanel />;
         }
     };
