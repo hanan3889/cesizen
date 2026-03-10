@@ -29,18 +29,22 @@ Route::prefix('v1')->group(function () {
         Route::put('/profile', [AuthController::class, 'updateProfile']);
         Route::put('/password', [AuthController::class, 'changePassword']);
 
-        // Protected API resource routes
-        Route::apiResource('categories', CategorieInformationController::class)->except(['index', 'show']);
-        Route::apiResource('pages', PageInformationController::class)->except(['index', 'show']);
-        Route::post('pages/{id}/publier', [PageInformationController::class, 'publier']);
-        Route::post('pages/{id}/archiver', [PageInformationController::class, 'archiver']);
-
+        // Routes utilisateur authentifié (diagnostic)
         Route::get('diagnostics/statistiques', [DiagnosticStressController::class, 'statistiques']);
         Route::get('diagnostics/recents', [DiagnosticStressController::class, 'recents']);
         Route::apiResource('diagnostics', DiagnosticStressController::class);
-        
-// --- Admin User Management ---
+
+        // --- Routes réservées aux administrateurs ---
         Route::middleware('is_admin')->group(function () {
+            // Gestion des pages d'information (CRUD admin)
+            Route::apiResource('pages', PageInformationController::class)->except(['index', 'show']);
+            Route::post('pages/{id}/publier', [PageInformationController::class, 'publier']);
+            Route::post('pages/{id}/archiver', [PageInformationController::class, 'archiver']);
+
+            // Gestion des catégories (CRUD admin)
+            Route::apiResource('categories', CategorieInformationController::class)->except(['index', 'show']);
+
+            // Gestion des utilisateurs
             Route::post('users/{user}/reset-password', [UserController::class, 'resetPassword']);
             Route::get('users/statistiques', [UserController::class, 'statistiques']);
             Route::apiResource('users', UserController::class);
