@@ -12,7 +12,7 @@ import InformationShow from '../pages/Information/Show';
 import ShowCategory from '../pages/Categories/Show';
 import UsersIndex from '../pages/Admin/Users/Index';
 import AdminDashboard from '../pages/Admin/Dashboard';
-import ResetPassword from '../pages/auth/ResetPassword';
+import ResetPassword from '../pages/ResetPassword';
 
 const PrivateRoute = ({ children }) => {
     const { isAuthenticated, loading } = useAuth();
