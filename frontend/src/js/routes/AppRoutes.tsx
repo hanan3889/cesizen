@@ -11,6 +11,8 @@ import Informations from '../pages/Informations';
 import InformationShow from '../pages/Information/Show';
 import ShowCategory from '../pages/Categories/Show';
 import UsersIndex from '../pages/Admin/Users/Index';
+import AdminDashboard from '../pages/Admin/Dashboard';
+import ResetPassword from '../pages/Auth/ResetPassword';
 
 const PrivateRoute = ({ children }) => {
     const { isAuthenticated, loading } = useAuth();
@@ -19,9 +21,10 @@ const PrivateRoute = ({ children }) => {
 };
 
 const GuestRoute = ({ children }) => {
-    const { isAuthenticated, loading } = useAuth();
+    const { isAuthenticated, isAdmin, loading } = useAuth();
     if (loading) return null;
-    return !isAuthenticated ? children : <Navigate to="/dashboard" />;
+    if (!isAuthenticated) return children;
+    return <Navigate to={isAdmin() ? '/admin/dashboard' : '/dashboard'} />;
 };
 
 const AdminRoute = ({ children }) => {
@@ -45,11 +48,13 @@ const AppRoutes = () => (
             {/* Routes guest uniquement */}
             <Route path="/login" element={<GuestRoute><Login /></GuestRoute>} />
             <Route path="/register" element={<GuestRoute><Register /></GuestRoute>} />
+            <Route path="/reset-password" element={<ResetPassword />} />
 
             {/* Routes protégées */}
             <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
 
             {/* Routes admin */}
+            <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
             <Route path="/admin/users" element={<AdminRoute><UsersIndex /></AdminRoute>} />
 
             {/* Fallback */}

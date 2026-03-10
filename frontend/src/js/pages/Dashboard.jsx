@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { diagnosticService } from '../services/api';
 
 const Dashboard = () => {
-    const { user } = useAuth();
+    const { user, isAdmin } = useAuth();
+
+    // Les admins vont sur leur propre dashboard
+    if (isAdmin()) return <Navigate to="/admin/dashboard" replace />;
     const [stats, setStats] = useState(null);
     const [recentDiagnostics, setRecentDiagnostics] = useState([]);
     const [loading, setLoading] = useState(true);
