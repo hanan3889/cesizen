@@ -37,13 +37,8 @@ const Navbar = () => {
                         {isAuthenticated ? (
                             <>
                                 <Link to={isAdmin() ? '/admin/dashboard' : '/dashboard'} className="text-gray-700 hover:text-cesizen-green transition">
-                                    {isAdmin() ? 'Administration' : 'Tableau de bord'}
+                                    {isAdmin() ? 'Administration' : 'Mon espace'}
                                 </Link>
-                                {!isAdmin() && (
-                                    <Link to="/diagnostic/history" className="text-gray-700 hover:text-cesizen-green transition">
-                                        Mon historique
-                                    </Link>
-                                )}
                                 
                                 <div className="flex items-center space-x-4">
                                     <span className="text-gray-700">
@@ -96,13 +91,8 @@ const Navbar = () => {
                         {isAuthenticated ? (
                             <>
                                 <Link to={isAdmin() ? '/admin/dashboard' : '/dashboard'} className="block py-2 text-gray-700 hover:text-cesizen-green">
-                                    {isAdmin() ? 'Administration' : 'Tableau de bord'}
+                                    {isAdmin() ? 'Administration' : 'Mon espace'}
                                 </Link>
-                                {!isAdmin() && (
-                                    <Link to="/diagnostic/history" className="block py-2 text-gray-700 hover:text-cesizen-green">
-                                        Mon historique
-                                    </Link>
-                                )}
                                 <button
                                     onClick={handleLogout}
                                     className="btn-outline w-full mt-4"
