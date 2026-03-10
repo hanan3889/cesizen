@@ -69,7 +69,7 @@ const Results = ({ result, savedId, saving, deleting, error, isAuthenticated, on
                         {/* Disclaimer */}
                         <div className="diag-disclaimer">
                             <p className="diag-disclaimer-text">
-                                ⚠️ Outil d'auto-évaluation (échelle Holmes &amp; Rahe). Ne remplace pas un avis médical.
+                                Outil d'auto-évaluation (échelle Holmes &amp; Rahe). Ne remplace pas un avis médical.
                             </p>
                         </div>
 
@@ -86,9 +86,9 @@ const Results = ({ result, savedId, saving, deleting, error, isAuthenticated, on
                                     Diagnostic sauvegardé
                                 </div>
                                 <div className="diag-actions-2col">
-                                    <button onClick={onEdit} className="diag-btn diag-btn--outline">✏️ Modifier</button>
+                                    <button onClick={onEdit} className="diag-btn diag-btn--outline">Modifier</button>
                                     <button onClick={onDelete} disabled={deleting} className="diag-btn diag-btn--danger">
-                                        {deleting ? '...' : '🗑️ Supprimer'}
+                                        {deleting ? '...' : 'Supprimer'}
                                     </button>
                                 </div>
                                 <Link to="/diagnostic/history" className="diag-btn diag-btn--secondary block text-center">
@@ -101,7 +101,7 @@ const Results = ({ result, savedId, saving, deleting, error, isAuthenticated, on
                         ) : (
                             <div className="diag-actions">
                                 <button onClick={onSave} disabled={saving} className="diag-btn diag-btn--primary w-full">
-                                    {saving ? 'Sauvegarde en cours...' : isAuthenticated ? '💾 Sauvegarder mon diagnostic' : '🔒 Sauvegarder (connexion requise)'}
+                                    {saving ? 'Sauvegarde en cours...' : isAuthenticated ? 'Sauvegarder mon diagnostic' : 'Sauvegarder (connexion requise)'}
                                 </button>
                                 {!isAuthenticated && (
                                     <p className="text-xs text-center text-gray-400">
@@ -265,7 +265,7 @@ const DiagnosticQuestionnaire = () => {
 
                     {!isAuthenticated && (
                         <div className={`diag-notice diag-notice--guest`}>
-                            <span className="flex-shrink-0">ℹ️</span>
+                            <span className="flex-shrink-0"></span>
                             <span>
                                 Mode visiteur — résultats non sauvegardés.{' '}
                                 <Link to="/login" className="font-semibold underline">Se connecter</Link>
@@ -274,13 +274,13 @@ const DiagnosticQuestionnaire = () => {
                     )}
                     {hasPending && (
                         <div className={`diag-notice diag-notice--pending`}>
-                            <span className="flex-shrink-0">✅</span>
+                            <span className="flex-shrink-0"></span>
                             <span>Sélections restaurées. Cliquez sur "Sauvegarder" pour les enregistrer.</span>
                         </div>
                     )}
                     {error && (
                         <div className={`diag-notice diag-notice--error`}>
-                            <span className="flex-shrink-0">⚠️</span>
+                            <span className="flex-shrink-0"></span>
                             <span>{error}</span>
                         </div>
                     )}
@@ -336,7 +336,7 @@ const DiagnosticQuestionnaire = () => {
                         >
                             {selected.size === 0
                                 ? 'Sélectionnez au moins un événement'
-                                : `🧮 Calculer mon score (${selected.size} événement${selected.size !== 1 ? 's' : ''})`
+                                : `Calculer mon score (${selected.size} événement${selected.size !== 1 ? 's' : ''})`
                             }
                         </button>
                         {selected.size > 0 && (
