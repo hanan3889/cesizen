@@ -24,10 +24,31 @@ class CategorieInformationTest extends TestCase
                         'id',
                         'categorie',
                         'nombre_pages',
+                        'nombre_pages_publiees',
                         'created_at',
                     ]
                 ]
             ]);
+    }
+
+    public function test_index_returns_correct_nombre_pages_publiees()
+    {
+        $categorie = CategorieInformation::factory()->create();
+        \App\Models\PageInformation::factory()->count(2)->create([
+            'categorie_information_id' => $categorie->id,
+            'statut'                   => 'publie',
+        ]);
+        \App\Models\PageInformation::factory()->create([
+            'categorie_information_id' => $categorie->id,
+            'statut'                   => 'brouillon',
+        ]);
+
+        $response = $this->getJson('/api/v1/categories');
+
+        $response->assertStatus(200);
+        $found = collect($response->json('categories'))->firstWhere('id', $categorie->id);
+        $this->assertEquals(2, $found['nombre_pages_publiees']);
+        $this->assertEquals(3, $found['nombre_pages']);
     }
 
     public function test_can_get_a_single_category()
