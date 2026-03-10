@@ -149,6 +149,63 @@ class DiagnosticStressController extends Controller
     }
 
     /**
+     * @OA\Put(
+     *     path="/diagnostics/{id}",
+     *     summary="Mettre à jour les événements d'un diagnostic",
+     *     tags={"Diagnostics"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID du diagnostic",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"evenements"},
+     *             @OA\Property(property="evenements", type="array", @OA\Items(type="integer"), example={1, 2, 3})
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Diagnostic mis à jour"),
+     *     @OA\Response(response=401, description="Non authentifié"),
+     *     @OA\Response(response=404, description="Diagnostic non trouvé")
+     * )
+     */
+    public function update(Request $request, $id)
+    {
+        $diagnostic = DiagnosticStress::where('utilisateur_id', $request->user()->id)
+            ->findOrFail($id);
+
+        $request->validate([
+            'evenements'   => 'required|array|min:1',
+            'evenements.*' => 'exists:evenement_vies,id',
+        ]);
+
+        $syncData = [];
+        foreach ($request->evenements as $evenementId) {
+            $syncData[$evenementId] = ['date_selection' => now()];
+        }
+        $diagnostic->evenements()->sync($syncData);
+        $diagnostic->calculerScore();
+        $diagnostic->load('evenements');
+
+        return response()->json([
+            'message'    => 'Diagnostic mis à jour',
+            'diagnostic' => [
+                'id'                => $diagnostic->id,
+                'date'              => $diagnostic->date,
+                'score'             => $diagnostic->score,
+                'niveau_stress'     => $diagnostic->niveau_stress,
+                'recommandation'    => $diagnostic->recommandation,
+                'nombre_evenements' => $diagnostic->nombre_evenements,
+                'evenements'        => $diagnostic->evenements,
+            ],
+        ]);
+    }
+
+    /**
      * @OA\Delete(
      *     path="/diagnostics/{id}",
      *     summary="Supprimer un diagnostic",
