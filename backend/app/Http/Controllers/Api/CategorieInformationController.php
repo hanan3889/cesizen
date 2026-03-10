@@ -25,13 +25,14 @@ class CategorieInformationController extends Controller
      */
     public function index()
     {
-        $categories = CategorieInformation::withCount('pages')
+        $categories = CategorieInformation::withCount(['pages', 'pagesPubliees'])
             ->get()
             ->map(function ($categorie) {
                 return [
                     'id' => $categorie->id,
                     'categorie' => $categorie->categorie,
                     'nombre_pages' => $categorie->pages_count,
+                    'nombre_pages_publiees' => $categorie->pages_publiees_count,
                     'created_at' => $categorie->created_at,
                 ];
             });
@@ -117,12 +118,6 @@ class CategorieInformationController extends Controller
      */
     public function store(Request $request)
     {
-        if (!$request->user()->isAdmin()) {
-            return response()->json([
-                'message' => 'Action non autorisée',
-            ], 403);
-        }
-
         $request->validate([
             'categorie' => 'required|string|unique:categorie_informations,categorie|max:255',
         ]);
@@ -181,12 +176,6 @@ class CategorieInformationController extends Controller
      */
     public function update(Request $request, $id)
     {
-        if (!$request->user()->isAdmin()) {
-            return response()->json([
-                'message' => 'Action non autorisée',
-            ], 403);
-        }
-
         $categorie = CategorieInformation::findOrFail($id);
 
         $request->validate([
@@ -239,12 +228,6 @@ class CategorieInformationController extends Controller
      */
     public function destroy(Request $request, $id)
     {
-        if (!$request->user()->isAdmin()) {
-            return response()->json([
-                'message' => 'Action non autorisée',
-            ], 403);
-        }
-
         $categorie = CategorieInformation::findOrFail($id);
 
         // Vérifier s'il y a des pages associées

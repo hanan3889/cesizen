@@ -41,11 +41,17 @@ class PageInformationController extends Controller
             $query->where('categorie_information_id', $request->categorie_id);
         }
 
-        // Filtrer par statut 
-        if ($request->user() && $request->user()->isAdmin() && $request->has('statut')) {
-            $query->where('statut', $request->statut);
+        // Utiliser auth('sanctum') pour détecter l'admin même sur les routes publiques
+        $authUser = auth('sanctum')->user();
+
+        // Filtrer par statut
+        if ($authUser && $authUser->isAdmin()) {
+            // Admin voit tout (brouillon, publie, archive), avec filtre optionnel
+            if ($request->has('statut')) {
+                $query->where('statut', $request->statut);
+            }
         } else {
-            // Pour les utilisateurs normaux, seulement les pages publiées
+            // Utilisateurs normaux : seulement les pages publiées
             $query->publiees();
         }
 
@@ -88,8 +94,10 @@ class PageInformationController extends Controller
     {
         $page = PageInformation::with(['categorie', 'administrateur'])->findOrFail($id);
 
+        $authUser = auth('sanctum')->user();
+
         // Vérifier si la page est publiée
-        if ($page->statut !== 'publie' && (!auth()->check() || !auth()->user()->isAdmin())) {
+        if ($page->statut !== 'publie' && (!$authUser || !$authUser->isAdmin())) {
             return response()->json([
                 'message' => 'Cette page n\'est pas accessible',
             ], 403);
@@ -136,12 +144,6 @@ class PageInformationController extends Controller
      */
     public function store(Request $request)
     {
-        if (!$request->user()->isAdmin()) {
-            return response()->json([
-                'message' => 'Action non autorisée',
-            ], 403);
-        }
-
         $request->validate([
             'titre' => 'required|string|max:255',
             'description' => 'required|string',
@@ -208,12 +210,6 @@ class PageInformationController extends Controller
      */
     public function update(Request $request, $id)
     {
-        if (!$request->user()->isAdmin()) {
-            return response()->json([
-                'message' => 'Action non autorisée',
-            ], 403);
-        }
-
         $page = PageInformation::findOrFail($id);
 
         $request->validate([
@@ -263,12 +259,6 @@ class PageInformationController extends Controller
      */
     public function destroy(Request $request, $id)
     {
-        if (!$request->user()->isAdmin()) {
-            return response()->json([
-                'message' => 'Action non autorisée',
-            ], 403);
-        }
-
         $page = PageInformation::findOrFail($id);
         $page->delete();
 
@@ -310,12 +300,6 @@ class PageInformationController extends Controller
      */
     public function publier(Request $request, $id)
     {
-        if (!$request->user()->isAdmin()) {
-            return response()->json([
-                'message' => 'Action non autorisée',
-            ], 403);
-        }
-
         $page = PageInformation::findOrFail($id);
         $page->publier();
 
@@ -358,12 +342,6 @@ class PageInformationController extends Controller
      */
     public function archiver(Request $request, $id)
     {
-        if (!$request->user()->isAdmin()) {
-            return response()->json([
-                'message' => 'Action non autorisée',
-            ], 403);
-        }
-
         $page = PageInformation::findOrFail($id);
         $page->archiver();
 
@@ -431,8 +409,10 @@ class PageInformationController extends Controller
             ->where('slug', $slug)
             ->firstOrFail();
 
+        $authUser = auth('sanctum')->user();
+
         // Vérifier si la page est publiée
-        if ($page->statut !== 'publie' && (!auth()->check() || !auth()->user()->isAdmin())) {
+        if ($page->statut !== 'publie' && (!$authUser || !$authUser->isAdmin())) {
             return response()->json([
                 'message' => 'Cette page n\'est pas accessible',
             ], 403);
