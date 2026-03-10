@@ -392,7 +392,7 @@ const InfoPanel = () => {
         try {
             const page = url ? new URL(url).searchParams.get('page') : '1';
             const res = await pageService.getAll({ page });
-            setPages(res.data?.data ?? res.data);
+            setPages(res.data);
         } catch {
             setError('Impossible de charger les pages.');
         } finally { setLoading(false); }
