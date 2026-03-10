@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
-import { Link, router } from '@inertiajs/react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import AppLogo from './app-logo';
 
 const Navbar = () => {
     const { user, isAuthenticated, isAdmin, logout } = useAuth();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const navigate = useNavigate();
 
     const handleLogout = async () => {
         await logout();
-        router.visit('/login');
+        navigate('/login');
     };
 
     return (
@@ -16,35 +18,27 @@ const Navbar = () => {
             <div className="container mx-auto px-4">
                 <div className="flex justify-between items-center h-16">
                     {/* Logo */}
-                    <Link href="/" className="flex items-center space-x-2">
-                        <div className="w-10 h-10 bg-cesizen-green rounded-full flex items-center justify-center">
-                            <span className="text-white font-bold text-xl">C</span>
-                        </div>
-                        <span className="text-xl font-bold text-cesizen-green">
-                            CesiZen
-                        </span>
+                    <Link to="/" className="flex items-center space-x-2">
+                        <AppLogo />
                     </Link>
 
                     {/* Navigation Desktop */}
                     <div className="hidden md:flex items-center space-x-6">
-                        <Link href="/" className="text-gray-700 hover:text-cesizen-green transition">
+                        <Link to="/" className="text-gray-700 hover:text-cesizen-green transition">
                             Accueil
                         </Link>
-                        <Link href="/informations" className="text-gray-700 hover:text-cesizen-green transition">
+                        <Link to="/informations" className="text-gray-700 hover:text-cesizen-green transition">
                             Informations
                         </Link>
                         
                         {isAuthenticated ? (
                             <>
-                                <Link href="/dashboard" className="text-gray-700 hover:text-cesizen-green transition">
-                                    Tableau de bord
+                                <Link to={isAdmin() ? '/admin/dashboard' : '/dashboard'} className="text-gray-700 hover:text-cesizen-green transition">
+                                    {isAdmin() ? 'Administration' : 'Tableau de bord'}
                                 </Link>
-                                <Link href="/diagnostic" className="text-gray-700 hover:text-cesizen-green transition">
-                                    Test de stress
-                                </Link>
-                                {isAdmin() && (
-                                    <Link href="/admin" className="text-gray-700 hover:text-cesizen-green transition">
-                                        Administration
+                                {!isAdmin() && (
+                                    <Link to="/diagnostic" className="text-gray-700 hover:text-cesizen-green transition">
+                                        Test de stress
                                     </Link>
                                 )}
                                 
@@ -62,10 +56,10 @@ const Navbar = () => {
                             </>
                         ) : (
                             <div className="flex items-center space-x-4">
-                                <Link href="/login" className="text-gray-700 hover:text-cesizen-green transition">
+                                <Link to="/login" className="text-gray-700 hover:text-cesizen-green transition">
                                     Connexion
                                 </Link>
-                                <Link href="/register" className="btn-primary py-2">
+                                <Link to="/register" className="btn-primary py-2">
                                     Crée un compte
                                 </Link>
                             </div>
@@ -86,24 +80,21 @@ const Navbar = () => {
                 {/* Menu Mobile */}
                 {isMenuOpen && (
                     <div className="md:hidden py-4">
-                        <Link href="/" className="block py-2 text-gray-700 hover:text-cesizen-green">
+                        <Link to="/" className="block py-2 text-gray-700 hover:text-cesizen-green">
                             Accueil
                         </Link>
-                        <Link href="/informations" className="block py-2 text-gray-700 hover:text-cesizen-green">
+                        <Link to="/informations" className="block py-2 text-gray-700 hover:text-cesizen-green">
                             Informations
                         </Link>
                         
                         {isAuthenticated ? (
                             <>
-                                <Link href="/dashboard" className="block py-2 text-gray-700 hover:text-cesizen-green">
-                                    Tableau de bord
+                                <Link to={isAdmin() ? '/admin/dashboard' : '/dashboard'} className="block py-2 text-gray-700 hover:text-cesizen-green">
+                                    {isAdmin() ? 'Administration' : 'Tableau de bord'}
                                 </Link>
-                                <Link href="/diagnostic" className="block py-2 text-gray-700 hover:text-cesizen-green">
-                                    Test de stress
-                                </Link>
-                                {isAdmin() && (
-                                    <Link href="/admin" className="block py-2 text-gray-700 hover:text-cesizen-green">
-                                        Administration
+                                {!isAdmin() && (
+                                    <Link to="/diagnostic" className="block py-2 text-gray-700 hover:text-cesizen-green">
+                                        Test de stress
                                     </Link>
                                 )}
                                 <button
@@ -115,10 +106,10 @@ const Navbar = () => {
                             </>
                         ) : (
                             <>
-                                <Link href="/login" className="block py-2 text-gray-700 hover:text-cesizen-green">
+                                <Link to="/login" className="block py-2 text-gray-700 hover:text-cesizen-green">
                                     Connexion
                                 </Link>
-                                <Link href="/register" className="btn-primary w-full mt-4">
+                                <Link to="/register" className="btn-primary w-full mt-4">
                                     Crée un compte
                                 </Link>
                             </>

@@ -1,0 +1,4 @@
+feat: Standardize Login page logo with AppLogo
+
+Replaced the custom text-based logo with the `AppLogo` component on the `Login.jsx` page
+to ensure design consistency with the `Register.jsx` page.
