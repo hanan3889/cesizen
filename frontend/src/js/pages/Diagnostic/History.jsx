@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { diagnosticService } from '@/services/api';
+import '../../../css/diagnostic.css';
 
 const NIVEAU_KEY = { Faible: 'faible', Modéré: 'modere', Élevé: 'eleve' };
 
@@ -90,24 +91,26 @@ const DiagnosticHistory = () => {
                 ) : (
                     <>
                         {/* Cards diagnostics */}
-                        <div className="space-y-3 mb-4">
+                        <div className="space-y-2 mb-4">
                             {diagnostics.map(diag => {
                                 const key = NIVEAU_KEY[diag.niveau_stress] || 'faible';
                                 return (
-                                    <div key={diag.id} className={`diag-card diag-card--${key} !border-l-4`}>
-                                        <div className="flex items-center justify-between gap-3">
-                                            {/* Infos */}
-                                            <div className="min-w-0 flex-1">
-                                                <div className="flex items-center gap-2 flex-wrap">
-                                                    <span className="text-2xl font-extrabold text-gray-900 tabular-nums leading-none">
-                                                        {diag.score}
-                                                    </span>
-                                                    <span className="text-sm text-gray-400 font-normal">pts</span>
-                                                    <span className={`diag-badge diag-badge--${key}`}>
-                                                        {diag.niveau_stress}
-                                                    </span>
-                                                </div>
-                                                <p className="text-sm text-gray-500 mt-1.5">
+                                    <div key={diag.id} className={`diag-card diag-card--${key} !border-l-4 !py-3 !px-4`}>
+                                        <div className="grid grid-cols-[auto,1fr,auto] items-center gap-x-3">
+
+                                            {/* Score + badge */}
+                                            <div className="flex flex-col items-center gap-1">
+                                                <span className="text-2xl font-extrabold text-gray-900 tabular-nums leading-none">
+                                                    {diag.score}
+                                                </span>
+                                                <span className={`diag-badge diag-badge--${key}`}>
+                                                    {diag.niveau_stress}
+                                                </span>
+                                            </div>
+
+                                            {/* Date + nb événements */}
+                                            <div className="min-w-0">
+                                                <p className="text-sm font-medium text-gray-700 truncate">
                                                     {formatDate(diag.created_at)}
                                                 </p>
                                                 <p className="text-xs text-gray-400 mt-0.5">
@@ -119,11 +122,11 @@ const DiagnosticHistory = () => {
                                             <button
                                                 onClick={() => handleDelete(diag.id)}
                                                 disabled={deleting === diag.id}
-                                                className="flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-xl text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors disabled:opacity-40"
+                                                className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-300 hover:text-red-500 hover:bg-red-50 transition-colors disabled:opacity-40"
                                                 title="Supprimer"
                                             >
                                                 {deleting === diag.id ? (
-                                                    <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                                                    <div className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" />
                                                 ) : (
                                                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
