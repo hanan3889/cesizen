@@ -46,7 +46,7 @@ Route::prefix('v1')->group(function () {
         
         // --- Admin User Management ---
         Route::middleware('is_admin')->group(function () {
-            Route::post('users/{id}/reset-password', [UserController::class, 'resetPassword']);
+            Route::post('users/{user}/reset-password', [UserController::class, 'resetPassword']);
             Route::get('users/statistiques', [UserController::class, 'statistiques']);
             Route::apiResource('users', UserController::class);
         });

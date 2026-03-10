@@ -148,15 +148,22 @@ class UserController extends Controller
     {
         $status = Password::sendResetLink(['email' => $user->email]);
 
-        if ($status === Password::RESET_LINK_SENT) {
-            return response()->json([
-                'message' => 'Email de réinitialisation envoyé à ' . $user->email,
-            ]);
-        }
+        \Log::info('Password reset status for ' . $user->email . ': ' . $status);
 
-        return response()->json([
-            'message' => 'Impossible d\'envoyer l\'email de réinitialisation.',
-        ], 500);
+        return match ($status) {
+            Password::RESET_LINK_SENT => response()->json([
+                'message' => 'Email de réinitialisation envoyé à ' . $user->email,
+            ]),
+            Password::RESET_THROTTLED => response()->json([
+                'message' => 'Un email a déjà été envoyé récemment. Veuillez patienter 60 secondes avant de réessayer.',
+            ], 429),
+            Password::INVALID_USER => response()->json([
+                'message' => 'Aucun utilisateur trouvé avec cet email.',
+            ], 404),
+            default => response()->json([
+                'message' => 'Erreur lors de l\'envoi : ' . $status,
+            ], 500),
+        };
     }
 
     /**
