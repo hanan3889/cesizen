@@ -250,8 +250,9 @@ const UsersPanel = () => {
             await userService.resetPassword(resetModal.user.id);
             showFeedback('success', `Email de réinitialisation envoyé à ${resetModal.user.email}.`);
             setResetModal({ open: false, user: null });
-        } catch {
-            showFeedback('error', "Impossible d'envoyer l'email de réinitialisation.");
+        } catch (err) {
+            const msg = err.response?.data?.message ?? "Impossible d'envoyer l'email de réinitialisation.";
+            showFeedback('error', msg);
         } finally {
             setActionLoading(false);
         }
