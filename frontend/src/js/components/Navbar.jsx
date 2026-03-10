@@ -30,15 +30,18 @@ const Navbar = () => {
                         <Link to="/informations" className="text-gray-700 hover:text-cesizen-green transition">
                             Informations
                         </Link>
-                        
+                        <Link to="/diagnostic" className="text-gray-700 hover:text-cesizen-green transition">
+                            Test de stress
+                        </Link>
+
                         {isAuthenticated ? (
                             <>
                                 <Link to={isAdmin() ? '/admin/dashboard' : '/dashboard'} className="text-gray-700 hover:text-cesizen-green transition">
                                     {isAdmin() ? 'Administration' : 'Tableau de bord'}
                                 </Link>
                                 {!isAdmin() && (
-                                    <Link to="/diagnostic" className="text-gray-700 hover:text-cesizen-green transition">
-                                        Test de stress
+                                    <Link to="/diagnostic/history" className="text-gray-700 hover:text-cesizen-green transition">
+                                        Mon historique
                                     </Link>
                                 )}
                                 
@@ -86,15 +89,18 @@ const Navbar = () => {
                         <Link to="/informations" className="block py-2 text-gray-700 hover:text-cesizen-green">
                             Informations
                         </Link>
-                        
+                        <Link to="/diagnostic" className="block py-2 text-gray-700 hover:text-cesizen-green">
+                            Test de stress
+                        </Link>
+
                         {isAuthenticated ? (
                             <>
                                 <Link to={isAdmin() ? '/admin/dashboard' : '/dashboard'} className="block py-2 text-gray-700 hover:text-cesizen-green">
                                     {isAdmin() ? 'Administration' : 'Tableau de bord'}
                                 </Link>
                                 {!isAdmin() && (
-                                    <Link to="/diagnostic" className="block py-2 text-gray-700 hover:text-cesizen-green">
-                                        Test de stress
+                                    <Link to="/diagnostic/history" className="block py-2 text-gray-700 hover:text-cesizen-green">
+                                        Mon historique
                                     </Link>
                                 )}
                                 <button

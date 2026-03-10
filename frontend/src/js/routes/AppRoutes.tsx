@@ -13,6 +13,8 @@ import ShowCategory from '../pages/Categories/Show';
 import UsersIndex from '../pages/Admin/Users/Index';
 import AdminDashboard from '../pages/Admin/Dashboard';
 import ResetPassword from '../pages/ResetPassword';
+import DiagnosticQuestionnaire from '../pages/Diagnostic/Questionnaire';
+import DiagnosticHistory from '../pages/Diagnostic/History';
 
 const PrivateRoute = ({ children }) => {
     const { isAuthenticated, loading } = useAuth();
@@ -52,6 +54,10 @@ const AppRoutes = () => (
 
             {/* Routes protégées */}
             <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+            <Route path="/diagnostic/history" element={<PrivateRoute><DiagnosticHistory /></PrivateRoute>} />
+
+            {/* Route publique — accessible visiteurs et connectés */}
+            <Route path="/diagnostic" element={<DiagnosticQuestionnaire />} />
 
             {/* Routes admin */}
             <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
