@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Head, Link } from '@inertiajs/react';
 import AdminLayout from '@/layouts/AdminLayout';
 import { type User } from '@/types/user';
 import { userService } from '@/services/api';
@@ -25,12 +24,13 @@ const UsersIndex = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
+    useEffect(() => {
+        document.title = 'Gestion des Utilisateurs — CesiZen';
+    }, []);
+
     const fetchUsers = async (url?: string) => {
         setLoading(true);
         try {
-            // userService.getAll() prend un objet de filtres, mais pour la pagination,
-            // l'URL complète est dans la réponse de l'API.
-            // Nous devons extraire le numéro de page de l'URL.
             const page = url ? new URL(url).searchParams.get('page') : '1';
             const response = await userService.getAll({ page });
             setUsers(response.data);
@@ -131,18 +131,13 @@ const UsersIndex = () => {
     };
 
     return (
-        <>
-            <Head title="Gestion des Utilisateurs" />
+        <AdminLayout>
             <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-6">
                 Gestion des Utilisateurs
             </h1>
             {renderContent()}
-        </>
+        </AdminLayout>
     );
 };
 
-// Assigne le layout d'administration à cette page
-UsersIndex.layout = (page: React.ReactNode) => <AdminLayout>{page}</AdminLayout>;
-
 export default UsersIndex;
-
