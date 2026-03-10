@@ -133,4 +133,165 @@ class PageInformationTest extends TestCase
 
         $response->assertStatus(403);
     }
+
+    // --- Admin vs non-admin visibility ---
+
+    public function test_admin_sees_all_pages_including_non_published()
+    {
+        $admin = \App\Models\User::factory()->admin()->create();
+        PageInformation::factory()->create(['statut' => 'publie']);
+        PageInformation::factory()->create(['statut' => 'brouillon']);
+        PageInformation::factory()->create(['statut' => 'archive']);
+
+        $response = $this->actingAs($admin)->getJson('/api/v1/pages');
+
+        $response->assertStatus(200);
+        $this->assertCount(3, $response->json('data'));
+    }
+
+    public function test_non_admin_sees_only_published_pages()
+    {
+        $user = \App\Models\User::factory()->create();
+        PageInformation::factory()->create(['statut' => 'publie']);
+        PageInformation::factory()->create(['statut' => 'brouillon']);
+        PageInformation::factory()->create(['statut' => 'archive']);
+
+        $response = $this->actingAs($user)->getJson('/api/v1/pages');
+
+        $response->assertStatus(200);
+        $this->assertCount(1, $response->json('data'));
+    }
+
+    public function test_guest_sees_only_published_pages()
+    {
+        PageInformation::factory()->create(['statut' => 'publie']);
+        PageInformation::factory()->create(['statut' => 'brouillon']);
+
+        $response = $this->getJson('/api/v1/pages');
+
+        $response->assertStatus(200);
+        $this->assertCount(1, $response->json('data'));
+    }
+
+    public function test_admin_can_filter_pages_by_status()
+    {
+        $admin = \App\Models\User::factory()->admin()->create();
+        PageInformation::factory()->count(2)->create(['statut' => 'brouillon']);
+        PageInformation::factory()->create(['statut' => 'publie']);
+
+        $response = $this->actingAs($admin)->getJson('/api/v1/pages?statut=brouillon');
+
+        $response->assertStatus(200);
+        $this->assertCount(2, $response->json('data'));
+    }
+
+    public function test_non_admin_cannot_view_non_published_page()
+    {
+        $user = \App\Models\User::factory()->create();
+        $page = PageInformation::factory()->create(['statut' => 'brouillon']);
+
+        $response = $this->actingAs($user)->getJson('/api/v1/pages/' . $page->id);
+
+        $response->assertStatus(403);
+    }
+
+    public function test_admin_can_view_non_published_page()
+    {
+        $admin = \App\Models\User::factory()->admin()->create();
+        $page  = PageInformation::factory()->create(['statut' => 'brouillon']);
+
+        $response = $this->actingAs($admin)->getJson('/api/v1/pages/' . $page->id);
+
+        $response->assertStatus(200)
+                 ->assertJsonPath('page.id', $page->id);
+    }
+
+    // --- Publier / Archiver ---
+
+    public function test_admin_can_publish_a_page()
+    {
+        $admin = \App\Models\User::factory()->admin()->create();
+        $page  = PageInformation::factory()->create(['statut' => 'brouillon']);
+
+        $response = $this->actingAs($admin)->postJson('/api/v1/pages/' . $page->id . '/publier');
+
+        $response->assertStatus(200);
+        $this->assertDatabaseHas('page_informations', ['id' => $page->id, 'statut' => 'publie']);
+    }
+
+    public function test_non_admin_cannot_publish_a_page()
+    {
+        $user = \App\Models\User::factory()->create();
+        $page = PageInformation::factory()->create(['statut' => 'brouillon']);
+
+        $response = $this->actingAs($user)->postJson('/api/v1/pages/' . $page->id . '/publier');
+
+        $response->assertStatus(403);
+    }
+
+    public function test_admin_can_archive_a_page()
+    {
+        $admin = \App\Models\User::factory()->admin()->create();
+        $page  = PageInformation::factory()->create(['statut' => 'publie']);
+
+        $response = $this->actingAs($admin)->postJson('/api/v1/pages/' . $page->id . '/archiver');
+
+        $response->assertStatus(200);
+        $this->assertDatabaseHas('page_informations', ['id' => $page->id, 'statut' => 'archive']);
+    }
+
+    // --- Latest ---
+
+    public function test_latest_returns_at_most_5_published_pages()
+    {
+        PageInformation::factory()->count(7)->create(['statut' => 'publie']);
+        PageInformation::factory()->count(2)->create(['statut' => 'brouillon']);
+
+        $response = $this->getJson('/api/v1/pages/latest');
+
+        $response->assertStatus(200);
+        $this->assertCount(5, $response->json());
+    }
+
+    public function test_latest_does_not_include_non_published_pages()
+    {
+        PageInformation::factory()->count(2)->create(['statut' => 'publie']);
+        PageInformation::factory()->count(3)->create(['statut' => 'brouillon']);
+
+        $response = $this->getJson('/api/v1/pages/latest');
+
+        $response->assertStatus(200);
+        $this->assertCount(2, $response->json());
+    }
+
+    // --- Show by slug ---
+
+    public function test_can_get_a_published_page_by_slug()
+    {
+        $page = PageInformation::factory()->create(['statut' => 'publie', 'slug' => 'mon-article']);
+
+        $response = $this->getJson('/api/v1/pages/slug/mon-article');
+
+        $response->assertStatus(200)
+                 ->assertJsonPath('id', $page->id);
+    }
+
+    public function test_guest_cannot_access_non_published_page_by_slug()
+    {
+        PageInformation::factory()->create(['statut' => 'brouillon', 'slug' => 'brouillon-article']);
+
+        $response = $this->getJson('/api/v1/pages/slug/brouillon-article');
+
+        $response->assertStatus(403);
+    }
+
+    public function test_admin_can_access_non_published_page_by_slug()
+    {
+        $admin = \App\Models\User::factory()->admin()->create();
+        PageInformation::factory()->create(['statut' => 'brouillon', 'slug' => 'brouillon-admin']);
+
+        $response = $this->actingAs($admin)->getJson('/api/v1/pages/slug/brouillon-admin');
+
+        $response->assertStatus(200);
+    }
 }
