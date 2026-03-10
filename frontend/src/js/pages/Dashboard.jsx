@@ -75,8 +75,8 @@ const EditDiagnosticModal = ({ open, diagnostic, onSubmit, onClose, loading }) =
         setEventsLoading(true);
         evenementService.getAll()
             .then(res => {
-                const data = res.data?.data ?? res.data ?? [];
-                setAllEvents(Array.isArray(data) ? data : []);
+                const data = res.data?.evenements ?? [];
+                setAllEvents(data);
             })
             .finally(() => setEventsLoading(false));
     }, [open, diagnostic]);

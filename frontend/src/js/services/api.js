@@ -43,7 +43,7 @@ export const authService = {
     logout: () => axios.post('/logout'),
     me: () => api.get('/me'),
     updateProfile: (data) => api.put('/profile', data),
-    changePassword: (data) => api.post('/change-password', data),
+    changePassword: (data) => api.put('/password', data),
     resetPasswordComplete: (data) => api.post('/reset-password', data),
 };
 
@@ -52,6 +52,7 @@ export const diagnosticService = {
     getAll: (page = 1) => api.get(`/diagnostics?page=${page}`),
     getOne: (id) => api.get(`/diagnostics/${id}`),
     create: (data) => api.post('/diagnostics', data),
+    update: (id, data) => api.put(`/diagnostics/${id}`, data),
     delete: (id) => api.delete(`/diagnostics/${id}`),
     getStats: () => api.get('/diagnostics/statistiques'),
     getRecents: () => api.get('/diagnostics/recents'),
