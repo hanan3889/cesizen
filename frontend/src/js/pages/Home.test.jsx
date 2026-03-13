@@ -1,19 +1,24 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import axios from 'axios';
 import Home from '@/pages/Home';
 
-vi.mock('axios');
+vi.mock('@/services/api', () => ({
+    pageService: {
+        getAll: vi.fn(),
+    },
+}));
 vi.mock('@/components/Navbar', () => ({ default: () => null }));
 vi.mock('@/contexts/AuthContext', () => ({ useAuth: vi.fn() }));
+
 import { useAuth } from '@/contexts/AuthContext';
+import { pageService } from '@/services/api';
 
 const renderHome = (isAuthenticated = false) => {
     vi.mocked(useAuth).mockReturnValue({
         isAuthenticated,
         user: isAuthenticated ? { name: 'Jean' } : null,
     });
-    vi.mocked(axios.get).mockResolvedValue({ data: { data: [] } });
+    vi.mocked(pageService.getAll).mockResolvedValue({ data: { data: [] } });
     return render(<MemoryRouter><Home /></MemoryRouter>);
 };
 
@@ -34,7 +39,7 @@ describe('Page Home', () => {
         });
     });
 
-    it('affiche les boutons Connexion et Inscription pour un visiteur', async () => {
+    it('affiche les boutons Commencer et En savoir plus pour un visiteur', async () => {
         renderHome(false);
         await waitFor(() => {
             expect(screen.getByRole('link', { name: /commencer/i })).toBeInTheDocument();
@@ -50,16 +55,16 @@ describe('Page Home', () => {
         });
     });
 
-    it('appelle l\'API pour charger les pages', async () => {
+    it("appelle pageService.getAll avec statut publie pour charger les pages", async () => {
         renderHome();
         await waitFor(() => {
-            expect(axios.get).toHaveBeenCalledWith('/api/v1/pages');
+            expect(pageService.getAll).toHaveBeenCalledWith({ statut: 'publie' });
         });
     });
 
     it('affiche les articles récupérés depuis l\'API', async () => {
         vi.mocked(useAuth).mockReturnValue({ isAuthenticated: false, user: null });
-        vi.mocked(axios.get).mockResolvedValue({
+        vi.mocked(pageService.getAll).mockResolvedValue({
             data: {
                 data: [
                     { id: 1, titre: 'Article RGPD', slug: 'rgpd', statut: 'publie', description: 'Test description suffisamment longue pour le substring', categorie: { categorie: 'RGPD' }, updated_at: '2024-01-01' },
