@@ -115,6 +115,7 @@ export const userService = {
     update: (id, data) => api.put(`/users/${id}`, data),
     delete: (id) => api.delete(`/users/${id}`),
     resetPassword: (id, data) => api.post(`/users/${id}/reset-password`, data),
+    toggleActive: (id) => api.patch(`/users/${id}/toggle-active`),
     getStats: () => api.get('/users/statistiques'),
 };
 

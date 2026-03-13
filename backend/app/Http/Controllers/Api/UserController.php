@@ -133,6 +133,29 @@ class UserController extends Controller
     }
 
     /**
+     * @OA\Patch(
+     *     path="/users/{id}/toggle-active",
+     *     summary="Activer ou désactiver un utilisateur",
+     *     tags={"Utilisateurs"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Statut mis à jour"),
+     *     @OA\Response(response=403, description="Action non autorisée"),
+     *     @OA\Response(response=404, description="Utilisateur non trouvé")
+     * )
+     */
+    public function toggleActive(User $user)
+    {
+        $user->update(['is_active' => !$user->is_active]);
+
+        $message = $user->is_active
+            ? "Le compte de \"{$user->name}\" a été activé."
+            : "Le compte de \"{$user->name}\" a été désactivé.";
+
+        return response()->json(['message' => $message, 'user' => $user]);
+    }
+
+    /**
      * @OA\Post(
      *     path="/users/{id}/reset-password",
      *     summary="Réinitialiser le mot de passe d'un utilisateur",
