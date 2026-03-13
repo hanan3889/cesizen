@@ -92,6 +92,13 @@ export const categorieService = {
     delete: (id) => api.delete(`/categories/${id}`),
 };
 
+// Configuration du diagnostic (Admin)
+export const diagnosticConfigService = {
+    getAll: () => api.get('/diagnostic-config'),
+    update: (niveau, data) => api.put(`/diagnostic-config/${niveau}`, data),
+    delete: (niveau) => api.delete(`/diagnostic-config/${niveau}`),
+};
+
 // Utilisateurs (Admin)
 export const userService = {
     getAll: (filters = {}) => {
