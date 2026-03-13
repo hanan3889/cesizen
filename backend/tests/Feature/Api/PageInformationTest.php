@@ -294,4 +294,95 @@ class PageInformationTest extends TestCase
 
         $response->assertStatus(200);
     }
+
+    // --- 404 Tests ---
+
+    public function test_returns_404_for_non_existent_page()
+    {
+        $this->getJson('/api/v1/pages/99999')->assertStatus(404);
+    }
+
+    public function test_admin_gets_404_when_updating_non_existent_page()
+    {
+        $admin = \App\Models\User::factory()->admin()->create();
+        $this->actingAs($admin)->putJson('/api/v1/pages/99999', ['titre' => 'Ghost'])
+             ->assertStatus(404);
+    }
+
+    public function test_admin_gets_404_when_deleting_non_existent_page()
+    {
+        $admin = \App\Models\User::factory()->admin()->create();
+        $this->actingAs($admin)->deleteJson('/api/v1/pages/99999')->assertStatus(404);
+    }
+
+    public function test_returns_404_for_non_existent_slug()
+    {
+        $this->getJson('/api/v1/pages/slug/slug-inexistant')->assertStatus(404);
+    }
+
+    // --- 401 Guest Tests ---
+
+    public function test_guest_cannot_create_a_page()
+    {
+        $categorie = \App\Models\CategorieInformation::factory()->create();
+        $this->postJson('/api/v1/pages', [
+            'titre'                     => 'Test',
+            'description'               => 'Content',
+            'categorie_information_id'  => $categorie->id,
+        ])->assertStatus(401);
+    }
+
+    public function test_guest_cannot_update_a_page()
+    {
+        $page = PageInformation::factory()->create();
+        $this->putJson('/api/v1/pages/' . $page->id, ['titre' => 'Hacked'])->assertStatus(401);
+    }
+
+    public function test_guest_cannot_delete_a_page()
+    {
+        $page = PageInformation::factory()->create();
+        $this->deleteJson('/api/v1/pages/' . $page->id)->assertStatus(401);
+    }
+
+    // --- 422 Validation Tests ---
+
+    public function test_create_page_fails_with_missing_fields()
+    {
+        $admin = \App\Models\User::factory()->admin()->create();
+        $this->actingAs($admin)->postJson('/api/v1/pages', [])
+             ->assertStatus(422)
+             ->assertJsonValidationErrors(['titre', 'description', 'categorie_information_id']);
+    }
+
+    public function test_create_page_fails_with_invalid_categorie()
+    {
+        $admin = \App\Models\User::factory()->admin()->create();
+        $this->actingAs($admin)->postJson('/api/v1/pages', [
+            'titre'                    => 'Test',
+            'description'              => 'Content',
+            'categorie_information_id' => 99999,
+        ])->assertStatus(422)->assertJsonValidationErrors('categorie_information_id');
+    }
+
+    // --- 403 Non-Admin Action Tests ---
+
+    public function test_non_admin_cannot_archive_a_page()
+    {
+        $user = \App\Models\User::factory()->create();
+        $page = PageInformation::factory()->create(['statut' => 'publie']);
+        $this->actingAs($user)->postJson('/api/v1/pages/' . $page->id . '/archiver')
+             ->assertStatus(403);
+    }
+
+    public function test_guest_cannot_publish_a_page()
+    {
+        $page = PageInformation::factory()->create(['statut' => 'brouillon']);
+        $this->postJson('/api/v1/pages/' . $page->id . '/publier')->assertStatus(401);
+    }
+
+    public function test_guest_cannot_archive_a_page()
+    {
+        $page = PageInformation::factory()->create(['statut' => 'publie']);
+        $this->postJson('/api/v1/pages/' . $page->id . '/archiver')->assertStatus(401);
+    }
 }

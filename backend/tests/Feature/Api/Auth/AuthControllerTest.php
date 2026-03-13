@@ -129,4 +129,102 @@ class AuthControllerTest extends TestCase
         $response = $this->actingAs($user)->putJson('/api/v1/password', $passwordData);
         $response->assertStatus(422);
     }
+
+    // --- 401 Unauthenticated Tests ---
+
+    public function test_unauthenticated_user_cannot_access_profile()
+    {
+        $this->getJson('/api/v1/me')->assertStatus(401);
+    }
+
+    public function test_unauthenticated_user_cannot_update_profile()
+    {
+        $this->putJson('/api/v1/profile', ['name' => 'Hacker'])->assertStatus(401);
+    }
+
+    public function test_unauthenticated_user_cannot_delete_account()
+    {
+        $this->deleteJson('/api/v1/me', ['password' => 'password'])->assertStatus(401);
+    }
+
+    // --- Register Validation (400/422) ---
+
+    public function test_register_fails_with_missing_fields()
+    {
+        $this->postJson('/api/v1/register', [])->assertStatus(422)
+             ->assertJsonValidationErrors(['name', 'email', 'password']);
+    }
+
+    public function test_register_fails_with_short_password()
+    {
+        $response = $this->postJson('/api/v1/register', [
+            'name'                  => 'Test',
+            'email'                 => 'test@example.com',
+            'password'              => '123',
+            'password_confirmation' => '123',
+        ]);
+        $response->assertStatus(422)->assertJsonValidationErrors('password');
+    }
+
+    public function test_register_fails_with_password_mismatch()
+    {
+        $response = $this->postJson('/api/v1/register', [
+            'name'                  => 'Test',
+            'email'                 => 'test@example.com',
+            'password'              => 'password123',
+            'password_confirmation' => 'different123',
+        ]);
+        $response->assertStatus(422)->assertJsonValidationErrors('password');
+    }
+
+    // --- Login Validation (422) ---
+
+    public function test_login_fails_with_missing_fields()
+    {
+        $this->postJson('/api/v1/login', [])->assertStatus(422)
+             ->assertJsonValidationErrors(['email', 'password']);
+    }
+
+    // --- Deactivated Account ---
+
+    public function test_deactivated_user_cannot_login()
+    {
+        $user = User::factory()->create([
+            'password'  => Hash::make('password123'),
+            'is_active' => false,
+        ]);
+
+        $response = $this->postJson('/api/v1/login', [
+            'email'    => $user->email,
+            'password' => 'password123',
+        ]);
+
+        $response->assertStatus(422);
+    }
+
+    // --- Delete Account ---
+
+    public function test_user_can_delete_their_account()
+    {
+        $user = User::factory()->create(['password' => Hash::make('password123')]);
+
+        $response = $this->actingAs($user)->deleteJson('/api/v1/me', [
+            'password' => 'password123',
+        ]);
+
+        $response->assertStatus(200);
+        $this->assertDatabaseMissing('users', ['id' => $user->id]);
+    }
+
+    public function test_delete_account_fails_with_wrong_password()
+    {
+        $user = User::factory()->create(['password' => Hash::make('password123')]);
+
+        $response = $this->actingAs($user)->deleteJson('/api/v1/me', [
+            'password' => 'wrongpassword',
+        ]);
+
+        $response->assertStatus(422);
+        $this->assertDatabaseHas('users', ['id' => $user->id]);
+    }
 }
