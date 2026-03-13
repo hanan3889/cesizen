@@ -47,7 +47,7 @@ class DatabaseSeeder extends Seeder
             ['Élément', 'Quantité'],
             [
                 ['Catégories d\'information', '5'],
-                ['Pages d\'information', '5'],
+                ['Pages d\'information', '20 (4 par catégorie)'],
                 ['Événements de vie', '43'],
                 ['Utilisateurs', '3 (1 admin + 2 utilisateurs)'],
                 ['Configurations diagnostic', '3 (faible, modéré, élevé)'],

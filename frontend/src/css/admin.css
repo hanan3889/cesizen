@@ -290,3 +290,50 @@
 }
 
 .admin-textarea--error { @apply border-red-400; }
+
+/* ════════════════════════════════════════════════════════
+   BARRE DE RECHERCHE
+════════════════════════════════════════════════════════ */
+
+.admin-search-bar   { @apply mb-5; }
+
+.admin-search-wrap  {
+    @apply relative flex items-center;
+}
+
+.admin-search-icon  {
+    @apply absolute left-3 h-4 w-4 text-gray-400 pointer-events-none;
+}
+
+.admin-search-input {
+    @apply w-full pl-9 pr-9 py-2 border border-gray-300 rounded-lg text-sm
+           focus:ring-2 focus:ring-cesizen-green focus:border-transparent outline-none
+           placeholder-gray-400 bg-white;
+}
+
+.admin-search-clear {
+    @apply absolute right-3 text-gray-400 hover:text-gray-600 transition-colors;
+}
+
+.admin-search-count {
+    @apply mt-2 text-xs text-gray-500 italic;
+}
+
+.admin-search-filters {
+    @apply flex flex-wrap items-center gap-3;
+}
+
+.admin-search-filters .admin-search-wrap {
+    @apply flex-1 min-w-[200px];
+}
+
+.admin-filter-select {
+    @apply px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white
+           focus:ring-2 focus:ring-cesizen-green focus:border-transparent outline-none
+           text-gray-700 cursor-pointer;
+}
+
+.admin-filter-reset {
+    @apply flex items-center gap-1 px-3 py-2 text-xs font-medium text-gray-500
+           bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors;
+}

@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import Navbar from '../components/Navbar';
+import { pageService } from '../services/api';
 
 const Home = () => {
     const { isAuthenticated } = useAuth();
     const [pages, setPages] = useState([]);
 
     useEffect(() => {
-        axios.get('/api/v1/pages')
+        pageService.getAll({ statut: 'publie' })
             .then(res => setPages(res.data.data || []))
             .catch(() => setPages([]));
     }, []);
