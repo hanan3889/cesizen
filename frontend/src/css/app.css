@@ -43,3 +43,204 @@
         color: #4CAF50;
     }
 }
+
+/* ════════════════════════════════════════════════════════
+   RGAA 
+════════════════════════════════════════════════════════ */
+.skip-link {
+    position: absolute;
+    top: -100%;
+    left: 1rem;
+    z-index: 9999;
+    padding: 0.5rem 1rem;
+    background: #1a1a1a;
+    color: #fff;
+    font-weight: 600;
+    font-size: 0.9rem;
+    border-radius: 0 0 6px 6px;
+    text-decoration: none;
+    transition: top 0.15s;
+}
+.skip-link:focus {
+    top: 0;
+    outline: 3px solid #4CAF50;
+    outline-offset: 2px;
+}
+
+/* ════════════════════════════════════════════════════════
+   RGAA — BOUTON ACCESSIBILITÉ (navbar)
+════════════════════════════════════════════════════════ */
+.a11y-wrap {
+    position: relative;
+}
+
+.a11y-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+    border: 2px solid #4CAF50;
+    color: #4CAF50;
+    background: transparent;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+.a11y-trigger:hover,
+.a11y-trigger--active {
+    background: #4CAF50;
+    color: #fff;
+}
+.a11y-trigger:focus-visible {
+    outline: 3px solid #4CAF50;
+    outline-offset: 3px;
+}
+
+.a11y-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+    background: #ef4444;
+    color: #fff;
+    font-size: 0.6rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Panneau flottant */
+.a11y-panel {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 0.5rem);
+    width: 15rem;
+    background: #fff;
+    border: 1px solid #d1d5db;
+    border-radius: 0.75rem;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    padding: 1rem;
+    z-index: 200;
+}
+
+.a11y-panel-title {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #6b7280;
+    margin-bottom: 0.75rem;
+}
+
+.a11y-options {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.a11y-option {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    cursor: pointer;
+    padding: 0.4rem 0.5rem;
+    border-radius: 0.4rem;
+    transition: background 0.15s;
+    font-size: 0.875rem;
+    color: #374151;
+}
+.a11y-option:hover {
+    background: #f3f4f6;
+}
+
+.a11y-checkbox {
+    width: 1rem;
+    height: 1rem;
+    accent-color: #4CAF50;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.a11y-option-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.a11y-option-icon {
+    font-weight: 700;
+    color: #4CAF50;
+    width: 1.5rem;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.a11y-reset {
+    width: 100%;
+    padding: 0.4rem;
+    font-size: 0.8rem;
+    color: #6b7280;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.4rem;
+    background: transparent;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+.a11y-reset:hover:not(:disabled) {
+    background: #fee2e2;
+    color: #dc2626;
+    border-color: #fca5a5;
+}
+.a11y-reset:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* ════════════════════════════════════════════════════════
+   RGAA — MODES D'ACCESSIBILITÉ GLOBAUX
+   Appliqués sur <html> via JavaScript
+════════════════════════════════════════════════════════ */
+
+/* Agrandir le texte (+25%) */
+html.a11y-large-text {
+    font-size: 125%;
+}
+
+/* Contraste élevé */
+html.a11y-high-contrast,
+html.a11y-high-contrast body {
+    background-color: #000 !important;
+    color: #fff !important;
+}
+html.a11y-high-contrast .navbar {
+    background-color: #111 !important;
+    border-bottom: 2px solid #fff !important;
+}
+html.a11y-high-contrast a,
+html.a11y-high-contrast button:not(.a11y-trigger):not(.a11y-reset) {
+    color: #ffff00 !important;
+}
+html.a11y-high-contrast .btn-primary,
+html.a11y-high-contrast .btn-outline {
+    background-color: #ffff00 !important;
+    color: #000 !important;
+    border-color: #ffff00 !important;
+}
+html.a11y-high-contrast .card,
+html.a11y-high-contrast .bg-white {
+    background-color: #111 !important;
+    border: 1px solid #fff !important;
+}
+
+/* Souligner les liens */
+html.a11y-underline-links a {
+    text-decoration: underline !important;
+    text-underline-offset: 3px;
+}
