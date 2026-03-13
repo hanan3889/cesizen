@@ -75,10 +75,16 @@ jobs:
           node-version: '20'
       - name: Install NPM Dependencies
         run: npm install
-      - name: Run Vitest tests
-        run: npm run test -- --run
+      - name: Run Vitest tests with coverage
+        run: npm run test:ci
         env:
           LARAVEL_BYPASS_ENV_CHECK: 1
+      - name: Upload frontend coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: frontend-coverage-report
+          path: frontend/coverage/
 
   build-production:
     name: Build Frontend for Production
