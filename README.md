@@ -131,22 +131,6 @@ La documentation Swagger de l'API est disponible à :
 
 ---
 
-## CI/CD
-
-Le projet dispose de deux workflows GitHub Actions :
-
-### `ci.yml` — Intégration continue
-Déclenché sur chaque push et pull request vers `main` / `develop` :
-1. Exécution des tests PHPUnit (backend)
-2. Exécution des tests Vitest (frontend)
-3. Build de production du frontend (sur `main` uniquement)
-
-### `auto-release.yml` — Release automatique
-Déclenché à chaque merge de PR vers `main` :
-- Calcule automatiquement la prochaine version sémantique
-- Crée un tag Git et une GitHub Release avec notes de version générées
-
-
 ## Auteur
 
 **Hanan REBAÏA** — Promo CDA 25/26, CESI Meylan
