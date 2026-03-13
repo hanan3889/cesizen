@@ -27,9 +27,13 @@ jobs:
           LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "V.0.0")
           echo "latest_tag=$LATEST_TAG" >> $GITHUB_OUTPUT
 
-          # Nettoyage et extraction de la version (format V.MAJOR.MINOR)
-          VERSION=${LATEST_TAG#V.}
-          IFS='.' read -r MAJOR MINOR <<< "$VERSION"
+          # Extraction robuste : supprime tous les caractères non-numériques en tête
+          # Gère tous les formats : v0.0.2 / V.0.2 / V.v0.0.2 / etc.
+          VERSION=$(echo "$LATEST_TAG" | sed 's/^[^0-9]*//')
+          MAJOR=$(echo "$VERSION" | cut -d. -f1)
+          MINOR=$(echo "$VERSION" | cut -d. -f2)
+          MAJOR=${MAJOR:-0}
+          MINOR=${MINOR:-0}
 
           # Incrémentation du MINOR
           MINOR=$((MINOR + 1))
@@ -55,16 +59,16 @@ jobs:
       - name: Generate Release Notes
         id: release_notes
         run: |
-          PREVIOUS_TAG=${{ steps.get_tag.outputs.latest_tag }}
-          
+          PREVIOUS_TAG="${{ steps.get_tag.outputs.latest_tag }}"
+
           echo "##  Changements dans cette Release" > release_notes.md
           echo "" >> release_notes.md
-          
+
           # Si c'est le tout premier tag, on prend tous les commits
           if [ "$PREVIOUS_TAG" = "V.0.0" ]; then
             git log --pretty=format:"- %s (%h)" >> release_notes.md
           else
-            git log $PREVIOUS_TAG..HEAD --pretty=format:"- %s (%h)" >> release_notes.md
+            git log "$PREVIOUS_TAG"..HEAD --pretty=format:"- %s (%h)" >> release_notes.md
           fi
           
           echo "" >> release_notes.md
