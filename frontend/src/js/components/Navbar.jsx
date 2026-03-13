@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import AppLogo from './app-logo';
+import AccessibilityMenu from './AccessibilityMenu';
 
 const Navbar = () => {
     const { user, isAuthenticated, isAdmin, logout } = useAuth();
@@ -14,11 +15,17 @@ const Navbar = () => {
     };
 
     return (
-        <nav className="navbar">
+        <>
+            {/* Lien d'évitement RGAA — critère 12.7 */}
+            <a href="#main-content" className="skip-link">
+                Aller au contenu principal
+            </a>
+
+        <nav className="navbar" aria-label="Navigation principale">
             <div className="container mx-auto px-4">
                 <div className="flex justify-between items-center h-16">
                     {/* Logo */}
-                    <Link to="/" className="flex items-center space-x-2">
+                    <Link to="/" className="flex items-center space-x-2" aria-label="CesiZen — Accueil">
                         <AppLogo />
                     </Link>
 
@@ -64,15 +71,21 @@ const Navbar = () => {
                         )}
                     </div>
 
-                    {/* Burger Menu Mobile */}
+                    {/* Bouton accessibilité + Burger Mobile */}
+                    <div className="flex items-center gap-3">
+                        <AccessibilityMenu />
+
                     <button
                         onClick={() => setIsMenuOpen(!isMenuOpen)}
                         className="md:hidden"
+                        aria-expanded={isMenuOpen}
+                        aria-label={isMenuOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
                     >
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-6 h-6" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                         </svg>
                     </button>
+                    </div>
                 </div>
 
                 {/* Menu Mobile */}
@@ -114,6 +127,7 @@ const Navbar = () => {
                 )}
             </div>
         </nav>
+        </>
     );
 };
 

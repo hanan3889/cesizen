@@ -6,7 +6,7 @@ const Layout = () => {
     return (
         <div className="min-h-screen bg-gray-50">
             <Navbar />
-            <main>
+            <main id="main-content" tabIndex={-1}>
                 <Outlet />
             </main>
             <footer className="bg-white border-t mt-auto">
