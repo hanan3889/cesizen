@@ -1,4 +1,4 @@
-import { AlertTriangle, KeyRound, Trash2 } from 'lucide-react';
+import { AlertTriangle, KeyRound, ShieldCheck, Trash2, UserCheck, UserX } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import AdminLayout from '@/layouts/AdminLayout';
@@ -53,6 +53,64 @@ const ConfirmModal = ({
     );
 };
 
+// Modale changement de rôle
+const RoleModal = ({
+    open, user, onConfirm, onCancel, loading,
+}: {
+    open: boolean;
+    user: User | null;
+    onConfirm: (role: string) => void;
+    onCancel: () => void;
+    loading: boolean;
+}) => {
+    const [selectedRole, setSelectedRole] = useState(user?.role ?? 'utilisateur');
+
+    useEffect(() => {
+        if (user) setSelectedRole(user.role);
+    }, [user]);
+
+    if (!open || !user) return null;
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 max-w-md w-full mx-4">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">Modifier le rôle</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-5">
+                    Utilisateur : <span className="font-medium text-gray-700 dark:text-gray-200">{user.name}</span>
+                </p>
+                <div className="mb-6">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Nouveau rôle
+                    </label>
+                    <select
+                        value={selectedRole}
+                        onChange={(e) => setSelectedRole(e.target.value)}
+                        className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-cesizen-green"
+                    >
+                        <option value="utilisateur">Utilisateur</option>
+                        <option value="administrateur">Administrateur</option>
+                    </select>
+                </div>
+                <div className="flex justify-end gap-3">
+                    <button
+                        onClick={onCancel}
+                        className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+                    >
+                        Annuler
+                    </button>
+                    <button
+                        onClick={() => onConfirm(selectedRole)}
+                        disabled={loading || selectedRole === user.role}
+                        className="px-4 py-2 text-sm font-medium text-white bg-cesizen-green hover:bg-cesizen-green-dark disabled:opacity-50 rounded-md transition-colors"
+                    >
+                        {loading ? 'Enregistrement...' : 'Confirmer'}
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 const UsersIndex = () => {
     const [users, setUsers] = useState<{ data: User[]; links: any[] }>({ data: [], links: [] });
     const [loading, setLoading] = useState(true);
@@ -63,6 +121,10 @@ const UsersIndex = () => {
     const [deleteModal, setDeleteModal] = useState<{ open: boolean; user: User | null }>({ open: false, user: null });
     // État de la modale de reset
     const [resetModal, setResetModal] = useState<{ open: boolean; user: User | null }>({ open: false, user: null });
+    // État de la modale de désactivation/activation
+    const [toggleActiveModal, setToggleActiveModal] = useState<{ open: boolean; user: User | null }>({ open: false, user: null });
+    // État de la modale de changement de rôle
+    const [roleModal, setRoleModal] = useState<{ open: boolean; user: User | null }>({ open: false, user: null });
     // États de chargement des actions
     const [actionLoading, setActionLoading] = useState(false);
 
@@ -103,6 +165,38 @@ const UsersIndex = () => {
             fetchUsers();
         } catch (err) {
             showFeedback('error', 'Impossible de supprimer cet utilisateur.');
+            console.error(err);
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
+    const handleToggleActive = async () => {
+        if (!toggleActiveModal.user) return;
+        setActionLoading(true);
+        try {
+            const response = await userService.toggleActive(toggleActiveModal.user.id);
+            showFeedback('success', response.data.message);
+            setToggleActiveModal({ open: false, user: null });
+            fetchUsers();
+        } catch (err) {
+            showFeedback('error', 'Impossible de modifier le statut de cet utilisateur.');
+            console.error(err);
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
+    const handleChangeRole = async (newRole: string) => {
+        if (!roleModal.user) return;
+        setActionLoading(true);
+        try {
+            await userService.update(roleModal.user.id, { role: newRole });
+            showFeedback('success', `Le rôle de "${roleModal.user.name}" a été changé en "${newRole}".`);
+            setRoleModal({ open: false, user: null });
+            fetchUsers();
+        } catch (err) {
+            showFeedback('error', 'Impossible de modifier le rôle de cet utilisateur.');
             console.error(err);
         } finally {
             setActionLoading(false);
@@ -160,6 +254,7 @@ const UsersIndex = () => {
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Nom</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Email</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Rôle</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Statut</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Inscrit le</th>
                                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
                             </tr>
@@ -178,9 +273,42 @@ const UsersIndex = () => {
                                             {user.role}
                                         </span>
                                     </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                        <span className={`px-2.5 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                                            user.is_active
+                                                ? 'bg-emerald-100 text-emerald-800'
+                                                : 'bg-gray-100 text-gray-500'
+                                        }`}>
+                                            {user.is_active ? 'Actif' : 'Désactivé'}
+                                        </span>
+                                    </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{formatDate(user.created_at)}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         <div className="flex items-center justify-end gap-2">
+                                            {/* Changer le rôle */}
+                                            <button
+                                                onClick={() => setRoleModal({ open: true, user })}
+                                                title="Modifier le rôle"
+                                                className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-md transition-colors"
+                                            >
+                                                <ShieldCheck className="h-3.5 w-3.5" />
+                                                Rôle
+                                            </button>
+                                            {/* Désactiver / Réactiver */}
+                                            <button
+                                                onClick={() => setToggleActiveModal({ open: true, user })}
+                                                title={user.is_active ? 'Désactiver ce compte' : 'Réactiver ce compte'}
+                                                className={`inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-md border transition-colors ${
+                                                    user.is_active
+                                                        ? 'text-orange-700 bg-orange-50 hover:bg-orange-100 border-orange-200'
+                                                        : 'text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border-emerald-200'
+                                                }`}
+                                            >
+                                                {user.is_active
+                                                    ? <><UserX className="h-3.5 w-3.5" />Désactiver</>
+                                                    : <><UserCheck className="h-3.5 w-3.5" />Réactiver</>
+                                                }
+                                            </button>
                                             {/* Reset mot de passe */}
                                             <button
                                                 onClick={() => setResetModal({ open: true, user })}
@@ -252,6 +380,15 @@ const UsersIndex = () => {
 
             {renderContent()}
 
+            {/* Modale changement de rôle */}
+            <RoleModal
+                open={roleModal.open}
+                user={roleModal.user}
+                onConfirm={handleChangeRole}
+                onCancel={() => setRoleModal({ open: false, user: null })}
+                loading={actionLoading}
+            />
+
             {/* Modale suppression */}
             <ConfirmModal
                 open={deleteModal.open}
@@ -261,6 +398,29 @@ const UsersIndex = () => {
                 confirmClass="bg-red-600 hover:bg-red-700 disabled:opacity-50"
                 onConfirm={handleDelete}
                 onCancel={() => setDeleteModal({ open: false, user: null })}
+            />
+
+            {/* Modale désactiver/réactiver */}
+            <ConfirmModal
+                open={toggleActiveModal.open}
+                title={toggleActiveModal.user?.is_active ? 'Désactiver le compte' : 'Réactiver le compte'}
+                message={
+                    toggleActiveModal.user?.is_active
+                        ? `Êtes-vous sûr de vouloir désactiver le compte de "${toggleActiveModal.user?.name}" ? L'utilisateur ne pourra plus se connecter.`
+                        : `Êtes-vous sûr de vouloir réactiver le compte de "${toggleActiveModal.user?.name}" ? L'utilisateur pourra de nouveau se connecter.`
+                }
+                confirmLabel={
+                    actionLoading
+                        ? 'En cours...'
+                        : toggleActiveModal.user?.is_active ? 'Désactiver' : 'Réactiver'
+                }
+                confirmClass={
+                    toggleActiveModal.user?.is_active
+                        ? 'bg-orange-500 hover:bg-orange-600 disabled:opacity-50'
+                        : 'bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50'
+                }
+                onConfirm={handleToggleActive}
+                onCancel={() => setToggleActiveModal({ open: false, user: null })}
             />
 
             {/* Modale reset mot de passe */}

@@ -57,6 +57,7 @@ Route::prefix('v1')->group(function () {
 
             // Gestion des utilisateurs
             Route::post('users/{user}/reset-password', [UserController::class, 'resetPassword']);
+            Route::patch('users/{user}/toggle-active', [UserController::class, 'toggleActive']);
             Route::get('users/statistiques', [UserController::class, 'statistiques']);
             Route::apiResource('users', UserController::class);
         });

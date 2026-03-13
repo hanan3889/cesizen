@@ -113,6 +113,12 @@ class AuthController extends Controller
             ]);
         }
 
+        if (!$user->is_active) {
+            throw ValidationException::withMessages([
+                'email' => ['Ce compte a été désactivé. Veuillez contacter un administrateur.'],
+            ]);
+        }
+
         // Révoquer les anciens tokens
         $user->tokens()->delete();
 
