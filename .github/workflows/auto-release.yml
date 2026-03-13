@@ -23,13 +23,12 @@ jobs:
       - name: Get latest tag and bump version
         id: get_tag
         run: |
-          # Récupère le dernier tag ou V.0.0
-          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "V.0.0")
+          # Récupère uniquement les tags au format strict V.MAJOR.MINOR (ex: V.2.3)
+          # Ignore tous les autres formats (v0.0.2, V.v0.0.2, V.0.10, etc.)
+          LATEST_TAG=$(git tag --sort=-creatordate | grep -E '^V\.[0-9]+\.[0-9]+$' | head -1 || echo "V.0.0")
           echo "latest_tag=$LATEST_TAG" >> $GITHUB_OUTPUT
 
-          # Extraction robuste : supprime tous les caractères non-numériques en tête
-          # Gère tous les formats : v0.0.2 / V.0.2 / V.v0.0.2 / etc.
-          VERSION=$(echo "$LATEST_TAG" | sed 's/^[^0-9]*//')
+          VERSION=$(echo "$LATEST_TAG" | sed 's/^V\.//')
           MAJOR=$(echo "$VERSION" | cut -d. -f1)
           MINOR=$(echo "$VERSION" | cut -d. -f2)
           MAJOR=${MAJOR:-0}
