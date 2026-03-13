@@ -1,8 +1,8 @@
-import { Activity, Eye, EyeOff, FileText, KeyRound, LogOut, Pencil, Plus, Settings, Tag, Trash2, Users, X } from 'lucide-react';
+import { Activity, CalendarDays, Eye, EyeOff, FileText, KeyRound, LogOut, Pencil, Plus, Settings, Tag, Trash2, Users, X } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import AppLogo from '@/components/app-logo';
 import { useAuth } from '../../contexts/AuthContext';
-import { authService, categorieService, diagnosticConfigService, pageService, userService } from '../../services/api';
+import { authService, categorieService, diagnosticConfigService, evenementService, pageService, userService } from '../../services/api';
 import '../../../css/admin.css';
 
 /* ─────────────────────────────────────────
@@ -1010,12 +1010,246 @@ const DiagnosticConfigPanel = () => {
 };
 
 /* ─────────────────────────────────────────
+   Modale — Créer / Modifier un événement
+───────────────────────────────────────── */
+const EMPTY_EVT = { type_evenement: '', points: '' };
+
+const EvenementFormModal = ({ open, evenement, loading, serverError, onSubmit, onClose }) => {
+    const [form, setForm] = useState(EMPTY_EVT);
+    const [errors, setErrors] = useState({});
+
+    useEffect(() => {
+        if (open) {
+            setForm(evenement ? { type_evenement: evenement.type_evenement, points: evenement.points } : EMPTY_EVT);
+            setErrors({});
+        }
+    }, [open, evenement]);
+
+    if (!open) return null;
+
+    const set = (field) => (e) => setForm(f => ({ ...f, [field]: e.target.value }));
+
+    const validate = () => {
+        const e = {};
+        if (!form.type_evenement.trim()) e.type_evenement = "L'intitulé est requis.";
+        const pts = Number(form.points);
+        if (!form.points || isNaN(pts) || pts < 1 || pts > 1000) e.points = 'Points requis (1–1000).';
+        setErrors(e);
+        return Object.keys(e).length === 0;
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        if (validate()) onSubmit({ type_evenement: form.type_evenement.trim(), points: Number(form.points) });
+    };
+
+    return (
+        <div className="admin-modal-overlay">
+            <div className="admin-modal--sm">
+                <div className="admin-modal-header">
+                    <h3 className="admin-modal-title">{evenement ? "Modifier l'événement" : 'Nouvel événement'}</h3>
+                    <button onClick={onClose} className="admin-modal-close"><X className="h-5 w-5" /></button>
+                </div>
+                <form onSubmit={handleSubmit} className="admin-modal-body">
+                    {serverError && (
+                        <div className="admin-feedback admin-feedback--error">{serverError}</div>
+                    )}
+                    <Field label="Intitulé de l'événement" error={errors.type_evenement}>
+                        <input
+                            type="text"
+                            value={form.type_evenement}
+                            onChange={set('type_evenement')}
+                            placeholder="Ex : Décès du conjoint"
+                            className={inputCls(errors.type_evenement)}
+                            autoFocus
+                        />
+                    </Field>
+                    <Field label="Points Holmes & Rahe (1–1000)" error={errors.points}>
+                        <input
+                            type="number"
+                            min="1"
+                            max="1000"
+                            value={form.points}
+                            onChange={set('points')}
+                            placeholder="Ex : 100"
+                            className={inputCls(errors.points)}
+                        />
+                    </Field>
+                    <div className="admin-modal-footer">
+                        <button type="button" onClick={onClose} className="admin-modal-btn-cancel">Annuler</button>
+                        <button type="submit" disabled={loading} className="admin-modal-btn-submit">
+                            {loading ? 'Enregistrement...' : (evenement ? 'Mettre à jour' : 'Créer')}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+};
+
+/* ─────────────────────────────────────────
+   Panneau — Événements de vie
+───────────────────────────────────────── */
+const IMPACT_BADGE = {
+    'Élevé': 'bg-red-100 text-red-700',
+    'Moyen': 'bg-amber-100 text-amber-700',
+    'Faible': 'bg-green-100 text-green-700',
+};
+
+const EvenementsPanel = () => {
+    const [evenements, setEvenements] = useState([]);
+    const [loading, setLoading]       = useState(true);
+    const [error, setError]           = useState(null);
+    const [feedback, setFeedback]     = useState(null);
+    const [formError, setFormError]   = useState(null);
+    const [deleteModal, setDeleteModal] = useState({ open: false, evenement: null });
+    const [formModal, setFormModal]     = useState({ open: false, evenement: null });
+    const [actionLoading, setActionLoading] = useState(false);
+
+    const showFeedback = (type, message) => {
+        setFeedback({ type, message });
+        setTimeout(() => setFeedback(null), 5000);
+    };
+
+    const fetchEvenements = async () => {
+        setLoading(true);
+        try {
+            const res = await evenementService.getAll({ ordre: 'desc' });
+            setEvenements(res.data?.evenements ?? []);
+        } catch {
+            setError('Impossible de charger les événements.');
+        } finally { setLoading(false); }
+    };
+
+    useEffect(() => { fetchEvenements(); }, []);
+
+    const handleDelete = async () => {
+        if (!deleteModal.evenement) return;
+        setActionLoading(true);
+        try {
+            await evenementService.delete(deleteModal.evenement.id);
+            showFeedback('success', `"${deleteModal.evenement.type_evenement}" a été supprimé.`);
+            setDeleteModal({ open: false, evenement: null });
+            fetchEvenements();
+        } catch (err) {
+            showFeedback('error', err.response?.data?.message || 'Impossible de supprimer cet événement.');
+        } finally { setActionLoading(false); }
+    };
+
+    const handleSubmit = async (formData) => {
+        setActionLoading(true);
+        setFormError(null);
+        try {
+            if (formModal.evenement) {
+                await evenementService.update(formModal.evenement.id, formData);
+                showFeedback('success', 'Événement mis à jour.');
+            } else {
+                await evenementService.create(formData);
+                showFeedback('success', 'Événement créé.');
+            }
+            setFormModal({ open: false, evenement: null });
+            fetchEvenements();
+        } catch (err) {
+            const msg = err.response?.data?.errors
+                ? Object.values(err.response.data.errors).flat().join(' ')
+                : (err.response?.data?.message || "Impossible d'enregistrer l'événement.");
+            setFormError(msg);
+        } finally { setActionLoading(false); }
+    };
+
+    return (
+        <div>
+            <div className="admin-panel-header">
+                <h2 className="admin-panel-title">Événements de vie</h2>
+                <button onClick={() => setFormModal({ open: true, evenement: null })} className="admin-btn-primary">
+                    <Plus className="h-4 w-4" /> Nouvel événement
+                </button>
+            </div>
+
+            <Feedback feedback={feedback} />
+
+            {loading ? <Spinner /> : error ? (
+                <div className="admin-error-banner">{error}</div>
+            ) : evenements.length === 0 ? (
+                <div className="admin-empty">
+                    <CalendarDays className="h-12 w-12 mx-auto mb-4 opacity-40" />
+                    <p className="admin-empty-title">Aucun événement pour le moment</p>
+                    <p className="admin-empty-desc">Cliquez sur "Nouvel événement" pour commencer.</p>
+                </div>
+            ) : (
+                <div className="admin-table-wrap">
+                    <table className="admin-table">
+                        <thead className="admin-thead">
+                            <tr>
+                                <th className="admin-th">Intitulé</th>
+                                <th className="admin-th">Points</th>
+                                <th className="admin-th">Impact</th>
+                                <th className="admin-th admin-th--right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody className="admin-tbody">
+                            {evenements.map(evt => (
+                                <tr key={evt.id} className="admin-tr">
+                                    <td className="admin-td--bold">{evt.type_evenement}</td>
+                                    <td className="admin-td font-mono">{evt.points}</td>
+                                    <td className="admin-td">
+                                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${IMPACT_BADGE[evt.niveau_impact] ?? ''}`}>
+                                            {evt.niveau_impact}
+                                        </span>
+                                    </td>
+                                    <td className="admin-td--right">
+                                        <div className="admin-td-actions">
+                                            <button
+                                                onClick={() => setFormModal({ open: true, evenement: evt })}
+                                                className="admin-btn-action admin-btn-action--edit"
+                                            >
+                                                <Pencil className="h-3.5 w-3.5" /> Modifier
+                                            </button>
+                                            <button
+                                                onClick={() => setDeleteModal({ open: true, evenement: evt })}
+                                                className="admin-btn-action admin-btn-action--delete"
+                                            >
+                                                <Trash2 className="h-3.5 w-3.5" /> Supprimer
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                    <p className="text-xs text-gray-400 mt-2 text-right">{evenements.length} événement{evenements.length !== 1 ? 's' : ''}</p>
+                </div>
+            )}
+
+            <ConfirmModal
+                open={deleteModal.open}
+                title="Supprimer l'événement"
+                message={`Supprimer "${deleteModal.evenement?.type_evenement}" ? Cette action est irréversible.`}
+                confirmLabel={actionLoading ? 'Suppression...' : 'Supprimer'}
+                confirmVariant="danger"
+                onConfirm={handleDelete}
+                onCancel={() => setDeleteModal({ open: false, evenement: null })}
+            />
+            <EvenementFormModal
+                open={formModal.open}
+                evenement={formModal.evenement}
+                loading={actionLoading}
+                serverError={formError}
+                onSubmit={handleSubmit}
+                onClose={() => { setFormModal({ open: false, evenement: null }); setFormError(null); }}
+            />
+        </div>
+    );
+};
+
+/* ─────────────────────────────────────────
    Sidebar
 ───────────────────────────────────────── */
 const navItems = [
     { key: 'users',            label: 'Utilisateurs',  icon: Users },
     { key: 'informations',     label: 'Informations',   icon: FileText },
     { key: 'categories',       label: 'Catégories',     icon: Tag },
+    { key: 'evenements',       label: 'Événements',     icon: CalendarDays },
     { key: 'diagnostic-config', label: 'Diagnostic',   icon: Activity },
     { key: 'settings',         label: 'Paramètres',     icon: Settings },
 ];
@@ -1066,6 +1300,7 @@ const AdminDashboard = () => {
             case 'users':             return <UsersPanel />;
             case 'informations':      return <InfoPanel />;
             case 'categories':        return <CategoriesPanel />;
+            case 'evenements':        return <EvenementsPanel />;
             case 'diagnostic-config': return <DiagnosticConfigPanel />;
             case 'settings':          return <SettingsPanel user={user} />;
             default:                  return <UsersPanel />;
