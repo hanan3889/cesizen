@@ -2,6 +2,8 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
+import RgpdConsentBanner from '../components/RgpdConsentBanner';
 
 import Home from '../pages/Home';
 import Login from '../pages/Login';
@@ -15,6 +17,7 @@ import AdminDashboard from '../pages/Admin/Dashboard';
 import ResetPassword from '../pages/ResetPassword';
 import DiagnosticQuestionnaire from '../pages/Diagnostic/Questionnaire';
 import DiagnosticHistory from '../pages/Diagnostic/History';
+import PrivacyPolicy from '../pages/PrivacyPolicy';
 
 const PrivateRoute = ({ children }) => {
     const { isAuthenticated, loading } = useAuth();
@@ -46,6 +49,7 @@ const AppRoutes = () => (
             <Route path="/informations" element={<Informations />} />
             <Route path="/informations/:slug" element={<InformationShow />} />
             <Route path="/categories/:id" element={<ShowCategory />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
 
             {/* Routes guest uniquement */}
             <Route path="/login" element={<GuestRoute><Login /></GuestRoute>} />
@@ -66,6 +70,8 @@ const AppRoutes = () => (
             {/* Fallback */}
             <Route path="*" element={<Navigate to="/" />} />
         </Routes>
+        <Footer />
+        <RgpdConsentBanner />
     </>
 );
 
