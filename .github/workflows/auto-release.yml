@@ -26,15 +26,28 @@ jobs:
           # Récupère le dernier tag ou v0.0.0
           LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
           echo "latest_tag=$LATEST_TAG" >> $GITHUB_OUTPUT
-          
+
           # Nettoyage et extraction de la version
           VERSION=${LATEST_TAG#v}
           IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
-          
+
           # Incrémentation du PATCH
           PATCH=$((PATCH + 1))
+
+          # Si PATCH dépasse 10 → on incrémente MINOR et on remet PATCH à 0
+          if [ $PATCH -gt 10 ]; then
+            PATCH=0
+            MINOR=$((MINOR + 1))
+          fi
+
+          # Si MINOR dépasse 10 → on incrémente MAJOR et on remet MINOR à 0
+          if [ $MINOR -gt 10 ]; then
+            MINOR=0
+            MAJOR=$((MAJOR + 1))
+          fi
+
           NEW_VERSION="v$MAJOR.$MINOR.$PATCH"
-          
+
           echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
           echo "Nouvelle version calculée: $NEW_VERSION"
       

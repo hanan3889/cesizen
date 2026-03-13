@@ -1,4 +1,4 @@
-import { Activity, CalendarDays, Eye, EyeOff, FileText, KeyRound, LogOut, Pencil, Plus, Settings, Tag, Trash2, Users, X } from 'lucide-react';
+import { Activity, CalendarDays, Eye, EyeOff, FileText, KeyRound, LogOut, Pencil, Plus, Settings, ShieldCheck, Tag, Trash2, UserCheck, UserX, Users, X } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import AppLogo from '@/components/app-logo';
 import { useAuth } from '../../contexts/AuthContext';
@@ -161,6 +161,48 @@ const CreateUserModal = ({ open, loading, onSubmit, onClose }) => {
 };
 
 /* ─────────────────────────────────────────
+   Modale — Changer le rôle
+───────────────────────────────────────── */
+const RoleModal = ({ open, user, loading, onConfirm, onCancel }) => {
+    const [selectedRole, setSelectedRole] = useState(user?.role ?? 'utilisateur');
+
+    useEffect(() => { if (user) setSelectedRole(user.role); }, [user]);
+
+    if (!open || !user) return null;
+    return (
+        <div className="admin-modal-overlay--plain">
+            <div className="admin-confirm-box">
+                <h3 className="admin-confirm-title">Modifier le rôle</h3>
+                <p className="admin-confirm-message">
+                    Utilisateur : <strong>{user.name}</strong>
+                </p>
+                <div style={{ margin: '12px 0' }}>
+                    <label className="admin-field-label">Nouveau rôle</label>
+                    <select
+                        value={selectedRole}
+                        onChange={e => setSelectedRole(e.target.value)}
+                        className="admin-input"
+                    >
+                        <option value="utilisateur">Utilisateur</option>
+                        <option value="administrateur">Administrateur</option>
+                    </select>
+                </div>
+                <div className="admin-confirm-actions">
+                    <button onClick={onCancel} className="admin-confirm-btn-cancel">Annuler</button>
+                    <button
+                        onClick={() => onConfirm(selectedRole)}
+                        disabled={loading || selectedRole === user.role}
+                        className="admin-confirm-btn--success"
+                    >
+                        {loading ? 'Enregistrement...' : 'Confirmer'}
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+/* ─────────────────────────────────────────
    Panneau — Utilisateurs
 ───────────────────────────────────────── */
 const UsersPanel = () => {
@@ -170,6 +212,8 @@ const UsersPanel = () => {
     const [feedback, setFeedback] = useState(null);
     const [deleteModal, setDeleteModal] = useState({ open: false, user: null });
     const [resetModal, setResetModal] = useState({ open: false, user: null });
+    const [toggleActiveModal, setToggleActiveModal] = useState({ open: false, user: null });
+    const [roleModal, setRoleModal] = useState({ open: false, user: null });
     const [createModal, setCreateModal] = useState(false);
     const [actionLoading, setActionLoading] = useState(false);
 
@@ -225,6 +269,32 @@ const UsersPanel = () => {
         } finally { setActionLoading(false); }
     };
 
+    const handleToggleActive = async () => {
+        if (!toggleActiveModal.user) return;
+        setActionLoading(true);
+        try {
+            const res = await userService.toggleActive(toggleActiveModal.user.id);
+            showFeedback('success', res.data.message);
+            setToggleActiveModal({ open: false, user: null });
+            fetchUsers();
+        } catch {
+            showFeedback('error', 'Impossible de modifier le statut de cet utilisateur.');
+        } finally { setActionLoading(false); }
+    };
+
+    const handleChangeRole = async (newRole) => {
+        if (!roleModal.user) return;
+        setActionLoading(true);
+        try {
+            await userService.update(roleModal.user.id, { role: newRole });
+            showFeedback('success', `Le rôle de "${roleModal.user.name}" a été changé en "${newRole}".`);
+            setRoleModal({ open: false, user: null });
+            fetchUsers();
+        } catch {
+            showFeedback('error', 'Impossible de modifier le rôle de cet utilisateur.');
+        } finally { setActionLoading(false); }
+    };
+
     return (
         <div>
             <div className="admin-panel-header">
@@ -249,6 +319,7 @@ const UsersPanel = () => {
                                     <th className="admin-th">Nom</th>
                                     <th className="admin-th">Email</th>
                                     <th className="admin-th">Rôle</th>
+                                    <th className="admin-th">Statut</th>
                                     <th className="admin-th">Inscrit le</th>
                                     <th className="admin-th admin-th--right">Actions</th>
                                 </tr>
@@ -263,9 +334,23 @@ const UsersPanel = () => {
                                                 {user.role}
                                             </span>
                                         </td>
+                                        <td className="admin-td">
+                                            <span className={`admin-badge admin-badge--${user.is_active ? 'active' : 'inactive'}`}>
+                                                {user.is_active ? 'Actif' : 'Désactivé'}
+                                            </span>
+                                        </td>
                                         <td className="admin-td">{formatDate(user.created_at)}</td>
                                         <td className="admin-td--right">
                                             <div className="admin-td-actions">
+                                                <button onClick={() => setRoleModal({ open: true, user })} className="admin-btn-action admin-btn-action--role">
+                                                    <ShieldCheck className="h-3.5 w-3.5" /> Rôle
+                                                </button>
+                                                <button onClick={() => setToggleActiveModal({ open: true, user })} className={`admin-btn-action ${user.is_active ? 'admin-btn-action--deactivate' : 'admin-btn-action--activate'}`}>
+                                                    {user.is_active
+                                                        ? <><UserX className="h-3.5 w-3.5" /> Désactiver</>
+                                                        : <><UserCheck className="h-3.5 w-3.5" /> Réactiver</>
+                                                    }
+                                                </button>
                                                 <button onClick={() => setResetModal({ open: true, user })} className="admin-btn-action admin-btn-action--warning">
                                                     <KeyRound className="h-3.5 w-3.5" /> Réinit. MDP
                                                 </button>
@@ -283,6 +368,16 @@ const UsersPanel = () => {
                 </>
             )}
 
+            <RoleModal open={roleModal.open} user={roleModal.user} loading={actionLoading}
+                onConfirm={handleChangeRole} onCancel={() => setRoleModal({ open: false, user: null })} />
+            <ConfirmModal open={toggleActiveModal.open}
+                title={toggleActiveModal.user?.is_active ? 'Désactiver le compte' : 'Réactiver le compte'}
+                message={toggleActiveModal.user?.is_active
+                    ? `Êtes-vous sûr de vouloir désactiver le compte de "${toggleActiveModal.user?.name}" ? L'utilisateur ne pourra plus se connecter.`
+                    : `Êtes-vous sûr de vouloir réactiver le compte de "${toggleActiveModal.user?.name}" ?`}
+                confirmLabel={actionLoading ? 'En cours...' : toggleActiveModal.user?.is_active ? 'Désactiver' : 'Réactiver'}
+                confirmVariant={toggleActiveModal.user?.is_active ? 'warning' : 'success'}
+                onConfirm={handleToggleActive} onCancel={() => setToggleActiveModal({ open: false, user: null })} />
             <ConfirmModal open={deleteModal.open} title="Supprimer l'utilisateur"
                 message={`Êtes-vous sûr de vouloir supprimer "${deleteModal.user?.name}" (${deleteModal.user?.email}) ? Cette action est irréversible.`}
                 confirmLabel={actionLoading ? 'Suppression...' : 'Supprimer'} confirmVariant="danger"
