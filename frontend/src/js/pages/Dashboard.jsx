@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, Navigate } from 'react-router-dom';
-import { ClipboardList, Settings, LogOut, Plus, Pencil, Trash2, X, Eye, EyeOff } from 'lucide-react';
+import { ClipboardList, Settings, LogOut, Plus, Pencil, Trash2, X, Eye, EyeOff, Download, ShieldAlert } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { useAuth } from '../contexts/AuthContext';
 import { diagnosticService, authService, evenementService } from '../services/api';
@@ -355,12 +355,87 @@ const DiagnosticsPanel = () => {
     );
 };
 
+/* ─── Modale suppression de compte (double confirmation) ─── */
+const DeleteAccountModal = ({ open, onClose, onConfirm, loading }) => {
+    const [step, setStep] = useState(1);
+    const [password, setPassword] = useState('');
+    const [show, setShow] = useState(false);
+    const [error, setError] = useState('');
+
+    useEffect(() => {
+        if (open) { setStep(1); setPassword(''); setError(''); setShow(false); }
+    }, [open]);
+
+    if (!open) return null;
+
+    const handleConfirm = async () => {
+        if (!password.trim()) { setError('Le mot de passe est requis.'); return; }
+        setError('');
+        const result = await onConfirm(password);
+        if (result?.error) setError(result.error);
+    };
+
+    return (
+        <div className="admin-modal-overlay--plain">
+            <div className="admin-confirm-box" style={{ maxWidth: '420px' }}>
+                {step === 1 ? (
+                    <>
+                        <div className="flex items-center gap-3 mb-3">
+                            <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                                <ShieldAlert className="h-5 w-5 text-red-600" />
+                            </div>
+                            <h3 className="admin-confirm-title mb-0">Supprimer mon compte</h3>
+                        </div>
+                        <p className="admin-confirm-message">
+                            Cette action est <strong>irréversible</strong>. Votre compte, votre historique de diagnostics et toutes vos données personnelles seront définitivement supprimés.
+                        </p>
+                        <div className="admin-confirm-actions">
+                            <button onClick={onClose} className="admin-confirm-btn-cancel">Annuler</button>
+                            <button onClick={() => setStep(2)} className="admin-confirm-btn--danger">Continuer</button>
+                        </div>
+                    </>
+                ) : (
+                    <>
+                        <h3 className="admin-confirm-title">Confirmer la suppression</h3>
+                        <p className="admin-confirm-message">Entrez votre mot de passe pour confirmer la suppression définitive de votre compte.</p>
+                        {error && <p className="text-sm text-red-600 mt-2 mb-1">{error}</p>}
+                        <div className="relative mt-3 mb-4">
+                            <input
+                                type={show ? 'text' : 'password'}
+                                value={password}
+                                onChange={e => setPassword(e.target.value)}
+                                onKeyDown={e => e.key === 'Enter' && handleConfirm()}
+                                placeholder="Votre mot de passe"
+                                className="admin-input pr-10"
+                                autoFocus
+                            />
+                            <button type="button" onClick={() => setShow(s => !s)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                                {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                            </button>
+                        </div>
+                        <div className="admin-confirm-actions">
+                            <button onClick={onClose} className="admin-confirm-btn-cancel">Annuler</button>
+                            <button onClick={handleConfirm} disabled={loading} className="admin-confirm-btn--danger">
+                                {loading ? 'Suppression...' : 'Supprimer définitivement'}
+                            </button>
+                        </div>
+                    </>
+                )}
+            </div>
+        </div>
+    );
+};
+
 /* ─── Panneau — Paramètres ────────────────────────────────── */
 const SettingsPanel = ({ user }) => {
+    const { logout } = useAuth();
     const [form, setForm] = useState({ current_password: '', password: '', password_confirmation: '' });
     const [errors, setErrors] = useState({});
     const [feedback, setFeedback] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [exporting, setExporting] = useState(false);
+    const [deleteModal, setDeleteModal] = useState(false);
+    const [deleteLoading, setDeleteLoading] = useState(false);
     const [show, setShow] = useState({ current: false, new: false, confirm: false });
 
     const showFeedback = (type, message) => {
@@ -399,6 +474,39 @@ const SettingsPanel = ({ user }) => {
         } finally { setLoading(false); }
     };
 
+    const handleExport = async () => {
+        setExporting(true);
+        try {
+            const res = await authService.exportData();
+            const blob = new Blob([JSON.stringify(res.data, null, 2)], { type: 'application/json' });
+            const url  = URL.createObjectURL(blob);
+            const a    = document.createElement('a');
+            a.href     = url;
+            a.download = `cesizen-donnees-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        } catch {
+            showFeedback('error', "Impossible d'exporter les données. Veuillez réessayer.");
+        } finally { setExporting(false); }
+    };
+
+    const handleDeleteAccount = async (password) => {
+        setDeleteLoading(true);
+        try {
+            await authService.deleteAccount({ password });
+            // Nettoyage local puis déconnexion
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.assign('/');
+        } catch (err) {
+            const msg = err.response?.data?.errors?.password?.[0]
+                ?? err.response?.data?.message
+                ?? 'Impossible de supprimer le compte.';
+            setDeleteLoading(false);
+            return { error: msg };
+        }
+    };
+
     const inputCls = (err) => `admin-input${err ? ' admin-input--error' : ''}`;
 
     return (
@@ -419,61 +527,36 @@ const SettingsPanel = ({ user }) => {
                 </div>
             </div>
 
+            <Feedback feedback={feedback} />
+
             {/* Formulaire mot de passe */}
-            <div className="bg-white rounded-xl shadow-sm p-6 max-w-md">
+            <div className="bg-white rounded-xl shadow-sm p-6 max-w-md mb-6">
                 <h3 className="text-base font-semibold text-gray-800 mb-5">Changer le mot de passe</h3>
-
-                <Feedback feedback={feedback} />
-
                 <form onSubmit={handleSubmit} className="space-y-4">
-                    {/* Mot de passe actuel */}
                     <Field label="Mot de passe actuel" error={errors.current_password}>
                         <div className="relative">
-                            <input
-                                type={show.current ? 'text' : 'password'}
-                                value={form.current_password}
-                                onChange={set('current_password')}
-                                placeholder="Votre mot de passe actuel"
-                                className={inputCls(errors.current_password)}
-                            />
+                            <input type={show.current ? 'text' : 'password'} value={form.current_password} onChange={set('current_password')} placeholder="Votre mot de passe actuel" className={inputCls(errors.current_password)} />
                             <button type="button" onClick={() => toggleShow('current')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
                                 {show.current ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                             </button>
                         </div>
                     </Field>
-
-                    {/* Nouveau mot de passe */}
                     <Field label="Nouveau mot de passe" error={errors.password}>
                         <div className="relative">
-                            <input
-                                type={show.new ? 'text' : 'password'}
-                                value={form.password}
-                                onChange={set('password')}
-                                placeholder="Minimum 8 caractères"
-                                className={inputCls(errors.password)}
-                            />
+                            <input type={show.new ? 'text' : 'password'} value={form.password} onChange={set('password')} placeholder="Minimum 8 caractères" className={inputCls(errors.password)} />
                             <button type="button" onClick={() => toggleShow('new')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
                                 {show.new ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                             </button>
                         </div>
                     </Field>
-
-                    {/* Confirmation */}
                     <Field label="Confirmer le nouveau mot de passe" error={errors.password_confirmation}>
                         <div className="relative">
-                            <input
-                                type={show.confirm ? 'text' : 'password'}
-                                value={form.password_confirmation}
-                                onChange={set('password_confirmation')}
-                                placeholder="Répétez le nouveau mot de passe"
-                                className={inputCls(errors.password_confirmation)}
-                            />
+                            <input type={show.confirm ? 'text' : 'password'} value={form.password_confirmation} onChange={set('password_confirmation')} placeholder="Répétez le nouveau mot de passe" className={inputCls(errors.password_confirmation)} />
                             <button type="button" onClick={() => toggleShow('confirm')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
                                 {show.confirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                             </button>
                         </div>
                     </Field>
-
                     <div className="pt-2">
                         <button type="submit" disabled={loading} className="admin-btn-primary">
                             {loading ? 'Modification...' : 'Modifier le mot de passe'}
@@ -481,6 +564,37 @@ const SettingsPanel = ({ user }) => {
                     </div>
                 </form>
             </div>
+
+            {/* Données personnelles (RGPD) */}
+            <div className="bg-white rounded-xl shadow-sm p-6 max-w-md mb-6">
+                <h3 className="text-base font-semibold text-gray-800 mb-1">Mes données personnelles</h3>
+                <p className="text-xs text-gray-500 mb-4">
+                    Conformément au RGPD, vous pouvez exporter l'ensemble de vos données.{' '}
+                    <Link to="/privacy" className="text-cesizen-green hover:underline">Politique de confidentialité →</Link>
+                </p>
+                <button onClick={handleExport} disabled={exporting} className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-cesizen-green border border-cesizen-green rounded-lg hover:bg-green-50 transition disabled:opacity-50">
+                    <Download className="h-4 w-4" />
+                    {exporting ? 'Export en cours...' : 'Exporter mes données (JSON)'}
+                </button>
+            </div>
+
+            {/* Zone danger */}
+            <div className="bg-white rounded-xl shadow-sm p-6 max-w-md border border-red-100">
+                <h3 className="text-base font-semibold text-red-700 mb-1 flex items-center gap-2">
+                    <ShieldAlert className="h-4 w-4" /> Zone dangereuse
+                </h3>
+                <p className="text-xs text-gray-500 mb-4">La suppression de votre compte est définitive et irréversible. Toutes vos données seront perdues.</p>
+                <button onClick={() => setDeleteModal(true)} className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 border border-red-300 rounded-lg hover:bg-red-50 transition">
+                    <Trash2 className="h-4 w-4" /> Supprimer mon compte
+                </button>
+            </div>
+
+            <DeleteAccountModal
+                open={deleteModal}
+                loading={deleteLoading}
+                onConfirm={handleDeleteAccount}
+                onClose={() => setDeleteModal(false)}
+            />
         </div>
     );
 };

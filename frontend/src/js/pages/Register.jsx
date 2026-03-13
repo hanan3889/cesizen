@@ -10,6 +10,7 @@ const Register = () => {
         password: '',
         password_confirmation: '',
     });
+    const [rgpdConsent, setRgpdConsent] = useState(false);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const { register } = useAuth();
@@ -33,6 +34,11 @@ const Register = () => {
 
         if (formData.password.length < 8) {
             setError('Le mot de passe doit contenir au moins 8 caractères');
+            return;
+        }
+
+        if (!rgpdConsent) {
+            setError('Vous devez accepter la politique de confidentialité pour créer un compte.');
             return;
         }
 
@@ -169,9 +175,22 @@ const Register = () => {
                             </button>
                         </div>
 
-                        <p className="text-xs text-center text-gray-500">
-                            En créant un compte, vous acceptez nos conditions d'utilisation et notre politique de confidentialité conforme au RGPD
-                        </p>
+                        <div className="flex items-start gap-3">
+                            <input
+                                id="rgpd"
+                                type="checkbox"
+                                checked={rgpdConsent}
+                                onChange={e => setRgpdConsent(e.target.checked)}
+                                className="mt-0.5 h-4 w-4 accent-cesizen-green flex-shrink-0 cursor-pointer"
+                            />
+                            <label htmlFor="rgpd" className="text-xs text-gray-600 cursor-pointer leading-relaxed">
+                                J'ai lu et j'accepte la{' '}
+                                <Link to="/privacy" className="font-medium text-cesizen-green hover:underline" target="_blank">
+                                    politique de confidentialité
+                                </Link>{' '}
+                                de CesiZen. Mes données sont traitées conformément au RGPD.
+                            </label>
+                        </div>
                     </form>
                 </div>
             </div>
