@@ -480,6 +480,7 @@ const InfoPanel = () => {
     const [formModal, setFormModal] = useState({ open: false, page: null });
     const [actionLoading, setActionLoading] = useState(false);
     const [search, setSearch] = useState('');
+    const [filterCat, setFilterCat] = useState('');
 
     const showFeedback = (type, message) => { setFeedback({ type, message }); setTimeout(() => setFeedback(null), 5000); };
 
@@ -533,11 +534,13 @@ const InfoPanel = () => {
 
     const pageList = Array.isArray(pages?.data) ? pages.data : Array.isArray(pages) ? pages : [];
 
-    const filteredPages = search.trim() === ''
-        ? pageList
-        : pageList.filter(p =>
-            p.titre.toLowerCase().startsWith(search.toLowerCase())
-          );
+    const filteredPages = pageList.filter(p => {
+        const matchSearch = search.trim() === '' || p.titre.toLowerCase().startsWith(search.toLowerCase());
+        const matchCat    = filterCat === '' || String(p.categorie_information_id) === filterCat;
+        return matchSearch && matchCat;
+    });
+
+    const isFiltered = search.trim() !== '' || filterCat !== '';
 
     return (
         <div>
@@ -548,28 +551,53 @@ const InfoPanel = () => {
                 </button>
             </div>
 
-            {/* Barre de recherche */}
+            {/* Barre de recherche + filtre catégorie */}
             <div className="admin-search-bar">
-                <div className="admin-search-wrap">
-                    <svg className="admin-search-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-                    </svg>
-                    <input
-                        type="text"
-                        value={search}
-                        onChange={e => setSearch(e.target.value)}
-                        placeholder="Rechercher une page par titre..."
-                        className="admin-search-input"
-                    />
-                    {search && (
-                        <button onClick={() => setSearch('')} className="admin-search-clear" aria-label="Effacer">
-                            <X className="h-4 w-4" />
+                <div className="admin-search-filters">
+                    <div className="admin-search-wrap">
+                        <svg className="admin-search-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                        </svg>
+                        <input
+                            type="text"
+                            value={search}
+                            onChange={e => setSearch(e.target.value)}
+                            placeholder="Rechercher par titre..."
+                            className="admin-search-input"
+                        />
+                        {search && (
+                            <button onClick={() => setSearch('')} className="admin-search-clear" aria-label="Effacer">
+                                <X className="h-4 w-4" />
+                            </button>
+                        )}
+                    </div>
+
+                    <select
+                        value={filterCat}
+                        onChange={e => setFilterCat(e.target.value)}
+                        className="admin-filter-select"
+                    >
+                        <option value="">Toutes les catégories</option>
+                        {categories.map(c => (
+                            <option key={c.id} value={String(c.id)}>{c.categorie}</option>
+                        ))}
+                    </select>
+
+                    {isFiltered && (
+                        <button
+                            onClick={() => { setSearch(''); setFilterCat(''); }}
+                            className="admin-filter-reset"
+                        >
+                            <X className="h-3.5 w-3.5" /> Réinitialiser
                         </button>
                     )}
                 </div>
-                {search.trim() !== '' && (
+
+                {isFiltered && (
                     <p className="admin-search-count">
-                        {filteredPages.length} résultat{filteredPages.length !== 1 ? 's' : ''} pour « {search} »
+                        {filteredPages.length} résultat{filteredPages.length !== 1 ? 's' : ''}
+                        {search.trim() !== '' && <> pour « {search} »</>}
+                        {filterCat !== '' && <> · {categories.find(c => String(c.id) === filterCat)?.categorie}</>}
                     </p>
                 )}
             </div>
@@ -601,7 +629,7 @@ const InfoPanel = () => {
                                 {filteredPages.length === 0 ? (
                                     <tr>
                                         <td colSpan={5} className="admin-td text-center py-8 text-gray-400">
-                                            Aucune page ne commence par « {search} »
+                                            Aucune page ne correspond à votre recherche
                                         </td>
                                     </tr>
                                 ) : filteredPages.map(p => (
@@ -627,7 +655,7 @@ const InfoPanel = () => {
                             </tbody>
                         </table>
                     </div>
-                    {search.trim() === '' && <PaginationNav links={pages?.links} onNavigate={fetchPages} />}
+                    {!isFiltered && <PaginationNav links={pages?.links} onNavigate={fetchPages} />}
                 </>
             )}
 
