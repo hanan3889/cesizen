@@ -139,30 +139,39 @@ class DiagnosticStress extends Model
      * Accesseurs
      */
 
-    // Obtenir le niveau de stress en texte
+    // Obtenir le niveau de stress en texte (seuils configurables via DiagnosticConfig)
     public function getNiveauStressAttribute()
     {
-        if ($this->score >= 300) {
+        $seuilEleve  = DiagnosticConfig::getSeuil('eleve',  300);
+        $seuilModere = DiagnosticConfig::getSeuil('modere', 150);
+
+        if ($this->score >= $seuilEleve) {
             return 'Élevé';
-        } elseif ($this->score >= 150) {
+        } elseif ($this->score >= $seuilModere) {
             return 'Modéré';
         } else {
             return 'Faible';
         }
     }
 
-    // Obtenir le message de recommandation
+    // Obtenir le message de recommandation (messages configurables via DiagnosticConfig)
     public function getRecommandationAttribute()
     {
         $niveau = $this->niveau_stress;
-        
-        $recommendations = [
-            'Élevé' => 'Votre niveau de stress est élevé. Il est fortement recommandé de consulter un professionnel de santé mentale.',
+
+        $defaults = [
+            'Élevé'  => 'Votre niveau de stress est élevé. Il est fortement recommandé de consulter un professionnel de santé mentale.',
             'Modéré' => 'Votre niveau de stress est modéré. Pensez à prendre du temps pour vous et à pratiquer des activités relaxantes.',
-            'Faible' => 'Votre niveau de stress est faible. Continuez à maintenir un bon équilibre de vie.'
+            'Faible' => 'Votre niveau de stress est faible. Continuez à maintenir un bon équilibre de vie.',
         ];
-        
-        return $recommendations[$niveau] ?? 'Consultez un professionnel pour une analyse personnalisée.';
+
+        $niveauKey = match ($niveau) {
+            'Élevé'  => 'eleve',
+            'Modéré' => 'modere',
+            default  => 'faible',
+        };
+
+        return DiagnosticConfig::getMessage($niveauKey, $defaults[$niveau] ?? 'Consultez un professionnel pour une analyse personnalisée.');
     }
 
     // Obtenir le nombre d'événements sélectionnés

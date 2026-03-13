@@ -95,6 +95,34 @@ class DiagnosticStressTest extends TestCase
         $response->assertStatus(422);
     }
 
+    // --- Update Tests ---
+
+    public function test_user_can_update_their_own_diagnostic()
+    {
+        $diagnostic = DiagnosticStress::factory()->create(['utilisateur_id' => $this->user->id]);
+        $event1     = EvenementVie::factory()->create(['points' => 40]);
+        $event2     = EvenementVie::factory()->create(['points' => 60]);
+
+        $response = $this->actingAs($this->user)->putJson("/api/v1/diagnostics/{$diagnostic->id}", [
+            'evenements' => [$event1->id, $event2->id],
+        ]);
+
+        $response->assertStatus(200)
+                 ->assertJsonPath('diagnostic.score', 100);
+    }
+
+    public function test_user_cannot_update_another_users_diagnostic()
+    {
+        $diagnostic = DiagnosticStress::factory()->create(['utilisateur_id' => $this->otherUser->id]);
+        $event      = EvenementVie::factory()->create();
+
+        $response = $this->actingAs($this->user)->putJson("/api/v1/diagnostics/{$diagnostic->id}", [
+            'evenements' => [$event->id],
+        ]);
+
+        $response->assertStatus(404);
+    }
+
     // --- Destroy Tests ---
 
     public function test_user_can_delete_their_own_diagnostic()
@@ -105,6 +133,15 @@ class DiagnosticStressTest extends TestCase
 
         $response->assertStatus(200);
         $this->assertDatabaseMissing('diagnostic_stresses', ['id' => $diagnostic->id]);
+    }
+
+    public function test_user_cannot_delete_another_users_diagnostic()
+    {
+        $diagnostic = DiagnosticStress::factory()->create(['utilisateur_id' => $this->otherUser->id]);
+
+        $response = $this->actingAs($this->user)->deleteJson("/api/v1/diagnostics/{$diagnostic->id}");
+
+        $response->assertStatus(404);
     }
 
     // --- Custom Routes Tests ---

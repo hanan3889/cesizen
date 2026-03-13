@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CategorieInformationController;
+use App\Http\Controllers\Api\DiagnosticConfigController;
 use App\Http\Controllers\Api\DiagnosticStressController;
 use App\Http\Controllers\Api\EvenementVieController;
 use App\Http\Controllers\Api\PageInformationController;
@@ -16,6 +17,7 @@ Route::prefix('v1')->group(function () {
     Route::post('/reset-password', [AuthController::class, 'resetPasswordComplete']);
 
     // Public API routes
+    Route::get('diagnostic-config', [DiagnosticConfigController::class, 'index']);
     Route::get('pages/latest', [PageInformationController::class, 'latest']);
     Route::get('pages/slug/{slug}', [PageInformationController::class, 'showBySlug']);
     Route::apiResource('pages', PageInformationController::class)->only(['index', 'show']);
@@ -43,6 +45,10 @@ Route::prefix('v1')->group(function () {
 
             // Gestion des catégories (CRUD admin)
             Route::apiResource('categories', CategorieInformationController::class)->except(['index', 'show']);
+
+            // Configuration du diagnostic de stress
+            Route::put('diagnostic-config/{niveau}', [DiagnosticConfigController::class, 'update']);
+            Route::delete('diagnostic-config/{niveau}', [DiagnosticConfigController::class, 'destroy']);
 
             // Gestion des utilisateurs
             Route::post('users/{user}/reset-password', [UserController::class, 'resetPassword']);
