@@ -14,11 +14,8 @@
     <!-- Vite -->
     @viteReactRefresh
     @vite(['src/css/app.css', 'src/js/app.tsx'])
-
-    <!-- Inertia -->
-    @inertiaHead
 </head>
 <body class="antialiased">
-    @inertia
+    <div id="app"></div>
 </body>
 </html>

@@ -1,0 +1,241 @@
+/* ============================================================
+   Diagnostic — Questionnaire Holmes & Rahe + Historique
+   ============================================================ */
+
+/* ════════════════════════════════════════════════════════
+   LAYOUT
+════════════════════════════════════════════════════════ */
+
+.diag-page {
+    @apply min-h-screen bg-gray-50;
+}
+
+.diag-wrapper {
+    @apply w-full max-w-md mx-auto px-4 pt-8 pb-8 sm:pt-12 sm:pb-12;
+}
+
+/* ════════════════════════════════════════════════════════
+   CARD DE BASE
+════════════════════════════════════════════════════════ */
+
+.diag-card {
+    @apply bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-5;
+}
+
+.diag-card--faible { @apply border-green-300; }
+.diag-card--modere { @apply border-yellow-300; }
+.diag-card--eleve  { @apply border-red-300; }
+
+/* ════════════════════════════════════════════════════════
+   BADGE NIVEAU
+════════════════════════════════════════════════════════ */
+
+.diag-badge {
+    @apply inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold border;
+}
+
+.diag-badge--faible { @apply bg-green-100 text-green-800 border-green-300; }
+.diag-badge--modere { @apply bg-yellow-100 text-yellow-800 border-yellow-300; }
+.diag-badge--eleve  { @apply bg-red-100 text-red-800 border-red-300; }
+
+/* ════════════════════════════════════════════════════════
+   FORMULAIRE — CARD TITRE
+════════════════════════════════════════════════════════ */
+
+.diag-form-header {
+    @apply bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-5 mb-4;
+}
+
+.diag-form-title-row {
+    @apply flex items-start justify-between gap-3;
+}
+
+.diag-form-title {
+    @apply text-xl font-bold text-gray-900;
+}
+
+.diag-form-subtitle {
+    @apply text-sm text-gray-500 mt-1;
+}
+
+.diag-form-history-link {
+    @apply flex-shrink-0 text-sm text-green-600 hover:underline mt-0.5;
+}
+
+/* ════════════════════════════════════════════════════════
+   FORMULAIRE — BANDEAUX
+════════════════════════════════════════════════════════ */
+
+.diag-notice {
+    @apply mt-4 flex items-start gap-2 rounded-xl px-4 py-3 text-sm;
+}
+
+.diag-notice--guest   { @apply bg-blue-50 border border-blue-200 text-blue-700; }
+.diag-notice--pending { @apply bg-green-50 border border-green-200 text-green-800; }
+.diag-notice--error   { @apply bg-red-50 border border-red-200 text-red-700; }
+
+/* ════════════════════════════════════════════════════════
+   FORMULAIRE — SCORE STICKY
+════════════════════════════════════════════════════════ */
+
+.diag-score-card {
+    @apply sticky top-16 z-20 bg-white rounded-2xl shadow-sm border
+           px-4 py-3 sm:px-5 mb-4;
+}
+
+.diag-score-inner  { @apply flex items-center justify-between gap-4; }
+.diag-score-label  { @apply text-xs font-medium text-gray-400 uppercase tracking-wider; }
+.diag-score-value  { @apply text-3xl font-extrabold text-gray-900 leading-none mt-0.5; }
+.diag-score-unit   { @apply text-base font-normal text-gray-400; }
+.diag-score-count  { @apply text-xs text-gray-400 mt-1.5; }
+
+/* ════════════════════════════════════════════════════════
+   FORMULAIRE — LISTE ÉVÉNEMENTS
+════════════════════════════════════════════════════════ */
+
+.diag-events-card {
+    @apply bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-4;
+}
+
+.diag-event-row {
+    @apply grid grid-cols-[1rem,1fr,auto] items-center gap-x-3
+           px-4 py-2.5 cursor-pointer transition-colors;
+}
+
+.diag-event-row--border   { @apply border-t border-gray-100; }
+.diag-event-row--selected { @apply bg-green-50; }
+.diag-event-row--idle     { @apply hover:bg-gray-50; }
+
+.diag-event-checkbox { @apply w-4 h-4 accent-green-600 cursor-pointer; }
+.diag-event-name     { @apply text-sm text-gray-800 leading-snug; }
+.diag-event-pts      { @apply text-sm font-bold tabular-nums; }
+
+.diag-event-pts--high   { @apply text-red-500; }
+.diag-event-pts--medium { @apply text-amber-500; }
+.diag-event-pts--low    { @apply text-green-600; }
+
+/* ════════════════════════════════════════════════════════
+   FORMULAIRE — SECTION CTA "CALCULER"
+════════════════════════════════════════════════════════ */
+
+.diag-cta-section { @apply rounded-2xl overflow-hidden shadow-sm; }
+.diag-cta-top     { @apply bg-green-600 px-5 py-4; }
+
+.diag-cta-btn {
+    @apply w-full py-3.5 bg-white text-green-700 font-bold text-base rounded-xl
+           hover:bg-green-50 active:bg-green-100
+           disabled:opacity-50 disabled:cursor-not-allowed
+           transition-colors shadow-sm;
+}
+
+.diag-cta-hint   { @apply text-green-100 text-xs text-center mt-2; }
+.diag-cta-footer { @apply bg-green-700 px-5 py-3 text-center; }
+.diag-cta-cancel { @apply text-green-200 hover:text-white text-sm transition-colors; }
+
+/* ════════════════════════════════════════════════════════
+   RÉSULTATS — EN-TÊTE COLORÉ
+════════════════════════════════════════════════════════ */
+
+.diag-result-header { @apply px-5 py-6 text-center; }
+
+.diag-result-header--faible { @apply bg-green-600; }
+.diag-result-header--modere { @apply bg-orange-500; }
+.diag-result-header--eleve  { @apply bg-red-600; }
+
+.diag-result-header-label {
+    @apply text-xs font-semibold uppercase tracking-widest mb-2 opacity-80;
+}
+
+.diag-result-header-label--faible { @apply text-green-50; }
+.diag-result-header-label--modere { @apply text-orange-50; }
+.diag-result-header-label--eleve  { @apply text-red-50; }
+
+.diag-result-score { @apply text-7xl font-extrabold text-white leading-none; }
+.diag-result-unit  { @apply text-white opacity-70 text-sm mt-1; }
+
+.diag-result-pill      { @apply mt-3 inline-block bg-white/20 backdrop-blur-sm rounded-full px-4 py-1; }
+.diag-result-pill-text { @apply text-white font-bold text-sm; }
+
+/* ════════════════════════════════════════════════════════
+   RÉSULTATS — CORPS
+════════════════════════════════════════════════════════ */
+
+.diag-result-body   { @apply p-5 space-y-4; }
+.diag-result-count  { @apply text-xs text-gray-400 text-center; }
+
+.diag-progress-labels { @apply flex justify-between text-xs text-gray-400; }
+
+.diag-progress-track {
+    @apply h-3 rounded-full overflow-hidden my-1.5;
+}
+
+.diag-progress-track--faible { @apply bg-green-200; }
+.diag-progress-track--modere { @apply bg-orange-200; }
+.diag-progress-track--eleve  { @apply bg-red-200; }
+
+.diag-progress-fill {
+    @apply h-full rounded-full transition-all duration-700;
+}
+
+.diag-progress-fill--faible { @apply bg-green-400; }
+.diag-progress-fill--modere { @apply bg-orange-400; }
+.diag-progress-fill--eleve  { @apply bg-red-400; }
+
+.diag-reco      { @apply rounded-xl border p-4; }
+.diag-reco-text { @apply text-sm leading-relaxed; }
+
+.diag-reco--faible { @apply bg-green-50 border-green-200 text-green-900; }
+.diag-reco--modere { @apply bg-orange-50 border-orange-200 text-orange-900; }
+.diag-reco--eleve  { @apply bg-red-50 border-red-200 text-red-900; }
+
+.diag-disclaimer      { @apply bg-amber-50 border border-amber-200 rounded-xl p-3; }
+.diag-disclaimer-text { @apply text-xs text-amber-800 leading-relaxed; }
+
+.diag-error-box {
+    @apply bg-red-50 border border-red-200 rounded-xl p-3 text-sm text-red-700;
+}
+
+/* ════════════════════════════════════════════════════════
+   RÉSULTATS — ACTIONS
+════════════════════════════════════════════════════════ */
+
+.diag-actions      { @apply space-y-3; }
+.diag-actions-2col { @apply grid grid-cols-2 gap-3; }
+
+.diag-saved-banner {
+    @apply flex items-center justify-center gap-2 py-2.5
+           bg-green-50 border border-green-200 rounded-xl
+           text-sm font-semibold text-green-700;
+}
+
+/* ════════════════════════════════════════════════════════
+   BOUTONS
+════════════════════════════════════════════════════════ */
+
+.diag-btn {
+    @apply w-full py-3 px-4 rounded-xl font-semibold text-sm transition-colors
+           disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+.diag-btn--primary   { @apply bg-green-600 text-white hover:bg-green-700 active:bg-green-800; }
+.diag-btn--secondary { @apply bg-white border border-gray-200 text-gray-700 hover:bg-gray-50; }
+.diag-btn--outline   { @apply bg-white border border-gray-300 text-gray-600 hover:bg-gray-50; }
+.diag-btn--danger    { @apply bg-white border border-red-200 text-red-600 hover:bg-red-50; }
+.diag-btn--ghost     { @apply bg-transparent text-gray-400 hover:text-gray-600 text-sm py-2; }
+
+/* ════════════════════════════════════════════════════════
+   LIENS & CHARGEMENT
+════════════════════════════════════════════════════════ */
+
+.diag-back-link {
+    @apply text-sm text-gray-400 hover:text-gray-600 transition-colors;
+}
+
+.diag-loading-screen {
+    @apply min-h-screen flex items-center justify-center bg-gray-50;
+}
+
+.diag-spinner {
+    @apply w-8 h-8 border-2 border-green-600 border-t-transparent
+           rounded-full animate-spin mx-auto mb-3;
+}

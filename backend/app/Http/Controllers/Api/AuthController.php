@@ -4,9 +4,12 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
@@ -254,6 +257,37 @@ class AuthController extends Controller
      *     )
      * )
      */
+    /**
+     * Compléter la réinitialisation du mot de passe via token email
+     */
+    public function resetPasswordComplete(Request $request)
+    {
+        $request->validate([
+            'token'                 => 'required|string',
+            'email'                 => 'required|email',
+            'password'              => 'required|string|min:8|confirmed',
+            'password_confirmation' => 'required',
+        ]);
+
+        $status = Password::reset(
+            $request->only('email', 'password', 'password_confirmation', 'token'),
+            function (User $user, string $password) {
+                $user->forceFill([
+                    'password'       => Hash::make($password),
+                    'remember_token' => Str::random(60),
+                ])->save();
+
+                event(new PasswordReset($user));
+            }
+        );
+
+        if ($status === Password::PASSWORD_RESET) {
+            return response()->json(['message' => 'Mot de passe réinitialisé avec succès.']);
+        }
+
+        return response()->json(['message' => __($status)], 422);
+    }
+
     public function changePassword(Request $request)
     {
         $request->validate([
@@ -276,5 +310,66 @@ class AuthController extends Controller
         return response()->json([
             'message' => 'Mot de passe changé avec succès',
         ]);
+    }
+
+    /**
+     * Exporte toutes les données personnelles de l'utilisateur (RGPD).
+     */
+    public function exportData(Request $request)
+    {
+        $user = $request->user();
+
+        $diagnostics = $user->diagnostics()
+            ->with('evenements')
+            ->orderByDesc('created_at')
+            ->get()
+            ->map(fn($d) => [
+                'id'                => $d->id,
+                'date'              => optional($d->date ?? $d->created_at)->toIso8601String(),
+                'score'             => $d->score,
+                'niveau_stress'     => $d->niveau_stress,
+                'recommandation'    => $d->recommandation,
+                'nombre_evenements' => $d->nombre_evenements,
+                'evenements'        => $d->evenements->map(fn($e) => [
+                    'type_evenement' => $e->type_evenement,
+                    'points'         => $e->points,
+                ]),
+            ]);
+
+        return response()->json([
+            'export_date' => now()->toIso8601String(),
+            'profil'      => [
+                'nom'              => $user->name,
+                'email'            => $user->email,
+                'date_inscription' => $user->created_at->toIso8601String(),
+            ],
+            'diagnostics' => $diagnostics,
+        ]);
+    }
+
+    /**
+     * Supprime définitivement le compte de l'utilisateur connecté (RGPD).
+     */
+    public function deleteAccount(Request $request)
+    {
+        $request->validate([
+            'password' => 'required|string',
+        ]);
+
+        $user = $request->user();
+
+        if (!Hash::check($request->password, $user->password)) {
+            throw ValidationException::withMessages([
+                'password' => ['Le mot de passe est incorrect.'],
+            ]);
+        }
+
+        // Révoquer tous les tokens Sanctum
+        $user->tokens()->delete();
+
+        // Supprimer l'utilisateur (diagnostics supprimés en cascade)
+        $user->delete();
+
+        return response()->json(['message' => 'Compte supprimé avec succès.']);
     }
 }

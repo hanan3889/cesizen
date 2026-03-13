@@ -43,7 +43,10 @@ export const authService = {
     logout: () => axios.post('/logout'),
     me: () => api.get('/me'),
     updateProfile: (data) => api.put('/profile', data),
-    changePassword: (data) => api.post('/change-password', data),
+    changePassword: (data) => api.put('/password', data),
+    resetPasswordComplete: (data) => api.post('/reset-password', data),
+    exportData: () => api.get('/me/export'),
+    deleteAccount: (data) => api.delete('/me', { data }),
 };
 
 // Diagnostics
@@ -51,6 +54,7 @@ export const diagnosticService = {
     getAll: (page = 1) => api.get(`/diagnostics?page=${page}`),
     getOne: (id) => api.get(`/diagnostics/${id}`),
     create: (data) => api.post('/diagnostics', data),
+    update: (id, data) => api.put(`/diagnostics/${id}`, data),
     delete: (id) => api.delete(`/diagnostics/${id}`),
     getStats: () => api.get('/diagnostics/statistiques'),
     getRecents: () => api.get('/diagnostics/recents'),
@@ -64,6 +68,9 @@ export const evenementService = {
     },
     getOne: (id) => api.get(`/evenements/${id}`),
     search: (query) => api.get(`/evenements/search?q=${query}`),
+    create: (data) => api.post('/evenements', data),
+    update: (id, data) => api.put(`/evenements/${id}`, data),
+    delete: (id) => api.delete(`/evenements/${id}`),
 };
 
 // Pages d'information
@@ -73,6 +80,7 @@ export const pageService = {
         return api.get(`/pages?${params}`);
     },
     getOne: (id) => api.get(`/pages/${id}`),
+    getBySlug: (slug) => api.get(`/pages/slug/${slug}`),
     create: (data) => api.post('/pages', data),
     update: (id, data) => api.put(`/pages/${id}`, data),
     delete: (id) => api.delete(`/pages/${id}`),
@@ -89,6 +97,13 @@ export const categorieService = {
     delete: (id) => api.delete(`/categories/${id}`),
 };
 
+// Configuration du diagnostic (Admin)
+export const diagnosticConfigService = {
+    getAll: () => api.get('/diagnostic-config'),
+    update: (niveau, data) => api.put(`/diagnostic-config/${niveau}`, data),
+    delete: (niveau) => api.delete(`/diagnostic-config/${niveau}`),
+};
+
 // Utilisateurs (Admin)
 export const userService = {
     getAll: (filters = {}) => {
@@ -96,6 +111,7 @@ export const userService = {
         return api.get(`/users?${params}`);
     },
     getOne: (id) => api.get(`/users/${id}`),
+    create: (data) => api.post('/users', data),
     update: (id, data) => api.put(`/users/${id}`, data),
     delete: (id) => api.delete(`/users/${id}`),
     resetPassword: (id, data) => api.post(`/users/${id}/reset-password`, data),
