@@ -24,6 +24,19 @@ export default defineConfig({
         globals: true,
         environment: 'jsdom',
         setupFiles: './src/js/setupTests.ts',
+        testTimeout: 15000,
+        coverage: {
+            provider: 'v8',
+            reporter: ['text', 'lcov', 'clover'],
+            reportsDirectory: './coverage',
+            include: ['src/js/**/*.{js,jsx,ts,tsx}'],
+            exclude: [
+                'src/js/**/*.test.{js,jsx,ts,tsx}',
+                'src/js/setupTests.ts',
+                'src/js/app.tsx',
+                'src/js/routes/**',
+            ],
+        },
     },
     resolve: {
         alias: {

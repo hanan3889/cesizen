@@ -64,7 +64,9 @@ describe('Page Register', () => {
         await fillForm(user, { confirm: 'autremotdepasse' });
         await user.click(screen.getByRole('button', { name: /créer mon compte/i }));
 
-        expect(screen.getByText(/mots de passe ne correspondent pas/i)).toBeInTheDocument();
+        await waitFor(() => {
+            expect(screen.getByText(/mots de passe ne correspondent pas/i)).toBeInTheDocument();
+        });
     });
 
     it('affiche une erreur si le mot de passe est trop court', async () => {
@@ -74,7 +76,9 @@ describe('Page Register', () => {
         await fillForm(user, { password: 'court', confirm: 'court' });
         await user.click(screen.getByRole('button', { name: /créer mon compte/i }));
 
-        expect(screen.getByText(/au moins 8 caractères/i)).toBeInTheDocument();
+        await waitFor(() => {
+            expect(screen.getByText(/au moins 8 caractères/i)).toBeInTheDocument();
+        });
     });
 
     it('redirige vers /dashboard après inscription réussie', async () => {
