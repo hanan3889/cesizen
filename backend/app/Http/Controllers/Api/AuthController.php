@@ -311,4 +311,65 @@ class AuthController extends Controller
             'message' => 'Mot de passe changé avec succès',
         ]);
     }
+
+    /**
+     * Exporte toutes les données personnelles de l'utilisateur (RGPD).
+     */
+    public function exportData(Request $request)
+    {
+        $user = $request->user();
+
+        $diagnostics = $user->diagnostics()
+            ->with('evenements')
+            ->orderByDesc('created_at')
+            ->get()
+            ->map(fn($d) => [
+                'id'                => $d->id,
+                'date'              => optional($d->date ?? $d->created_at)->toIso8601String(),
+                'score'             => $d->score,
+                'niveau_stress'     => $d->niveau_stress,
+                'recommandation'    => $d->recommandation,
+                'nombre_evenements' => $d->nombre_evenements,
+                'evenements'        => $d->evenements->map(fn($e) => [
+                    'type_evenement' => $e->type_evenement,
+                    'points'         => $e->points,
+                ]),
+            ]);
+
+        return response()->json([
+            'export_date' => now()->toIso8601String(),
+            'profil'      => [
+                'nom'              => $user->name,
+                'email'            => $user->email,
+                'date_inscription' => $user->created_at->toIso8601String(),
+            ],
+            'diagnostics' => $diagnostics,
+        ]);
+    }
+
+    /**
+     * Supprime définitivement le compte de l'utilisateur connecté (RGPD).
+     */
+    public function deleteAccount(Request $request)
+    {
+        $request->validate([
+            'password' => 'required|string',
+        ]);
+
+        $user = $request->user();
+
+        if (!Hash::check($request->password, $user->password)) {
+            throw ValidationException::withMessages([
+                'password' => ['Le mot de passe est incorrect.'],
+            ]);
+        }
+
+        // Révoquer tous les tokens Sanctum
+        $user->tokens()->delete();
+
+        // Supprimer l'utilisateur (diagnostics supprimés en cascade)
+        $user->delete();
+
+        return response()->json(['message' => 'Compte supprimé avec succès.']);
+    }
 }
