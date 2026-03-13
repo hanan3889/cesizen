@@ -168,4 +168,63 @@ class EvenementVieController extends Controller
             'total' => $evenements->count(),
         ]);
     }
+
+    /**
+     * Crée un nouvel événement. Réservé aux administrateurs.
+     */
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'type_evenement' => 'required|string|max:255|unique:evenement_vies,type_evenement',
+            'points'         => 'required|integer|min:1|max:1000',
+        ]);
+
+        $evenement = EvenementVie::create($validated);
+
+        return response()->json([
+            'message'    => 'Événement créé avec succès.',
+            'evenement'  => [
+                'id'             => $evenement->id,
+                'type_evenement' => $evenement->type_evenement,
+                'points'         => $evenement->points,
+                'niveau_impact'  => $evenement->niveau_impact,
+            ],
+        ], 201);
+    }
+
+    /**
+     * Met à jour un événement existant. Réservé aux administrateurs.
+     */
+    public function update(Request $request, $id)
+    {
+        $evenement = EvenementVie::findOrFail($id);
+
+        $validated = $request->validate([
+            'type_evenement' => 'required|string|max:255|unique:evenement_vies,type_evenement,' . $id,
+            'points'         => 'required|integer|min:1|max:1000',
+        ]);
+
+        $evenement->update($validated);
+
+        return response()->json([
+            'message'   => 'Événement mis à jour.',
+            'evenement' => [
+                'id'             => $evenement->id,
+                'type_evenement' => $evenement->type_evenement,
+                'points'         => $evenement->points,
+                'niveau_impact'  => $evenement->niveau_impact,
+            ],
+        ]);
+    }
+
+    /**
+     * Supprime un événement. Réservé aux administrateurs.
+     */
+    public function destroy($id)
+    {
+        $evenement = EvenementVie::findOrFail($id);
+        $evenement->delete();
+
+        return response()->json(['message' => 'Événement supprimé.']);
+    }
 }
