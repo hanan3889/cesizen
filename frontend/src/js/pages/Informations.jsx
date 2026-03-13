@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Head, Link } from '@inertiajs/react';
+import { Link } from 'react-router-dom';
 import { pageService } from '../services/api';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react";
@@ -10,7 +10,7 @@ const ArticleCard = ({ article }) => {
             <h3 className="text-xl font-semibold text-gray-900 mb-3">{article.titre}</h3>
             <p className="text-gray-600 mb-4 flex-grow">{article.description}</p>
             <Link
-                href={`/categories/${article.categorie.id}`}
+                to={`/categories/${article.categorie.id}`}
                 className="text-cesizen-green underline font-semibold mt-auto"
             >
                 {article.categorie.categorie}
@@ -80,7 +80,7 @@ const Informations = () => {
 
     return (
         <>
-            <Head title="Informations" />
+            
             <div className="bg-gray-50 py-12 min-h-screen">
                 <div className="container mx-auto px-4">
                     <h1 className="text-4xl font-bold text-center text-gray-900 mb-4">

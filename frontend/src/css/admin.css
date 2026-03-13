@@ -1,0 +1,286 @@
+/* ============================================================
+   Admin Dashboard
+   ============================================================ */
+
+/* ════════════════════════════════════════════════════════
+   LAYOUT
+════════════════════════════════════════════════════════ */
+
+.admin-layout {
+    @apply flex h-screen bg-gray-100 overflow-hidden;
+}
+
+.admin-main {
+    @apply flex-1 overflow-y-auto;
+}
+
+.admin-content {
+    @apply p-8;
+}
+
+/* ════════════════════════════════════════════════════════
+   SIDEBAR
+════════════════════════════════════════════════════════ */
+
+.admin-sidebar {
+    @apply w-64 flex-shrink-0 bg-cesizen-green-dark flex flex-col min-h-screen;
+}
+
+.admin-sidebar-logo {
+    @apply h-16 flex items-center justify-center px-4 border-b border-cesizen-green/40;
+}
+
+.admin-sidebar-logo-inner {
+    @apply flex items-center gap-3;
+}
+
+.admin-sidebar-logo-text {
+    @apply text-white text-xl font-bold;
+}
+
+.admin-sidebar-user {
+    @apply px-4 py-4 border-b border-cesizen-green/20;
+}
+
+.admin-sidebar-user-label {
+    @apply text-green-100 text-xs uppercase tracking-wider mb-1;
+}
+
+.admin-sidebar-user-name {
+    @apply text-white font-semibold truncate;
+}
+
+.admin-sidebar-user-email {
+    @apply text-green-200 text-xs truncate;
+}
+
+.admin-sidebar-nav {
+    @apply flex-1 px-3 py-5 space-y-1;
+}
+
+.admin-nav-item {
+    @apply w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors text-left;
+}
+
+.admin-nav-item--active { @apply bg-white/20 text-white shadow-sm; }
+.admin-nav-item--idle   { @apply text-green-100 hover:bg-white/10 hover:text-white; }
+
+.admin-nav-dot {
+    @apply ml-auto w-1.5 h-1.5 rounded-full bg-white;
+}
+
+.admin-sidebar-footer {
+    @apply px-3 py-4 border-t border-cesizen-green/20;
+}
+
+.admin-logout-btn {
+    @apply w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium
+           text-green-200 hover:bg-red-500/20 hover:text-red-200 transition-colors;
+}
+
+/* ════════════════════════════════════════════════════════
+   PANNEAU — EN-TÊTE
+════════════════════════════════════════════════════════ */
+
+.admin-panel-header {
+    @apply flex items-center justify-between mb-6;
+}
+
+.admin-panel-title {
+    @apply text-2xl font-bold text-gray-800;
+}
+
+/* ════════════════════════════════════════════════════════
+   BOUTONS
+════════════════════════════════════════════════════════ */
+
+.admin-btn-primary {
+    @apply inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white
+           bg-cesizen-green hover:bg-cesizen-green-dark rounded-lg transition-colors;
+}
+
+.admin-btn-danger {
+    @apply inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white
+           bg-red-600 hover:bg-red-700 rounded-lg transition-colors;
+}
+
+.admin-btn-action {
+    @apply inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-md transition-colors;
+}
+
+.admin-btn-action--edit    { @apply text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200; }
+.admin-btn-action--delete  { @apply text-red-700 bg-red-50 hover:bg-red-100 border border-red-200; }
+.admin-btn-action--warning { @apply text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200; }
+
+/* ════════════════════════════════════════════════════════
+   BADGES
+════════════════════════════════════════════════════════ */
+
+.admin-badge {
+    @apply px-2.5 py-0.5 inline-flex text-xs font-semibold rounded-full;
+}
+
+.admin-badge--admin     { @apply bg-green-100 text-green-800; }
+.admin-badge--user      { @apply bg-sky-100 text-sky-800; }
+.admin-badge--publie    { @apply bg-green-100 text-green-800; }
+.admin-badge--brouillon { @apply bg-gray-100 text-gray-700; }
+.admin-badge--archive   { @apply bg-amber-100 text-amber-800; }
+
+/* ════════════════════════════════════════════════════════
+   FEEDBACK
+════════════════════════════════════════════════════════ */
+
+.admin-feedback {
+    @apply mb-4 px-4 py-3 rounded-lg text-sm font-medium border;
+}
+
+.admin-feedback--success { @apply bg-green-50 text-green-800 border-green-200; }
+.admin-feedback--error   { @apply bg-red-50 text-red-800 border-red-200; }
+
+.admin-error-banner {
+    @apply px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-sm text-red-700;
+}
+
+/* ════════════════════════════════════════════════════════
+   CHARGEMENT
+════════════════════════════════════════════════════════ */
+
+.admin-spinner-wrap {
+    @apply flex items-center justify-center py-20;
+}
+
+.admin-spinner {
+    @apply animate-spin rounded-full h-10 w-10 border-b-2 border-cesizen-green;
+}
+
+/* ════════════════════════════════════════════════════════
+   ÉTAT VIDE
+════════════════════════════════════════════════════════ */
+
+.admin-empty {
+    @apply bg-white rounded-xl shadow-sm p-12 text-center text-gray-400;
+}
+
+.admin-empty-title { @apply font-medium; }
+.admin-empty-desc  { @apply text-sm mt-1; }
+
+/* ════════════════════════════════════════════════════════
+   TABLE
+════════════════════════════════════════════════════════ */
+
+.admin-table-wrap {
+    @apply bg-white rounded-xl shadow-sm overflow-x-auto;
+}
+
+.admin-table {
+    @apply min-w-full divide-y divide-gray-200;
+}
+
+.admin-thead { @apply bg-gray-50; }
+.admin-tbody { @apply divide-y divide-gray-100; }
+
+.admin-th {
+    @apply px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-left;
+}
+
+.admin-th--right { @apply text-right; }
+
+.admin-tr { @apply hover:bg-gray-50 transition-colors; }
+
+.admin-td        { @apply px-6 py-4 whitespace-nowrap text-sm text-gray-500; }
+.admin-td--bold  { @apply px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900; }
+.admin-td--title { @apply px-6 py-4 text-sm font-medium text-gray-900 max-w-xs; }
+.admin-td--right { @apply px-6 py-4 whitespace-nowrap text-right; }
+
+.admin-td-truncate { @apply block truncate; }
+.admin-td-actions  { @apply flex items-center justify-end gap-2; }
+
+/* ════════════════════════════════════════════════════════
+   PAGINATION
+════════════════════════════════════════════════════════ */
+
+.admin-pagination {
+    @apply mt-4 flex justify-end;
+}
+
+.admin-pagination-nav {
+    @apply inline-flex rounded-md shadow-sm -space-x-px;
+}
+
+.admin-page-btn         { @apply relative inline-flex items-center px-3 py-2 border text-sm font-medium; }
+.admin-page-btn--active { @apply z-10 bg-cesizen-green border-cesizen-green text-white; }
+.admin-page-btn--idle   { @apply bg-white border-gray-300 text-gray-500 hover:bg-gray-50 disabled:opacity-40; }
+.admin-page-btn--first  { @apply rounded-l-md; }
+.admin-page-btn--last   { @apply rounded-r-md; }
+
+/* ════════════════════════════════════════════════════════
+   MODALE
+════════════════════════════════════════════════════════ */
+
+.admin-modal-overlay {
+    @apply fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4;
+}
+
+.admin-modal-overlay--plain {
+    @apply fixed inset-0 z-50 flex items-center justify-center bg-black/50;
+}
+
+.admin-modal    { @apply bg-white rounded-xl shadow-xl w-full max-w-md; }
+.admin-modal--sm { @apply bg-white rounded-xl shadow-xl w-full max-w-sm; }
+.admin-modal--lg { @apply bg-white rounded-xl shadow-xl w-full max-w-lg max-h-[90vh] flex flex-col; }
+
+.admin-modal-header {
+    @apply flex items-center justify-between px-6 py-4 border-b flex-shrink-0;
+}
+
+.admin-modal-title { @apply text-lg font-semibold text-gray-900; }
+.admin-modal-close { @apply text-gray-400 hover:text-gray-600 transition-colors; }
+
+.admin-modal-body        { @apply px-6 py-5 space-y-4; }
+.admin-modal-body--scroll { @apply px-6 py-5 space-y-4 overflow-y-auto; }
+
+.admin-modal-footer {
+    @apply flex justify-end gap-3 pt-2;
+}
+
+.admin-modal-btn-cancel {
+    @apply px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors;
+}
+
+.admin-modal-btn-submit {
+    @apply px-4 py-2 text-sm font-medium text-white bg-cesizen-green hover:bg-cesizen-green-dark
+           rounded-lg transition-colors disabled:opacity-50;
+}
+
+/* Modale de confirmation */
+.admin-confirm-box     { @apply bg-white rounded-xl shadow-xl p-6 max-w-md w-full mx-4; }
+.admin-confirm-title   { @apply text-lg font-semibold text-gray-900 mb-2; }
+.admin-confirm-message { @apply text-sm text-gray-600 mb-6; }
+.admin-confirm-actions { @apply flex justify-end gap-3; }
+
+.admin-confirm-btn-cancel  { @apply px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors; }
+.admin-confirm-btn--danger  { @apply px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-md transition-colors; }
+.admin-confirm-btn--warning { @apply px-4 py-2 text-sm font-medium text-white bg-amber-500 hover:bg-amber-600 rounded-md transition-colors; }
+
+/* ════════════════════════════════════════════════════════
+   FORMULAIRE
+════════════════════════════════════════════════════════ */
+
+.admin-form-grid-2 { @apply grid grid-cols-2 gap-4; }
+
+.admin-field-label { @apply block text-sm font-medium text-gray-700 mb-1; }
+.admin-field-error { @apply mt-1 text-xs text-red-600; }
+
+.admin-input {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-lg text-sm
+           focus:ring-2 focus:ring-cesizen-green focus:border-transparent outline-none;
+}
+
+.admin-input--error   { @apply border-red-400; }
+
+.admin-textarea {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-lg text-sm
+           focus:ring-2 focus:ring-cesizen-green focus:border-transparent outline-none resize-y;
+}
+
+.admin-textarea--error { @apply border-red-400; }

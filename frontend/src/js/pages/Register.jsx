@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Link, router } from '@inertiajs/react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import Navbar from '../components/Navbar';
+import AppLogo from '../components/app-logo';
 
 const Register = () => {
     const [formData, setFormData] = useState({
@@ -10,9 +10,11 @@ const Register = () => {
         password: '',
         password_confirmation: '',
     });
+    const [rgpdConsent, setRgpdConsent] = useState(false);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const { register } = useAuth();
+    const navigate = useNavigate();
 
     const handleChange = (e) => {
         setFormData({
@@ -35,6 +37,11 @@ const Register = () => {
             return;
         }
 
+        if (!rgpdConsent) {
+            setError('Vous devez accepter la politique de confidentialité pour créer un compte.');
+            return;
+        }
+
         setLoading(true);
 
         const result = await register(
@@ -45,7 +52,7 @@ const Register = () => {
         );
 
         if (result.success) {
-            router.visit('/dashboard');
+            navigate('/dashboard');
         } else {
             setError(result.error);
         }
@@ -55,19 +62,18 @@ const Register = () => {
 
     return (
         <div>
-            <Navbar />
             <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-md w-full space-y-8">
                     <div>
-                        <div className="mx-auto h-12 w-12 bg-cesizen-green rounded-full flex items-center justify-center">
-                            <span className="text-white font-bold text-2xl">C</span>
+                        <div className="mx-auto flex justify-center">
+                            <AppLogo />
                         </div>
                         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-                            Créer un compte CesiZen
+                            Créer un compte
                         </h2>
                         <p className="mt-2 text-center text-sm text-gray-600">
                             Déjà inscrit ?{' '}
-                            <Link href="/login" className="font-medium text-cesizen-green hover:text-cesizen-green-dark">
+                            <Link to="/login" className="font-medium text-cesizen-green hover:text-cesizen-green-dark">
                                 Connectez-vous
                             </Link>
                         </p>
@@ -169,9 +175,22 @@ const Register = () => {
                             </button>
                         </div>
 
-                        <p className="text-xs text-center text-gray-500">
-                            En créant un compte, vous acceptez nos conditions d'utilisation et notre politique de confidentialité conforme au RGPD
-                        </p>
+                        <div className="flex items-start gap-3">
+                            <input
+                                id="rgpd"
+                                type="checkbox"
+                                checked={rgpdConsent}
+                                onChange={e => setRgpdConsent(e.target.checked)}
+                                className="mt-0.5 h-4 w-4 accent-cesizen-green flex-shrink-0 cursor-pointer"
+                            />
+                            <label htmlFor="rgpd" className="text-xs text-gray-600 cursor-pointer leading-relaxed">
+                                J'ai lu et j'accepte la{' '}
+                                <Link to="/privacy" className="font-medium text-cesizen-green hover:underline" target="_blank">
+                                    politique de confidentialité
+                                </Link>{' '}
+                                de CesiZen. Mes données sont traitées conformément au RGPD.
+                            </label>
+                        </div>
                     </form>
                 </div>
             </div>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Head, Link } from '@inertiajs/react';
+import { Link, useParams } from 'react-router-dom';
 import { categorieService } from '../../services/api';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react";
@@ -10,26 +10,33 @@ const ArticleCard = ({ page, category }) => {
             <h3 className="text-xl font-semibold text-gray-900 mb-3">{page.titre}</h3>
             <p className="text-gray-600 mb-4 flex-grow">{page.description}</p>
             <Link
-                href={`/categories/${category.id}`}
+                to={`/informations/${page.slug}`}
                 className="text-cesizen-green underline font-semibold mt-auto"
             >
-                {category.categorie}
+                Lire l'article
             </Link>
         </div>
     );
 };
 
-const ShowCategory = ({ categoryId }) => {
+const ShowCategory = () => {
+    const { id: categoryId } = useParams();
     const [category, setCategory] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
+        if (category) {
+            document.title = `${category.categorie} — CesiZen`;
+        }
+    }, [category]);
+
+    useEffect(() => {
         const fetchCategory = async () => {
             try {
                 const response = await categorieService.getOne(categoryId);
-                setCategory(response.data.categorie);
+                setCategory(response.data.categorie ?? response.data);
             } catch (err) {
                 setError('Impossible de charger la catégorie. Veuillez réessayer plus tard.');
                 console.error("Erreur lors de la récupération de la catégorie:", err);
@@ -38,7 +45,7 @@ const ShowCategory = ({ categoryId }) => {
             }
         };
 
-        fetchCategory();
+        if (categoryId) fetchCategory();
     }, [categoryId]);
 
     const filteredArticles = category?.pages?.filter(page =>
@@ -96,26 +103,22 @@ const ShowCategory = ({ categoryId }) => {
             );
         }
 
-        return null; // Should not happen if error is handled
+        return null;
     };
 
     return (
-        <>
-            <Head title={category ? category.categorie : 'Catégorie'} />
-            <div className="bg-gray-50 py-12 min-h-screen">
-                <div className="container mx-auto px-4">
-                    <h1 className="text-4xl font-bold text-center text-gray-900 mb-4">
-                        Catégorie : {category ? category.categorie : '...'}
-                    </h1>
-                    <p className="text-lg text-center text-gray-600 mb-12">
-                        {category ? `Articles et informations sur le thème "${category.categorie}".` : ''}
-                    </p>
-                    {renderContent()}
-                </div>
+        <div className="bg-gray-50 py-12 min-h-screen">
+            <div className="container mx-auto px-4">
+                <h1 className="text-4xl font-bold text-center text-gray-900 mb-4">
+                    Catégorie : {category ? category.categorie : '...'}
+                </h1>
+                <p className="text-lg text-center text-gray-600 mb-12">
+                    {category ? `Articles et informations sur le thème "${category.categorie}".` : ''}
+                </p>
+                {renderContent()}
             </div>
-        </>
+        </div>
     );
 };
 
 export default ShowCategory;
-

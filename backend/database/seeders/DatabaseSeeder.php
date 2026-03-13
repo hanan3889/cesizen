@@ -29,14 +29,19 @@ class DatabaseSeeder extends Seeder
         $this->call(EvenementVieSeeder::class);
         $this->command->newLine();
 
-        // 3. Créer l'administrateur et les utilisateurs de test
+        // 4. Créer l'administrateur et les utilisateurs de test
         $this->command->info('Création de l\'administrateur et des utilisateurs...');
         $this->call(AdminUserSeeder::class);
         $this->command->newLine();
 
+        // 5. Insérer la configuration du diagnostic de stress
+        $this->command->info('Insertion de la configuration du diagnostic de stress...');
+        $this->call(DiagnosticConfigSeeder::class);
+        $this->command->newLine();
+
         $this->command->info('Seeding terminé avec succès !');
         $this->command->newLine();
-        
+
         $this->command->info('Récapitulatif :');
         $this->command->table(
             ['Élément', 'Quantité'],
@@ -45,6 +50,7 @@ class DatabaseSeeder extends Seeder
                 ['Pages d\'information', '5'],
                 ['Événements de vie', '43'],
                 ['Utilisateurs', '3 (1 admin + 2 utilisateurs)'],
+                ['Configurations diagnostic', '3 (faible, modéré, élevé)'],
             ]
         );
 
