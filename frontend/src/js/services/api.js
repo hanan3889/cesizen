@@ -66,6 +66,9 @@ export const evenementService = {
     },
     getOne: (id) => api.get(`/evenements/${id}`),
     search: (query) => api.get(`/evenements/search?q=${query}`),
+    create: (data) => api.post('/evenements', data),
+    update: (id, data) => api.put(`/evenements/${id}`, data),
+    delete: (id) => api.delete(`/evenements/${id}`),
 };
 
 // Pages d'information

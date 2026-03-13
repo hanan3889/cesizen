@@ -50,6 +50,9 @@ Route::prefix('v1')->group(function () {
             Route::put('diagnostic-config/{niveau}', [DiagnosticConfigController::class, 'update']);
             Route::delete('diagnostic-config/{niveau}', [DiagnosticConfigController::class, 'destroy']);
 
+            // Gestion des événements de vie (CRUD admin)
+            Route::apiResource('evenements', EvenementVieController::class)->except(['index', 'show']);
+
             // Gestion des utilisateurs
             Route::post('users/{user}/reset-password', [UserController::class, 'resetPassword']);
             Route::get('users/statistiques', [UserController::class, 'statistiques']);
