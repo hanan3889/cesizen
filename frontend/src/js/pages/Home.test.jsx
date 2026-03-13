@@ -1,15 +1,26 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import Home from '@/pages/Home';
 
-vi.mock('@/services/api', () => ({
-    pageService: {
-        getAll: vi.fn(),
-    },
-}));
+// Mock axios pour que axios.create() retourne un objet valide avec interceptors
+vi.mock('axios', () => {
+    const mockInstance = {
+        interceptors: {
+            request: { use: vi.fn() },
+            response: { use: vi.fn() },
+        },
+        get:    vi.fn(),
+        post:   vi.fn(),
+        put:    vi.fn(),
+        delete: vi.fn(),
+        patch:  vi.fn(),
+    };
+    return { default: { create: vi.fn(() => mockInstance) } };
+});
+
 vi.mock('@/components/Navbar', () => ({ default: () => null }));
 vi.mock('@/contexts/AuthContext', () => ({ useAuth: vi.fn() }));
 
+import Home from '@/pages/Home';
 import { useAuth } from '@/contexts/AuthContext';
 import { pageService } from '@/services/api';
 
@@ -18,7 +29,7 @@ const renderHome = (isAuthenticated = false) => {
         isAuthenticated,
         user: isAuthenticated ? { name: 'Jean' } : null,
     });
-    vi.mocked(pageService.getAll).mockResolvedValue({ data: { data: [] } });
+    vi.spyOn(pageService, 'getAll').mockResolvedValue({ data: { data: [] } });
     return render(<MemoryRouter><Home /></MemoryRouter>);
 };
 
@@ -62,13 +73,21 @@ describe('Page Home', () => {
         });
     });
 
-    it('affiche les articles récupérés depuis l\'API', async () => {
+    it("affiche les articles récupérés depuis l'API", async () => {
         vi.mocked(useAuth).mockReturnValue({ isAuthenticated: false, user: null });
-        vi.mocked(pageService.getAll).mockResolvedValue({
+        vi.spyOn(pageService, 'getAll').mockResolvedValue({
             data: {
                 data: [
-                    { id: 1, titre: 'Article RGPD', slug: 'rgpd', statut: 'publie', description: 'Test description suffisamment longue pour le substring', categorie: { categorie: 'RGPD' }, updated_at: '2024-01-01' },
-                    { id: 2, titre: 'Gestion du stress', slug: 'stress', statut: 'publie', description: 'Test description suffisamment longue pour le substring', categorie: { categorie: 'Bien-être' }, updated_at: '2024-01-01' },
+                    {
+                        id: 1, titre: 'Article RGPD', slug: 'rgpd', statut: 'publie',
+                        description: 'Test description suffisamment longue pour le substring',
+                        categorie: { categorie: 'RGPD' }, updated_at: '2024-01-01',
+                    },
+                    {
+                        id: 2, titre: 'Gestion du stress', slug: 'stress', statut: 'publie',
+                        description: 'Test description suffisamment longue pour le substring',
+                        categorie: { categorie: 'Bien-être' }, updated_at: '2024-01-01',
+                    },
                 ],
             },
         });
