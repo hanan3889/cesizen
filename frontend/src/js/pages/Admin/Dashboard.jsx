@@ -1,8 +1,8 @@
-import { Eye, EyeOff, FileText, KeyRound, LogOut, Pencil, Plus, Settings, Tag, Trash2, Users, X } from 'lucide-react';
+import { Activity, Eye, EyeOff, FileText, KeyRound, LogOut, Pencil, Plus, Settings, Tag, Trash2, Users, X } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import AppLogo from '@/components/app-logo';
 import { useAuth } from '../../contexts/AuthContext';
-import { authService, categorieService, pageService, userService } from '../../services/api';
+import { authService, categorieService, diagnosticConfigService, pageService, userService } from '../../services/api';
 import '../../../css/admin.css';
 
 /* ─────────────────────────────────────────
@@ -798,13 +798,226 @@ const SettingsPanel = ({ user }) => {
 };
 
 /* ─────────────────────────────────────────
+   Panneau — Configuration du diagnostic
+───────────────────────────────────────── */
+const NIVEAU_LABELS = { faible: 'Faible', modere: 'Modéré', eleve: 'Élevé' };
+const NIVEAU_COLORS = { faible: '#22c55e', modere: '#f59e0b', eleve: '#ef4444' };
+
+const DIAGNOSTIC_DEFAULTS = {
+    faible: { seuil_min: 0,   seuil_max: 150,  message: 'Votre niveau de stress est faible. Continuez à maintenir un bon équilibre de vie.' },
+    modere: { seuil_min: 150, seuil_max: 300,  message: 'Votre niveau de stress est modéré. Pensez à prendre du temps pour vous et à pratiquer des activités relaxantes.' },
+    eleve:  { seuil_min: 300, seuil_max: null, message: 'Votre niveau de stress est élevé. Il est fortement recommandé de consulter un professionnel de santé mentale.' },
+};
+
+const DiagnosticConfigPanel = () => {
+    const [loadError, setLoadError]     = useState(null);
+    const [loading, setLoading]         = useState(true);
+    const [saving, setSaving]           = useState({});
+    const [resetting, setResetting]     = useState({});
+    const [forms, setForms]             = useState({});
+    const [cardFeedback, setCardFeedback] = useState({});
+    const [errors, setErrors]           = useState({});
+
+    const showCardFeedback = (niveau, type, message) => {
+        setCardFeedback(f => ({ ...f, [niveau]: { type, message } }));
+        setTimeout(() => setCardFeedback(f => ({ ...f, [niveau]: null })), 5000);
+    };
+
+    useEffect(() => { loadConfig(); }, []);
+
+    const setField = (niveau, field) => (e) =>
+        setForms(f => ({ ...f, [niveau]: { ...f[niveau], [field]: e.target.value } }));
+
+    const handleSave = async (niveau) => {
+        const form = forms[niveau];
+
+        // Garde : forms non chargé
+        if (!form) {
+            showCardFeedback(niveau, 'error', 'Données non chargées, veuillez recharger la page.');
+            return;
+        }
+
+        const e = {};
+        const seuilMin = Number(form.seuil_min);
+        const seuilMax = Number(form.seuil_max);
+
+        if (form.seuil_min === '' || isNaN(seuilMin) || seuilMin < 0)
+            e[`${niveau}_seuil_min`] = 'Valeur requise (≥ 0).';
+        if (niveau !== 'eleve' && (form.seuil_max === '' || isNaN(seuilMax) || seuilMax <= seuilMin))
+            e[`${niveau}_seuil_max`] = 'Doit être un entier supérieur au seuil min.';
+        if (!form.message.trim())
+            e[`${niveau}_message`] = 'Le message est requis.';
+
+        if (Object.keys(e).length) {
+            setErrors(err => ({ ...err, ...e }));
+            return;
+        }
+
+        setErrors(err => {
+            const cleaned = { ...err };
+            delete cleaned[`${niveau}_seuil_min`];
+            delete cleaned[`${niveau}_seuil_max`];
+            delete cleaned[`${niveau}_message`];
+            return cleaned;
+        });
+
+        setSaving(s => ({ ...s, [niveau]: true }));
+        try {
+            await diagnosticConfigService.update(niveau, {
+                seuil_min: seuilMin,
+                ...(niveau !== 'eleve' ? { seuil_max: seuilMax } : {}),
+                message: form.message,
+            });
+            showCardFeedback(niveau, 'success', `Niveau "${NIVEAU_LABELS[niveau]}" sauvegardé.`);
+        } catch (err) {
+            const msg = err.response?.data?.errors
+                ? Object.values(err.response.data.errors).flat().join(' ')
+                : (err.response?.data?.message || 'Erreur lors de la sauvegarde.');
+            showCardFeedback(niveau, 'error', msg);
+        } finally {
+            setSaving(s => ({ ...s, [niveau]: false }));
+        }
+    };
+
+    const loadConfig = () => {
+        setLoading(true);
+        diagnosticConfigService.getAll()
+            .then(res => {
+                const cfg = res.data?.config ?? {};
+                setForms({
+                    faible: { seuil_min: cfg.faible?.seuil_min ?? 0,   seuil_max: cfg.faible?.seuil_max ?? 150,  message: cfg.faible?.message ?? '' },
+                    modere: { seuil_min: cfg.modere?.seuil_min ?? 150,  seuil_max: cfg.modere?.seuil_max ?? 300,  message: cfg.modere?.message ?? '' },
+                    eleve:  { seuil_min: cfg.eleve?.seuil_min  ?? 300,  seuil_max: null,                          message: cfg.eleve?.message  ?? '' },
+                });
+            })
+            .catch(() => setLoadError('Impossible de charger la configuration. Veuillez recharger la page.'))
+            .finally(() => setLoading(false));
+    };
+
+    const handleReset = async (niveau) => {
+        if (!window.confirm(`Réinitialiser la configuration du niveau "${NIVEAU_LABELS[niveau]}" aux valeurs par défaut ?`)) return;
+        setResetting(r => ({ ...r, [niveau]: true }));
+        try {
+            await diagnosticConfigService.delete(niveau);
+            const def = DIAGNOSTIC_DEFAULTS[niveau];
+            setForms(f => ({ ...f, [niveau]: { ...def } }));
+            showCardFeedback(niveau, 'success', `Niveau "${NIVEAU_LABELS[niveau]}" réinitialisé aux valeurs par défaut.`);
+        } catch {
+            showCardFeedback(niveau, 'error', 'Erreur lors de la réinitialisation.');
+        } finally {
+            setResetting(r => ({ ...r, [niveau]: false }));
+        }
+    };
+
+    if (loading) return <Spinner />;
+
+    return (
+        <div>
+            <div className="admin-panel-header">
+                <h2 className="admin-panel-title">Configuration du diagnostic de stress</h2>
+                <p className="text-sm text-gray-500 mt-1">
+                    Définissez les seuils de score et les messages de recommandation pour chaque niveau.
+                </p>
+            </div>
+
+            {loadError && (
+                <div className="admin-feedback admin-feedback--error mb-4">{loadError}</div>
+            )}
+
+            <div className="space-y-6">
+                {['faible', 'modere', 'eleve'].map(niveau => (
+                    <div key={niveau} className="bg-white rounded-xl shadow-sm p-6">
+                        <div className="flex items-center gap-3 mb-5">
+                            <div
+                                className="w-3 h-3 rounded-full flex-shrink-0"
+                                style={{ backgroundColor: NIVEAU_COLORS[niveau] }}
+                            />
+                            <h3 className="text-base font-semibold text-gray-800">
+                                Niveau {NIVEAU_LABELS[niveau]}
+                            </h3>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                            <Field label="Seuil minimum (points)" error={errors[`${niveau}_seuil_min`]}>
+                                <input
+                                    type="number"
+                                    min="0"
+                                    value={forms[niveau]?.seuil_min ?? ''}
+                                    onChange={setField(niveau, 'seuil_min')}
+                                    className={inputCls(errors[`${niveau}_seuil_min`])}
+                                    disabled={niveau === 'faible'}
+                                />
+                            </Field>
+                            <Field label="Seuil maximum (points)" error={errors[`${niveau}_seuil_max`]}>
+                                {niveau === 'eleve' ? (
+                                    <input
+                                        type="text"
+                                        value="Illimité"
+                                        readOnly
+                                        className="admin-input opacity-50 cursor-not-allowed"
+                                    />
+                                ) : (
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        value={forms[niveau]?.seuil_max ?? ''}
+                                        onChange={setField(niveau, 'seuil_max')}
+                                        className={inputCls(errors[`${niveau}_seuil_max`])}
+                                    />
+                                )}
+                            </Field>
+                        </div>
+
+                        <Field label="Message de recommandation" error={errors[`${niveau}_message`]}>
+                            <textarea
+                                rows={3}
+                                value={forms[niveau]?.message ?? ''}
+                                onChange={setField(niveau, 'message')}
+                                placeholder="Message affiché à l'utilisateur pour ce niveau de stress..."
+                                className={textaCls(errors[`${niveau}_message`])}
+                            />
+                        </Field>
+
+                        <div className="mt-4 flex items-center justify-between gap-4">
+                            {cardFeedback[niveau] ? (
+                                <p className={`text-sm font-medium ${cardFeedback[niveau].type === 'success' ? 'text-green-600' : 'text-red-600'}`}>
+                                    {cardFeedback[niveau].message}
+                                </p>
+                            ) : <span />}
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={() => handleReset(niveau)}
+                                    disabled={resetting[niveau] || saving[niveau]}
+                                    className="admin-btn-danger"
+                                    title="Réinitialiser aux valeurs par défaut"
+                                >
+                                    {resetting[niveau] ? 'Réinitialisation...' : 'Réinitialiser'}
+                                </button>
+                                <button
+                                    onClick={() => handleSave(niveau)}
+                                    disabled={saving[niveau] || resetting[niveau]}
+                                    className="admin-btn-primary"
+                                >
+                                    {saving[niveau] ? 'Sauvegarde...' : 'Sauvegarder'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+};
+
+/* ─────────────────────────────────────────
    Sidebar
 ───────────────────────────────────────── */
 const navItems = [
-    { key: 'users',        label: 'Utilisateurs', icon: Users },
-    { key: 'informations', label: 'Informations',  icon: FileText },
-    { key: 'categories',   label: 'Catégories',    icon: Tag },
-    { key: 'settings',     label: 'Paramètres',    icon: Settings },
+    { key: 'users',            label: 'Utilisateurs',  icon: Users },
+    { key: 'informations',     label: 'Informations',   icon: FileText },
+    { key: 'categories',       label: 'Catégories',     icon: Tag },
+    { key: 'diagnostic-config', label: 'Diagnostic',   icon: Activity },
+    { key: 'settings',         label: 'Paramètres',     icon: Settings },
 ];
 
 const Sidebar = ({ active, onChange, user, onLogout }) => (
@@ -850,11 +1063,12 @@ const AdminDashboard = () => {
 
     const renderPanel = () => {
         switch (activeSection) {
-            case 'users':        return <UsersPanel />;
-            case 'informations': return <InfoPanel />;
-            case 'categories':   return <CategoriesPanel />;
-            case 'settings':     return <SettingsPanel user={user} />;
-            default:             return <UsersPanel />;
+            case 'users':             return <UsersPanel />;
+            case 'informations':      return <InfoPanel />;
+            case 'categories':        return <CategoriesPanel />;
+            case 'diagnostic-config': return <DiagnosticConfigPanel />;
+            case 'settings':          return <SettingsPanel user={user} />;
+            default:                  return <UsersPanel />;
         }
     };
 

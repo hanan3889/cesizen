@@ -1,17 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { evenementService, diagnosticService } from '@/services/api';
+import { evenementService, diagnosticService, diagnosticConfigService } from '@/services/api';
 import '../../../css/diagnostic.css';
 
 /* ── Helpers ─────────────────────────────────────────────────── */
 const NIVEAU_KEY   = (score) => score >= 300 ? 'eleve' : score >= 150 ? 'modere' : 'faible';
 const NIVEAU_LABEL = { faible: 'Faible', modere: 'Modéré', eleve: 'Élevé' };
-const RECOMMANDATIONS = {
-    faible: 'Votre niveau de stress est faible. Continuez à prendre soin de vous avec une activité physique régulière et un sommeil de qualité.',
-    modere: 'Votre niveau de stress est modéré. Pensez à pratiquer des techniques de relaxation (méditation, respiration profonde) et à parler de vos préoccupations à un proche.',
-    eleve:  'Votre niveau de stress est élevé. Il est conseillé de consulter un professionnel de santé et de mettre en place des stratégies de gestion du stress adaptées.',
-};
 const SESSION_KEY = 'cesizen_pending_diagnostic';
 
 /* ── Écran de résultats ──────────────────────────────────────── */
@@ -129,23 +124,35 @@ const DiagnosticQuestionnaire = () => {
     const { isAuthenticated } = useAuth();
     const navigate = useNavigate();
 
-    const [evenements, setEvenements]   = useState([]);
-    const [selected, setSelected]       = useState(new Set());
-    const [loading, setLoading]         = useState(true);
-    const [error, setError]             = useState(null);
-    const [step, setStep]               = useState('form');
-    const [localResult, setLocalResult] = useState(null);
-    const [savedId, setSavedId]         = useState(null);
-    const [saving, setSaving]           = useState(false);
-    const [deleting, setDeleting]       = useState(false);
-    const [hasPending, setHasPending]   = useState(false);
+    const [evenements, setEvenements]       = useState([]);
+    const [recommandations, setRecommandations] = useState({});
+    const [selected, setSelected]           = useState(new Set());
+    const [loading, setLoading]             = useState(true);
+    const [error, setError]                 = useState(null);
+    const [step, setStep]                   = useState('form');
+    const [localResult, setLocalResult]     = useState(null);
+    const [savedId, setSavedId]             = useState(null);
+    const [saving, setSaving]               = useState(false);
+    const [deleting, setDeleting]           = useState(false);
+    const [hasPending, setHasPending]       = useState(false);
 
     useEffect(() => {
         document.title = 'Questionnaire Holmes & Rahe — CesiZen';
-        evenementService.getAll()
-            .then(res => {
-                const evts = res.data.evenements || [];
+
+        Promise.all([
+            evenementService.getAll(),
+            diagnosticConfigService.getAll(),
+        ])
+            .then(([evtRes, cfgRes]) => {
+                const evts = evtRes.data.evenements || [];
+                const cfg  = cfgRes.data?.config ?? {};
+                const reco = {
+                    faible: cfg.faible?.message || 'Votre niveau de stress est faible.',
+                    modere: cfg.modere?.message || 'Votre niveau de stress est modéré.',
+                    eleve:  cfg.eleve?.message  || 'Votre niveau de stress est élevé.',
+                };
                 setEvenements(evts);
+                setRecommandations(reco);
 
                 if (isAuthenticated) {
                     const raw = sessionStorage.getItem(SESSION_KEY);
@@ -158,7 +165,7 @@ const DiagnosticQuestionnaire = () => {
                             setHasPending(true);
                             const sc = evts.filter(e => ids.has(e.id)).reduce((s, e) => s + e.points, 0);
                             const k  = NIVEAU_KEY(sc);
-                            setLocalResult({ score: sc, niveau_stress: NIVEAU_LABEL[k], recommandation: RECOMMANDATIONS[k], nombre_evenements: ids.size });
+                            setLocalResult({ score: sc, niveau_stress: NIVEAU_LABEL[k], recommandation: reco[k], nombre_evenements: ids.size });
                             setStep('results');
                         } catch { sessionStorage.removeItem(SESSION_KEY); }
                     }
@@ -179,7 +186,7 @@ const DiagnosticQuestionnaire = () => {
 
     const handleCalculate = () => {
         const k = NIVEAU_KEY(score);
-        setLocalResult({ score, niveau_stress: NIVEAU_LABEL[k], recommandation: RECOMMANDATIONS[k], nombre_evenements: selected.size });
+        setLocalResult({ score, niveau_stress: NIVEAU_LABEL[k], recommandation: recommandations[k], nombre_evenements: selected.size });
         setError(null);
         setStep('results');
     };
