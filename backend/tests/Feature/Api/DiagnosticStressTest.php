@@ -181,4 +181,70 @@ class DiagnosticStressTest extends TestCase
                      ]
                  ]);
     }
+
+    // --- 422 Validation Tests ---
+
+    public function test_store_fails_with_empty_events_array()
+    {
+        $response = $this->actingAs($this->user)->postJson('/api/v1/diagnostics', [
+            'evenements' => [],
+        ]);
+        $response->assertStatus(422)->assertJsonValidationErrors('evenements');
+    }
+
+    public function test_store_fails_with_missing_events_field()
+    {
+        $response = $this->actingAs($this->user)->postJson('/api/v1/diagnostics', []);
+        $response->assertStatus(422)->assertJsonValidationErrors('evenements');
+    }
+
+    public function test_update_fails_with_empty_events_array()
+    {
+        $diagnostic = DiagnosticStress::factory()->create(['utilisateur_id' => $this->user->id]);
+
+        $response = $this->actingAs($this->user)->putJson("/api/v1/diagnostics/{$diagnostic->id}", [
+            'evenements' => [],
+        ]);
+        $response->assertStatus(422)->assertJsonValidationErrors('evenements');
+    }
+
+    // --- History (GET /diagnostics) ---
+
+    public function test_diagnostics_history_is_paginated()
+    {
+        DiagnosticStress::factory()->count(12)->create(['utilisateur_id' => $this->user->id]);
+
+        $response = $this->actingAs($this->user)->getJson('/api/v1/diagnostics');
+
+        $response->assertStatus(200)
+                 ->assertJsonStructure(['data', 'current_page', 'per_page', 'total']);
+    }
+
+    public function test_diagnostics_history_only_returns_own_diagnostics()
+    {
+        DiagnosticStress::factory()->count(3)->create(['utilisateur_id' => $this->user->id]);
+        DiagnosticStress::factory()->count(5)->create(['utilisateur_id' => $this->otherUser->id]);
+
+        $response = $this->actingAs($this->user)->getJson('/api/v1/diagnostics');
+
+        $response->assertStatus(200);
+        $this->assertEquals(3, $response->json('total'));
+    }
+
+    public function test_diagnostics_history_ordered_by_date_desc()
+    {
+        $old = DiagnosticStress::factory()->create([
+            'utilisateur_id' => $this->user->id,
+            'date'           => now()->subDays(10),
+        ]);
+        $recent = DiagnosticStress::factory()->create([
+            'utilisateur_id' => $this->user->id,
+            'date'           => now()->subDay(),
+        ]);
+
+        $response = $this->actingAs($this->user)->getJson('/api/v1/diagnostics');
+
+        $response->assertStatus(200);
+        $this->assertEquals($recent->id, $response->json('data.0.id'));
+    }
 }

@@ -132,5 +132,112 @@ class UserControllerTest extends TestCase
                      ]
                  ]);
     }
+
+    // --- 404 Tests ---
+
+    public function test_admin_gets_404_for_non_existent_user()
+    {
+        $this->actingAs($this->admin)->getJson('/api/v1/users/99999')->assertStatus(404);
+    }
+
+    public function test_admin_gets_404_when_updating_non_existent_user()
+    {
+        $this->actingAs($this->admin)
+             ->putJson('/api/v1/users/99999', ['name' => 'Ghost'])
+             ->assertStatus(404);
+    }
+
+    public function test_admin_gets_404_when_deleting_non_existent_user()
+    {
+        $this->actingAs($this->admin)->deleteJson('/api/v1/users/99999')->assertStatus(404);
+    }
+
+    // --- Validation 422 Tests ---
+
+    public function test_create_user_fails_with_missing_fields()
+    {
+        $this->actingAs($this->admin)->postJson('/api/v1/users', [])
+             ->assertStatus(422)
+             ->assertJsonValidationErrors(['name', 'email', 'password', 'role']);
+    }
+
+    public function test_create_user_fails_with_invalid_role()
+    {
+        $this->actingAs($this->admin)->postJson('/api/v1/users', [
+            'name'                  => 'Test',
+            'email'                 => 'test@example.com',
+            'password'              => 'password123',
+            'password_confirmation' => 'password123',
+            'role'                  => 'superadmin',
+        ])->assertStatus(422)->assertJsonValidationErrors('role');
+    }
+
+    public function test_create_user_fails_with_duplicate_email()
+    {
+        $this->actingAs($this->admin)->postJson('/api/v1/users', [
+            'name'                  => 'Test',
+            'email'                 => $this->user->email,
+            'password'              => 'password123',
+            'password_confirmation' => 'password123',
+            'role'                  => 'utilisateur',
+        ])->assertStatus(422)->assertJsonValidationErrors('email');
+    }
+
+    // --- Toggle Active ---
+
+    public function test_guest_cannot_toggle_active()
+    {
+        $this->patchJson("/api/v1/users/{$this->user->id}/toggle-active")->assertStatus(401);
+    }
+
+    public function test_non_admin_cannot_toggle_active()
+    {
+        $this->actingAs($this->user)
+             ->patchJson("/api/v1/users/{$this->admin->id}/toggle-active")
+             ->assertStatus(403);
+    }
+
+    public function test_admin_can_deactivate_a_user()
+    {
+        $this->user->update(['is_active' => true]);
+
+        $response = $this->actingAs($this->admin)
+                         ->patchJson("/api/v1/users/{$this->user->id}/toggle-active");
+
+        $response->assertStatus(200);
+        $this->assertDatabaseHas('users', ['id' => $this->user->id, 'is_active' => false]);
+    }
+
+    public function test_admin_can_reactivate_a_deactivated_user()
+    {
+        $this->user->update(['is_active' => false]);
+
+        $response = $this->actingAs($this->admin)
+                         ->patchJson("/api/v1/users/{$this->user->id}/toggle-active");
+
+        $response->assertStatus(200);
+        $this->assertDatabaseHas('users', ['id' => $this->user->id, 'is_active' => true]);
+    }
+
+    public function test_admin_can_change_user_role_to_admin()
+    {
+        $response = $this->actingAs($this->admin)
+                         ->putJson("/api/v1/users/{$this->user->id}", ['role' => 'administrateur']);
+
+        $response->assertStatus(200)
+                 ->assertJsonPath('user.role', 'administrateur');
+        $this->assertDatabaseHas('users', ['id' => $this->user->id, 'role' => 'administrateur']);
+    }
+
+    public function test_admin_can_change_user_role_to_utilisateur()
+    {
+        $otherAdmin = User::factory()->admin()->create();
+
+        $response = $this->actingAs($this->admin)
+                         ->putJson("/api/v1/users/{$otherAdmin->id}", ['role' => 'utilisateur']);
+
+        $response->assertStatus(200)
+                 ->assertJsonPath('user.role', 'utilisateur');
+    }
 }
 
