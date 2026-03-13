@@ -27,7 +27,7 @@ const Informations = () => {
     useEffect(() => {
         const fetchArticles = async () => {
             try {
-                const response = await pageService.getAll();
+                const response = await pageService.getAll({ statut: 'publie' });
                 setArticles(response.data.data);
             } catch (err) {
                 setError('Impossible de charger les articles. Veuillez réessayer plus tard.');
