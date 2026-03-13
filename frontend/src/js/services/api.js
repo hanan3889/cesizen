@@ -45,6 +45,8 @@ export const authService = {
     updateProfile: (data) => api.put('/profile', data),
     changePassword: (data) => api.put('/password', data),
     resetPasswordComplete: (data) => api.post('/reset-password', data),
+    exportData: () => api.get('/me/export'),
+    deleteAccount: (data) => api.delete('/me', { data }),
 };
 
 // Diagnostics

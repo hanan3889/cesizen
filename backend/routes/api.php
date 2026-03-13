@@ -30,6 +30,8 @@ Route::prefix('v1')->group(function () {
         Route::get('/me', [AuthController::class, 'me']);
         Route::put('/profile', [AuthController::class, 'updateProfile']);
         Route::put('/password', [AuthController::class, 'changePassword']);
+        Route::get('/me/export', [AuthController::class, 'exportData']);
+        Route::delete('/me', [AuthController::class, 'deleteAccount']);
 
         // Routes utilisateur authentifié (diagnostic)
         Route::get('diagnostics/statistiques', [DiagnosticStressController::class, 'statistiques']);
