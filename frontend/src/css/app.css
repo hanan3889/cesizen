@@ -45,6 +45,154 @@
 }
 
 /* ════════════════════════════════════════════════════════
+   BOUTON THÈME SOMBRE / CLAIR
+════════════════════════════════════════════════════════ */
+.theme-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+    border: 2px solid #d1d5db;
+    color: #6b7280;
+    background: transparent;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s, background 0.2s;
+}
+.theme-toggle:hover {
+    border-color: #4CAF50;
+    color: #4CAF50;
+}
+.theme-toggle:focus-visible {
+    outline: 3px solid #4CAF50;
+    outline-offset: 3px;
+}
+
+/* ════════════════════════════════════════════════════════
+   THÈME SOMBRE — html.dark
+════════════════════════════════════════════════════════ */
+
+/* Base */
+html.dark body {
+    @apply bg-black text-gray-100;
+}
+
+/* Navbar */
+html.dark .navbar {
+    @apply bg-gray-900 shadow-gray-900;
+    border-bottom: 1px solid #374151;
+}
+html.dark .navbar a,
+html.dark .navbar span {
+    @apply text-gray-200;
+}
+html.dark .navbar a:hover {
+    @apply text-cesizen-green;
+}
+html.dark .theme-toggle {
+    border-color: #4b5563;
+    color: #d1d5db;
+}
+html.dark .theme-toggle:hover {
+    border-color: #4CAF50;
+    color: #4CAF50;
+}
+
+/* Composants */
+html.dark .card {
+    @apply bg-gray-900 shadow-gray-900;
+    border: 1px solid #374151;
+}
+html.dark .card:hover {
+    @apply shadow-gray-900;
+}
+html.dark .input-field {
+    @apply bg-gray-800 border-gray-600 text-gray-100 placeholder-gray-400;
+}
+html.dark .btn-outline {
+    @apply border-cesizen-green text-cesizen-green;
+}
+html.dark .btn-outline:hover {
+    @apply bg-cesizen-green text-white;
+}
+
+/* Fonds de sections */
+html.dark .bg-white     { background-color: #111827 !important; }
+html.dark .bg-gray-50   { background-color: #000000 !important; }
+html.dark .bg-gray-100  { background-color: #111827 !important; }
+
+/* Texte */
+html.dark .text-gray-900 { color: #f3f4f6 !important; }
+html.dark .text-gray-800 { color: #e5e7eb !important; }
+html.dark .text-gray-700 { color: #d1d5db !important; }
+html.dark .text-gray-600 { color: #f3f4f6 !important; }
+html.dark .text-gray-500 { color: #e5e7eb !important; }
+
+/* Exception hero : texte sombre sur fond dégradé clair */
+html.dark .from-green-50 h1,
+html.dark .from-green-50 h1.text-gray-900 { color: #111827 !important; }
+html.dark .from-green-50 .text-gray-600,
+html.dark .from-green-50 p.text-gray-600 { color: #374151 !important; }
+
+/* Bordures */
+html.dark .border-gray-200 { border-color: #374151 !important; }
+html.dark .border-gray-300 { border-color: #4b5563 !important; }
+
+/* Ombres */
+html.dark .shadow-md,
+html.dark .shadow-lg {
+    --tw-shadow-color: rgba(0, 0, 0, 0.5);
+}
+
+/* Footer */
+html.dark footer {
+    @apply bg-gray-900;
+    border-top: 1px solid #374151;
+}
+html.dark footer p,
+html.dark footer a {
+    color: #e5e7eb !important;
+}
+
+/* Formulaires */
+html.dark input[type="text"],
+html.dark input[type="email"],
+html.dark input[type="password"],
+html.dark select,
+html.dark textarea {
+    @apply bg-gray-800 border-gray-600 text-gray-100 placeholder-gray-400;
+}
+html.dark input[type="text"]:focus,
+html.dark input[type="email"]:focus,
+html.dark input[type="password"]:focus,
+html.dark select:focus,
+html.dark textarea:focus {
+    @apply ring-cesizen-green border-cesizen-green;
+}
+
+/* Panneau accessibilité en mode sombre */
+html.dark .a11y-panel {
+    @apply bg-gray-900 border-gray-700;
+}
+html.dark .a11y-panel-title {
+    @apply text-gray-400;
+}
+html.dark .a11y-option {
+    @apply text-gray-200;
+}
+html.dark .a11y-option:hover {
+    @apply bg-gray-800;
+}
+html.dark .a11y-reset {
+    @apply border-gray-600 text-gray-400;
+}
+html.dark .a11y-trigger {
+    border-color: #4CAF50;
+    color: #4CAF50;
+}
+
+/* ════════════════════════════════════════════════════════
    RGAA 
 ════════════════════════════════════════════════════════ */
 .skip-link {
@@ -83,7 +231,7 @@
     height: 2.25rem;
     border-radius: 50%;
     border: 2px solid #4CAF50;
-    color: #4CAF50;
+    color: #000;
     background: transparent;
     cursor: pointer;
     transition: background 0.2s, color 0.2s;
@@ -214,29 +362,250 @@ html.a11y-large-text {
 }
 
 /* Contraste élevé */
+
+/* Base : tout le texte en blanc sur noir */
 html.a11y-high-contrast,
 html.a11y-high-contrast body {
     background-color: #000 !important;
     color: #fff !important;
 }
+
+/* Tous les titres */
+html.a11y-high-contrast h1,
+html.a11y-high-contrast h2,
+html.a11y-high-contrast h3,
+html.a11y-high-contrast h4,
+html.a11y-high-contrast h5,
+html.a11y-high-contrast h6 {
+    color: #fff !important;
+}
+
+/* Tous les textes Tailwind → blanc */
+html.a11y-high-contrast [class*="text-gray-"],
+html.a11y-high-contrast [class*="text-slate-"],
+html.a11y-high-contrast [class*="text-zinc-"],
+html.a11y-high-contrast [class*="text-neutral-"],
+html.a11y-high-contrast [class*="text-stone-"],
+html.a11y-high-contrast [class*="text-green-"],
+html.a11y-high-contrast [class*="text-yellow-"],
+html.a11y-high-contrast [class*="text-blue-"],
+html.a11y-high-contrast [class*="text-red-"],
+html.a11y-high-contrast [class*="text-sky-"],
+html.a11y-high-contrast [class*="text-indigo-"],
+html.a11y-high-contrast [class*="text-purple-"],
+html.a11y-high-contrast [class*="text-pink-"],
+html.a11y-high-contrast [class*="text-orange-"],
+html.a11y-high-contrast [class*="text-teal-"],
+html.a11y-high-contrast [class*="text-emerald-"],
+html.a11y-high-contrast [class*="text-cyan-"],
+html.a11y-high-contrast [class*="text-rose-"],
+html.a11y-high-contrast [class*="text-violet-"],
+html.a11y-high-contrast .text-white {
+    color: #fff !important;
+}
+
+/* Liens en jaune pour les distinguer */
+html.a11y-high-contrast a {
+    color: #ffff00 !important;
+}
+/* Boutons génériques en jaune, SAUF les boutons à fond coloré (texte doit rester noir ou blanc) */
+html.a11y-high-contrast button:not(.a11y-trigger):not(.a11y-reset):not(.theme-toggle):not(.btn-primary):not(.btn-outline):not([class*="btn-primary"]):not([class*="btn-outline"]):not([class*="diag-btn"]):not([class*="diag-cta"]):not([class*="admin-btn"]):not([class*="admin-confirm"]):not([class*="admin-modal"]):not([class*="admin-page"]):not([class*="admin-logout"]) {
+    color: #ffff00 !important;
+}
+
+/* Bouton accessibilité */
+html.a11y-high-contrast .a11y-trigger {
+    color: #fff !important;
+    border-color: #fff !important;
+    background: #000 !important;
+}
+html.a11y-high-contrast .a11y-trigger:hover,
+html.a11y-high-contrast .a11y-trigger--active {
+    background: #ffff00 !important;
+    color: #000 !important;
+    border-color: #ffff00 !important;
+}
+
+/* Tous les fonds clairs → noir */
+html.a11y-high-contrast [class*="bg-white"],
+html.a11y-high-contrast [class*="bg-gray-"],
+html.a11y-high-contrast [class*="bg-slate-"],
+html.a11y-high-contrast [class*="bg-green-"],
+html.a11y-high-contrast [class*="bg-yellow-"],
+html.a11y-high-contrast [class*="bg-blue-"],
+html.a11y-high-contrast [class*="bg-red-"],
+html.a11y-high-contrast [class*="bg-sky-"],
+html.a11y-high-contrast [class*="bg-indigo-"],
+html.a11y-high-contrast [class*="bg-purple-"],
+html.a11y-high-contrast [class*="bg-pink-"],
+html.a11y-high-contrast [class*="bg-orange-"],
+html.a11y-high-contrast [class*="bg-teal-"],
+html.a11y-high-contrast [class*="bg-emerald-"],
+html.a11y-high-contrast [class*="bg-cyan-"],
+html.a11y-high-contrast [class*="bg-rose-"],
+html.a11y-high-contrast [class*="bg-violet-"],
+html.a11y-high-contrast [class*="bg-gradient-"] {
+    background-color: #000 !important;
+    background-image: none !important;
+    border: 1px solid #555 !important;
+}
+
+/* Sections de page */
+html.a11y-high-contrast section,
+html.a11y-high-contrast main,
+html.a11y-high-contrast .card,
+html.a11y-high-contrast .bg-white,
+html.a11y-high-contrast .bg-gray-50,
+html.a11y-high-contrast .bg-gray-100 {
+    background-color: #000 !important;
+    border: 1px solid #fff !important;
+}
+
+/* Navbar */
 html.a11y-high-contrast .navbar {
     background-color: #111 !important;
     border-bottom: 2px solid #fff !important;
 }
-html.a11y-high-contrast a,
-html.a11y-high-contrast button:not(.a11y-trigger):not(.a11y-reset) {
+html.a11y-high-contrast .navbar a,
+html.a11y-high-contrast .navbar span:not(.a11y-badge) {
+    color: #fff !important;
+}
+html.a11y-high-contrast .navbar a:hover {
     color: #ffff00 !important;
 }
+
+/* Boutons d'action : fond jaune, texte NOIR lisible */
 html.a11y-high-contrast .btn-primary,
-html.a11y-high-contrast .btn-outline {
+html.a11y-high-contrast .btn-outline,
+html.a11y-high-contrast a.btn-primary,
+html.a11y-high-contrast a.btn-outline {
     background-color: #ffff00 !important;
     color: #000 !important;
-    border-color: #ffff00 !important;
+    border: 2px solid #ffff00 !important;
 }
-html.a11y-high-contrast .card,
-html.a11y-high-contrast .bg-white {
+
+/* Inputs / selects / textareas */
+html.a11y-high-contrast input,
+html.a11y-high-contrast select,
+html.a11y-high-contrast textarea {
+    background-color: #000 !important;
+    color: #fff !important;
+    border: 2px solid #fff !important;
+}
+html.a11y-high-contrast input::placeholder,
+html.a11y-high-contrast textarea::placeholder {
+    color: #aaa !important;
+}
+
+/* Tableaux (dashboard utilisateurs) */
+html.a11y-high-contrast table,
+html.a11y-high-contrast thead,
+html.a11y-high-contrast tbody,
+html.a11y-high-contrast tr,
+html.a11y-high-contrast th,
+html.a11y-high-contrast td {
+    background-color: #000 !important;
+    color: #fff !important;
+    border-color: #fff !important;
+}
+html.a11y-high-contrast thead th {
     background-color: #111 !important;
+    color: #ffff00 !important;
+}
+
+/* Badges de statut */
+html.a11y-high-contrast [class*="badge"],
+html.a11y-high-contrast [class*="Badge"] {
+    background-color: #111 !important;
+    color: #ffff00 !important;
+    border: 1px solid #ffff00 !important;
+}
+
+/* Spans et paragraphes dans les cartes */
+html.a11y-high-contrast p,
+html.a11y-high-contrast span:not(.a11y-badge):not(.a11y-option-icon),
+html.a11y-high-contrast li,
+html.a11y-high-contrast td,
+html.a11y-high-contrast th,
+html.a11y-high-contrast label {
+    color: #fff !important;
+}
+
+/* Cartes statistiques dashboard : valeur chiffrée bien visible */
+html.a11y-high-contrast .text-2xl,
+html.a11y-high-contrast .text-3xl,
+html.a11y-high-contrast .text-4xl {
+    color: #ffff00 !important;
+}
+
+/* Bannière CTA gradient */
+html.a11y-high-contrast [class*="from-cesizen"],
+html.a11y-high-contrast [class*="to-cesizen"] {
+    background-color: #111 !important;
+    background-image: none !important;
+    border: 2px solid #fff !important;
+}
+
+/* Bouton "Faire un test" dans la bannière CTA */
+html.a11y-high-contrast [class*="bg-white"][class*="text-cesizen"] {
+    background-color: #ffff00 !important;
+    color: #000 !important;
+    border: 2px solid #ffff00 !important;
+}
+
+/* Badge rôle utilisateur / admin (bg-sky-100, bg-green-100…) */
+html.a11y-high-contrast [class*="rounded-full"][class*="bg-sky-"],
+html.a11y-high-contrast [class*="rounded-full"][class*="bg-green-"],
+html.a11y-high-contrast [class*="rounded-full"][class*="bg-red-"],
+html.a11y-high-contrast [class*="rounded-full"][class*="bg-blue-"],
+html.a11y-high-contrast [class*="rounded-full"][class*="bg-yellow-"] {
+    background-color: #111 !important;
+    color: #ffff00 !important;
+    border: 1px solid #ffff00 !important;
+}
+
+/* Zone danger : bordure rouge → blanche */
+html.a11y-high-contrast [class*="border-red-"] {
+    border-color: #fff !important;
+}
+
+/* Sidebar admin / dashboard */
+html.a11y-high-contrast .admin-sidebar,
+html.a11y-high-contrast .admin-layout {
+    background-color: #111 !important;
+}
+html.a11y-high-contrast .admin-nav-item,
+html.a11y-high-contrast .admin-nav-item--idle,
+html.a11y-high-contrast .admin-nav-item--active {
+    color: #fff !important;
+    background-color: transparent !important;
+}
+html.a11y-high-contrast .admin-nav-item--active {
+    background-color: #222 !important;
+    border-left: 3px solid #ffff00 !important;
+}
+html.a11y-high-contrast .admin-sidebar-user-name,
+html.a11y-high-contrast .admin-sidebar-user-email,
+html.a11y-high-contrast .admin-sidebar-user-label {
+    color: #fff !important;
+}
+
+/* Footer */
+html.a11y-high-contrast footer {
+    background-color: #111 !important;
+    border-top: 2px solid #fff !important;
+}
+
+/* Cercles décoratifs et illustrations */
+html.a11y-high-contrast [class*="rounded-full"][class*="bg-"] {
+    background-color: #333 !important;
     border: 1px solid #fff !important;
+}
+
+/* SVG icons */
+html.a11y-high-contrast svg:not([class*="a11y"]) {
+    color: #fff !important;
+    stroke: #fff !important;
 }
 
 /* Souligner les liens */

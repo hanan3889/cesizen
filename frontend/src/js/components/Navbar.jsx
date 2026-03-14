@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import AppLogo from './app-logo';
 import AccessibilityMenu from './AccessibilityMenu';
+import ThemeToggle from './ThemeToggle';
 
 const Navbar = () => {
     const { user, isAuthenticated, isAdmin, logout } = useAuth();
@@ -71,8 +72,9 @@ const Navbar = () => {
                         )}
                     </div>
 
-                    {/* Bouton accessibilité + Burger Mobile */}
+                    {/* Thème + Accessibilité + Burger Mobile */}
                     <div className="flex items-center gap-3">
+                        <ThemeToggle />
                         <AccessibilityMenu />
 
                     <button
