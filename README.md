@@ -50,6 +50,7 @@ Le frontend communique exclusivement avec le backend via l'API REST prefixée `/
 
 ## Technologies
 
+
 | Couche | Technologie | Version |
 |--------|-------------|---------|
 | Backend | Laravel | `12.x` |
