@@ -239,3 +239,200 @@
     @apply w-8 h-8 border-2 border-green-600 border-t-transparent
            rounded-full animate-spin mx-auto mb-3;
 }
+
+/* ════════════════════════════════════════════════════════
+   RGAA — CONTRASTE ÉLEVÉ
+════════════════════════════════════════════════════════ */
+
+/* Fond général */
+html.a11y-high-contrast .diag-page,
+html.a11y-high-contrast .diag-loading-screen {
+    background-color: #000 !important;
+}
+
+/* Toutes les cards blanches */
+html.a11y-high-contrast .diag-card,
+html.a11y-high-contrast .diag-form-header,
+html.a11y-high-contrast .diag-events-card,
+html.a11y-high-contrast .diag-score-card,
+html.a11y-high-contrast .diag-result-body {
+    background-color: #000 !important;
+    border: 1px solid #fff !important;
+}
+
+/* Titres et textes */
+html.a11y-high-contrast .diag-form-title,
+html.a11y-high-contrast .diag-form-subtitle,
+html.a11y-high-contrast .diag-score-label,
+html.a11y-high-contrast .diag-score-value,
+html.a11y-high-contrast .diag-score-unit,
+html.a11y-high-contrast .diag-score-count,
+html.a11y-high-contrast .diag-result-count,
+html.a11y-high-contrast .diag-back-link {
+    color: #fff !important;
+}
+
+/* Événements — nom et ligne */
+html.a11y-high-contrast .diag-event-row {
+    background-color: #000 !important;
+    border-top-color: #333 !important;
+}
+html.a11y-high-contrast .diag-event-row--selected {
+    background-color: #1a1a00 !important;
+    border-left: 3px solid #ffff00 !important;
+}
+html.a11y-high-contrast .diag-event-name {
+    color: #fff !important;
+}
+
+/* Points des événements : tous en jaune vif */
+html.a11y-high-contrast .diag-event-pts,
+html.a11y-high-contrast .diag-event-pts--high,
+html.a11y-high-contrast .diag-event-pts--medium,
+html.a11y-high-contrast .diag-event-pts--low {
+    color: #ffff00 !important;
+}
+
+/* Badge niveau */
+html.a11y-high-contrast .diag-badge,
+html.a11y-high-contrast .diag-badge--faible,
+html.a11y-high-contrast .diag-badge--modere,
+html.a11y-high-contrast .diag-badge--eleve {
+    background-color: #111 !important;
+    color: #ffff00 !important;
+    border: 1px solid #ffff00 !important;
+}
+
+/* Bandeaux (guest, pending, error) */
+html.a11y-high-contrast .diag-notice,
+html.a11y-high-contrast .diag-notice--guest,
+html.a11y-high-contrast .diag-notice--pending,
+html.a11y-high-contrast .diag-notice--error {
+    background-color: #111 !important;
+    border: 1px solid #fff !important;
+    color: #fff !important;
+}
+
+/* Section CTA "Calculer" */
+html.a11y-high-contrast .diag-cta-top,
+html.a11y-high-contrast .diag-cta-footer {
+    background-color: #111 !important;
+    border: 1px solid #fff !important;
+}
+html.a11y-high-contrast .diag-cta-btn,
+html.a11y-high-contrast .diag-cta-section .diag-cta-btn,
+html.a11y-high-contrast button.diag-cta-btn {
+    background-color: #ffff00 !important;
+    color: #000 !important;
+    border: none !important;
+}
+html.a11y-high-contrast .diag-cta-hint,
+html.a11y-high-contrast .diag-cta-cancel {
+    color: #fff !important;
+}
+
+/* Résultats — en-tête coloré */
+html.a11y-high-contrast .diag-result-header,
+html.a11y-high-contrast .diag-result-header--faible,
+html.a11y-high-contrast .diag-result-header--modere,
+html.a11y-high-contrast .diag-result-header--eleve {
+    background-color: #111 !important;
+    border-bottom: 2px solid #fff !important;
+}
+html.a11y-high-contrast .diag-result-header-label,
+html.a11y-high-contrast .diag-result-header-label--faible,
+html.a11y-high-contrast .diag-result-header-label--modere,
+html.a11y-high-contrast .diag-result-header-label--eleve,
+html.a11y-high-contrast .diag-result-score,
+html.a11y-high-contrast .diag-result-unit,
+html.a11y-high-contrast .diag-result-pill-text {
+    color: #fff !important;
+    opacity: 1 !important;
+}
+html.a11y-high-contrast .diag-result-pill {
+    background-color: #333 !important;
+    border: 1px solid #fff !important;
+}
+
+/* Barre de progression */
+html.a11y-high-contrast .diag-progress-labels span {
+    color: #fff !important;
+}
+html.a11y-high-contrast .diag-progress-track,
+html.a11y-high-contrast .diag-progress-track--faible,
+html.a11y-high-contrast .diag-progress-track--modere,
+html.a11y-high-contrast .diag-progress-track--eleve {
+    background-color: #333 !important;
+    border: 1px solid #555 !important;
+}
+html.a11y-high-contrast .diag-progress-fill,
+html.a11y-high-contrast .diag-progress-fill--faible,
+html.a11y-high-contrast .diag-progress-fill--modere,
+html.a11y-high-contrast .diag-progress-fill--eleve {
+    background-color: #ffff00 !important;
+}
+
+/* Bloc recommandation */
+html.a11y-high-contrast .diag-reco,
+html.a11y-high-contrast .diag-reco--faible,
+html.a11y-high-contrast .diag-reco--modere,
+html.a11y-high-contrast .diag-reco--eleve {
+    background-color: #111 !important;
+    border: 1px solid #fff !important;
+}
+html.a11y-high-contrast .diag-reco-text {
+    color: #fff !important;
+}
+
+/* Disclaimer */
+html.a11y-high-contrast .diag-disclaimer {
+    background-color: #111 !important;
+    border: 1px solid #fff !important;
+}
+html.a11y-high-contrast .diag-disclaimer-text {
+    color: #fff !important;
+}
+
+/* Erreur */
+html.a11y-high-contrast .diag-error-box {
+    background-color: #111 !important;
+    border: 1px solid #ff6666 !important;
+    color: #ff6666 !important;
+}
+
+/* Bannière "sauvegardé" */
+html.a11y-high-contrast .diag-saved-banner {
+    background-color: #111 !important;
+    border: 1px solid #fff !important;
+    color: #fff !important;
+}
+
+/* Boutons résultats — spécificité renforcée pour battre la règle button générique */
+html.a11y-high-contrast .diag-actions .diag-btn--primary,
+html.a11y-high-contrast .diag-actions-2col .diag-btn--primary,
+html.a11y-high-contrast button.diag-btn.diag-btn--primary {
+    background-color: #ffff00 !important;
+    color: #000 !important;
+    border: none !important;
+}
+html.a11y-high-contrast .diag-actions .diag-btn--secondary,
+html.a11y-high-contrast .diag-actions .diag-btn--outline,
+html.a11y-high-contrast .diag-actions .diag-btn--danger,
+html.a11y-high-contrast .diag-actions-2col .diag-btn--secondary,
+html.a11y-high-contrast .diag-actions-2col .diag-btn--outline,
+html.a11y-high-contrast .diag-actions-2col .diag-btn--danger,
+html.a11y-high-contrast button.diag-btn.diag-btn--secondary,
+html.a11y-high-contrast button.diag-btn.diag-btn--outline,
+html.a11y-high-contrast button.diag-btn.diag-btn--danger {
+    background-color: #000 !important;
+    color: #fff !important;
+    border: 1px solid #fff !important;
+}
+html.a11y-high-contrast .diag-btn--ghost {
+    color: #aaa !important;
+}
+
+/* Lien historique */
+html.a11y-high-contrast .diag-form-history-link {
+    color: #ffff00 !important;
+}
