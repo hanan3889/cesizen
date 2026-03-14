@@ -337,3 +337,292 @@
     @apply flex items-center gap-1 px-3 py-2 text-xs font-medium text-gray-500
            bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors;
 }
+
+/* ════════════════════════════════════════════════════════
+   THÈME SOMBRE — html.dark
+════════════════════════════════════════════════════════ */
+
+/* Layout */
+html.dark .admin-layout   { background-color: #000 !important; }
+html.dark .admin-content  { background-color: #000; }
+
+/* Titres et textes */
+html.dark .admin-panel-title { color: #f3f4f6 !important; }
+html.dark .admin-field-label { color: #d1d5db !important; }
+
+/* Tableau */
+html.dark .admin-table-wrap  { background-color: #111827 !important; border: 1px solid #374151; }
+html.dark .admin-thead        { background-color: #1f2937 !important; }
+html.dark .admin-tbody        { border-color: #374151; }
+html.dark .admin-tr           { border-color: #374151; }
+html.dark .admin-tr:hover     { background-color: #1f2937 !important; }
+html.dark .admin-th           { color: #9ca3af !important; border-color: #374151; }
+html.dark .admin-td           { color: #d1d5db !important; }
+html.dark .admin-td--bold     { color: #f3f4f6 !important; }
+html.dark .admin-td--title    { color: #f3f4f6 !important; }
+html.dark .admin-table        { --tw-divide-color: #374151; border-color: #374151; }
+
+/* Modales */
+html.dark .admin-modal,
+html.dark .admin-modal--sm,
+html.dark .admin-modal--lg   { background-color: #1f2937 !important; border: 1px solid #374151; }
+html.dark .admin-modal-header { border-color: #374151 !important; background-color: #111827; }
+html.dark .admin-modal-title  { color: #f3f4f6 !important; }
+html.dark .admin-modal-close  { color: #9ca3af !important; }
+html.dark .admin-modal-btn-cancel { background-color: #374151 !important; color: #d1d5db !important; }
+
+/* Confirmation */
+html.dark .admin-confirm-box      { background-color: #1f2937 !important; border: 1px solid #374151; }
+html.dark .admin-confirm-title    { color: #f3f4f6 !important; }
+html.dark .admin-confirm-message  { color: #d1d5db !important; }
+html.dark .admin-confirm-btn-cancel { background-color: #374151 !important; color: #d1d5db !important; }
+
+/* Formulaires */
+html.dark .admin-input,
+html.dark .admin-textarea {
+    background-color: #111827 !important;
+    border-color: #4b5563 !important;
+    color: #f3f4f6 !important;
+}
+html.dark .admin-input::placeholder,
+html.dark .admin-textarea::placeholder { color: #6b7280 !important; }
+
+/* Barre de recherche / filtres */
+html.dark .admin-search-input,
+html.dark .admin-filter-select {
+    background-color: #111827 !important;
+    border-color: #4b5563 !important;
+    color: #f3f4f6 !important;
+}
+html.dark .admin-filter-reset  { background-color: #374151 !important; color: #d1d5db !important; }
+html.dark .admin-search-count  { color: #9ca3af !important; }
+
+/* Pagination */
+html.dark .admin-page-btn--idle { background-color: #1f2937 !important; border-color: #4b5563 !important; color: #d1d5db !important; }
+
+/* État vide */
+html.dark .admin-empty       { background-color: #111827 !important; color: #9ca3af !important; border: 1px solid #374151; }
+
+/* Feedback */
+html.dark .admin-feedback--success { background-color: #052e16 !important; color: #bbf7d0 !important; border-color: #166534 !important; }
+html.dark .admin-feedback--error   { background-color: #450a0a !important; color: #fecaca !important; border-color: #991b1b !important; }
+html.dark .admin-error-banner      { background-color: #450a0a !important; color: #fecaca !important; border-color: #991b1b !important; }
+
+/* Cartes bg-white inline dans les panneaux */
+html.dark .admin-content .bg-white,
+html.dark .admin-content [class*="bg-white"] {
+    background-color: #111827 !important;
+    border-color: #374151;
+}
+
+/* Cartes stats colorées */
+html.dark .admin-content .bg-green-50,
+html.dark .admin-content .bg-yellow-50,
+html.dark .admin-content .bg-blue-50,
+html.dark .admin-content .bg-red-50 {
+    background-color: #1f2937 !important;
+    border-color: #374151 !important;
+}
+
+/* Textes inline dans les panneaux */
+html.dark .admin-content .text-gray-900 { color: #f3f4f6 !important; }
+html.dark .admin-content .text-gray-800 { color: #e5e7eb !important; }
+html.dark .admin-content .text-gray-700 { color: #d1d5db !important; }
+html.dark .admin-content .text-gray-600 { color: #f3f4f6 !important; }
+html.dark .admin-content .text-gray-500 { color: #e5e7eb !important; }
+html.dark .admin-content .text-gray-400 { color: #9ca3af !important; }
+html.dark .admin-content .border-gray-200 { border-color: #374151 !important; }
+html.dark .admin-content .border-gray-100 { border-color: #374151 !important; }
+html.dark .admin-content .divide-gray-200 > * + * { border-color: #374151 !important; }
+html.dark .admin-content .divide-gray-100 > * + * { border-color: #374151 !important; }
+
+/* Liste événements dans la modale édition */
+html.dark .admin-content .hover\:bg-gray-50:hover { background-color: #1f2937 !important; }
+html.dark .border-gray-200.rounded-lg             { border-color: #374151 !important; background-color: #111827; }
+html.dark .divide-gray-100 > * + *                { border-color: #374151 !important; }
+
+/* ════════════════════════════════════════════════════════
+   RGAA — CONTRASTE ÉLEVÉ
+════════════════════════════════════════════════════════ */
+
+/* Boutons primaires (fond coloré + texte blanc) → jaune/noir */
+html.a11y-high-contrast .admin-btn-primary,
+html.a11y-high-contrast .admin-btn-danger,
+html.a11y-high-contrast .admin-modal-btn-submit,
+html.a11y-high-contrast .admin-confirm-btn--success {
+    background-color: #ffff00 !important;
+    color: #000 !important;
+    border: 2px solid #ffff00 !important;
+}
+
+html.a11y-high-contrast .admin-confirm-btn--danger,
+html.a11y-high-contrast .admin-confirm-btn--warning {
+    background-color: #ff4444 !important;
+    color: #fff !important;
+    border: 2px solid #ff4444 !important;
+}
+
+/* Boutons secondaires / annulation → noir/blanc */
+html.a11y-high-contrast .admin-modal-btn-cancel,
+html.a11y-high-contrast .admin-confirm-btn-cancel {
+    background-color: #000 !important;
+    color: #fff !important;
+    border: 1px solid #fff !important;
+}
+
+/* Boutons d'action dans le tableau → fond noir, texte blanc, bordure blanche */
+html.a11y-high-contrast .admin-btn-action,
+html.a11y-high-contrast .admin-btn-action--edit,
+html.a11y-high-contrast .admin-btn-action--delete,
+html.a11y-high-contrast .admin-btn-action--warning,
+html.a11y-high-contrast .admin-btn-action--role,
+html.a11y-high-contrast .admin-btn-action--deactivate,
+html.a11y-high-contrast .admin-btn-action--activate {
+    background-color: #000 !important;
+    color: #fff !important;
+    border: 1px solid #fff !important;
+}
+
+/* Pagination */
+html.a11y-high-contrast .admin-page-btn--active {
+    background-color: #ffff00 !important;
+    color: #000 !important;
+    border-color: #ffff00 !important;
+}
+html.a11y-high-contrast .admin-page-btn--idle {
+    background-color: #000 !important;
+    color: #fff !important;
+    border-color: #fff !important;
+}
+
+/* Bouton déconnexion */
+html.a11y-high-contrast .admin-logout-btn {
+    color: #fff !important;
+    background-color: transparent !important;
+    border: 1px solid #fff !important;
+}
+
+/* Fermeture modale */
+html.a11y-high-contrast .admin-modal-close {
+    color: #fff !important;
+}
+
+/* Barre de recherche / filtre */
+html.a11y-high-contrast .admin-search-input,
+html.a11y-high-contrast .admin-filter-select {
+    background-color: #000 !important;
+    color: #fff !important;
+    border: 1px solid #fff !important;
+}
+html.a11y-high-contrast .admin-filter-reset {
+    background-color: #000 !important;
+    color: #fff !important;
+    border: 1px solid #fff !important;
+}
+
+/* Feedback / alertes */
+html.a11y-high-contrast .admin-feedback--success {
+    background-color: #111 !important;
+    color: #fff !important;
+    border: 1px solid #4CAF50 !important;
+}
+html.a11y-high-contrast .admin-feedback--error {
+    background-color: #111 !important;
+    color: #fff !important;
+    border: 1px solid #ff4444 !important;
+}
+
+/* Titres de panel et textes admin */
+html.a11y-high-contrast .admin-panel-title,
+html.a11y-high-contrast .admin-th,
+html.a11y-high-contrast .admin-td,
+html.a11y-high-contrast .admin-td--title,
+html.a11y-high-contrast .admin-td--bold,
+html.a11y-high-contrast .admin-empty-title,
+html.a11y-high-contrast .admin-empty-desc {
+    color: #fff !important;
+}
+
+html.a11y-high-contrast .admin-table-wrap,
+html.a11y-high-contrast .admin-table,
+html.a11y-high-contrast .admin-thead,
+html.a11y-high-contrast .admin-tbody,
+html.a11y-high-contrast .admin-tr {
+    background-color: #000 !important;
+    border-color: #333 !important;
+}
+html.a11y-high-contrast .admin-thead .admin-th {
+    background-color: #111 !important;
+    color: #ffff00 !important;
+    border-color: #555 !important;
+}
+html.a11y-high-contrast .admin-tr:hover {
+    background-color: #111 !important;
+}
+
+/* Modales / boîtes de confirmation */
+html.a11y-high-contrast .admin-modal,
+html.a11y-high-contrast .admin-modal--sm,
+html.a11y-high-contrast .admin-modal--lg,
+html.a11y-high-contrast .admin-confirm-box {
+    background-color: #000 !important;
+    border: 2px solid #fff !important;
+    color: #fff !important;
+}
+
+html.a11y-high-contrast .admin-modal-header {
+    background-color: #111 !important;
+    border-color: #555 !important;
+}
+
+html.a11y-high-contrast .admin-modal-title,
+html.a11y-high-contrast .admin-confirm-title {
+    color: #ffff00 !important;
+}
+
+html.a11y-high-contrast .admin-confirm-message {
+    color: #fff !important;
+}
+
+/* Bannière d'erreur (fond clair → fond noir, texte blanc) */
+html.a11y-high-contrast .admin-error-banner {
+    background-color: #111 !important;
+    color: #fff !important;
+    border: 1px solid #ff4444 !important;
+}
+
+/* État vide */
+html.a11y-high-contrast .admin-empty {
+    background-color: #000 !important;
+    border: 1px solid #fff !important;
+    color: #fff !important;
+}
+
+/* Conteneurs avec fond blanc dans les panneaux (paramètres, diagnostic config) */
+html.a11y-high-contrast .admin-content .bg-white,
+html.a11y-high-contrast .admin-content [class*="bg-white"] {
+    background-color: #000 !important;
+    border: 1px solid #555 !important;
+}
+
+/* Textes inline dans les panneaux Paramètres et DiagnosticConfig */
+html.a11y-high-contrast .admin-content .text-gray-900,
+html.a11y-high-contrast .admin-content .text-gray-800,
+html.a11y-high-contrast .admin-content .text-gray-700,
+html.a11y-high-contrast .admin-content .text-gray-600,
+html.a11y-high-contrast .admin-content .text-gray-500,
+html.a11y-high-contrast .admin-content .text-gray-400 {
+    color: #fff !important;
+}
+
+/* Badge Administrateur dans la carte profil */
+html.a11y-high-contrast .admin-content .bg-green-100 {
+    background-color: #111 !important;
+    color: #ffff00 !important;
+    border: 1px solid #ffff00 !important;
+}
+
+/* Boutons show/hide mot de passe dans Paramètres */
+html.a11y-high-contrast .admin-content button[class*="text-gray-"] {
+    color: #ffff00 !important;
+}

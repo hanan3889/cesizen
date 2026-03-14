@@ -1,8 +1,8 @@
-import { Activity, CalendarDays, Eye, EyeOff, FileText, KeyRound, LogOut, Pencil, Plus, Settings, ShieldCheck, Tag, Trash2, UserCheck, UserX, Users, X } from 'lucide-react';
+import { Activity, CalendarDays, ClipboardList, Eye, EyeOff, FileText, KeyRound, LogOut, Pencil, Plus, Settings, ShieldCheck, Tag, Trash2, UserCheck, UserX, Users, X } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import AppLogo from '@/components/app-logo';
 import { useAuth } from '../../contexts/AuthContext';
-import { authService, categorieService, diagnosticConfigService, evenementService, pageService, userService } from '../../services/api';
+import { authService, categorieService, diagnosticConfigService, diagnosticService, evenementService, pageService, userService } from '../../services/api';
 import '../../../css/admin.css';
 
 /* ─────────────────────────────────────────
@@ -1405,15 +1405,290 @@ const EvenementsPanel = () => {
 };
 
 /* ─────────────────────────────────────────
+   Panneau — Diagnostics de tous les utilisateurs (Admin)
+───────────────────────────────────────── */
+const NiveauBadgeAdmin = ({ niveau }) => {
+    const map = {
+        'Faible':  'admin-badge--publie',
+        'Modéré':  'admin-badge--brouillon',
+        'Élevé':   'admin-badge--archive',
+    };
+    return <span className={`admin-badge ${map[niveau] ?? 'admin-badge--brouillon'}`}>{niveau ?? '—'}</span>;
+};
+
+const EditDiagnosticAdminModal = ({ open, diagnostic, onSubmit, onClose, loading }) => {
+    const [allEvents, setAllEvents] = useState([]);
+    const [selected, setSelected] = useState(new Set());
+    const [date, setDate] = useState('');
+    const [eventsLoading, setEventsLoading] = useState(false);
+    const [search, setSearch] = useState('');
+
+    useEffect(() => {
+        if (!open || !diagnostic) return;
+        setSearch('');
+        setDate(diagnostic.date ? diagnostic.date.substring(0, 10) : '');
+        setSelected(new Set((diagnostic.evenements ?? []).map(e => e.id)));
+        setEventsLoading(true);
+        evenementService.getAll()
+            .then(res => setAllEvents(res.data?.evenements ?? []))
+            .finally(() => setEventsLoading(false));
+    }, [open, diagnostic]);
+
+    if (!open) return null;
+
+    const toggle = (id) => setSelected(prev => {
+        const next = new Set(prev);
+        next.has(id) ? next.delete(id) : next.add(id);
+        return next;
+    });
+
+    const filtered = allEvents.filter(e =>
+        e.type_evenement?.toLowerCase().includes(search.toLowerCase())
+    );
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        if (selected.size === 0) return;
+        onSubmit({ date, evenements: [...selected] });
+    };
+
+    return (
+        <div className="admin-modal-overlay">
+            <div className="admin-modal--lg">
+                <div className="admin-modal-header">
+                    <h3 className="admin-modal-title">
+                        Modifier le diagnostic — <span className="font-normal text-base">{diagnostic?.utilisateur?.name}</span>
+                    </h3>
+                    <button onClick={onClose} className="admin-modal-close"><X className="h-5 w-5" /></button>
+                </div>
+                <form onSubmit={handleSubmit} className="admin-modal-body--scroll">
+                    <Field label="Date du diagnostic">
+                        <input
+                            type="date"
+                            value={date}
+                            onChange={e => setDate(e.target.value)}
+                            className="admin-input"
+                        />
+                    </Field>
+
+                    <p className="text-sm text-gray-500 -mt-1">
+                        Événements sélectionnés —{' '}
+                        <span className="font-semibold text-gray-700">{selected.size}</span>
+                    </p>
+
+                    <input
+                        type="text"
+                        value={search}
+                        onChange={e => setSearch(e.target.value)}
+                        placeholder="Rechercher un événement..."
+                        className="admin-input"
+                    />
+
+                    {eventsLoading ? <Spinner /> : (
+                        <div className="border border-gray-200 rounded-lg divide-y divide-gray-100 max-h-64 overflow-y-auto">
+                            {filtered.map(ev => (
+                                <label key={ev.id} className="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={selected.has(ev.id)}
+                                        onChange={() => toggle(ev.id)}
+                                        className="w-4 h-4 accent-cesizen-green flex-shrink-0"
+                                    />
+                                    <span className="text-sm text-gray-700 flex-1">{ev.type_evenement}</span>
+                                    <span className="text-xs font-semibold text-gray-400 flex-shrink-0">{ev.points} pts</span>
+                                </label>
+                            ))}
+                            {filtered.length === 0 && (
+                                <p className="text-center text-sm text-gray-400 py-6">Aucun événement trouvé.</p>
+                            )}
+                        </div>
+                    )}
+
+                    <div className="admin-modal-footer">
+                        <button type="button" onClick={onClose} className="admin-modal-btn-cancel">Annuler</button>
+                        <button type="submit" disabled={loading || selected.size === 0} className="admin-modal-btn-submit">
+                            {loading ? 'Enregistrement...' : 'Enregistrer'}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+};
+
+const DiagnosticsUsersPanel = () => {
+    const [diagnostics, setDiagnostics] = useState([]);
+    const [meta, setMeta] = useState({ current_page: 1, last_page: 1, links: [] });
+    const [page, setPage] = useState(1);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [feedback, setFeedback] = useState(null);
+    const [deleteModal, setDeleteModal] = useState({ open: false, diag: null });
+    const [editModal, setEditModal] = useState({ open: false, diag: null });
+    const [actionLoading, setActionLoading] = useState(false);
+
+    const showFeedback = (type, message) => {
+        setFeedback({ type, message });
+        setTimeout(() => setFeedback(null), 5000);
+    };
+
+    const fetchData = async (p = 1) => {
+        setLoading(true);
+        setError(null);
+        try {
+            const res = await diagnosticService.adminGetAll(p);
+            const d = res.data;
+            setDiagnostics(d.data ?? []);
+            setMeta({ current_page: d.current_page ?? 1, last_page: d.last_page ?? 1, links: d.links ?? [] });
+        } catch {
+            setError('Impossible de charger les diagnostics.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => { fetchData(page); }, [page]);
+
+    const handleDelete = async () => {
+        setActionLoading(true);
+        try {
+            await diagnosticService.adminDelete(deleteModal.diag.id);
+            showFeedback('success', 'Diagnostic supprimé avec succès.');
+            setDeleteModal({ open: false, diag: null });
+            fetchData(page);
+        } catch {
+            showFeedback('error', 'Impossible de supprimer ce diagnostic.');
+        } finally { setActionLoading(false); }
+    };
+
+    const handleEdit = async (formData) => {
+        setActionLoading(true);
+        try {
+            await diagnosticService.adminUpdate(editModal.diag.id, formData);
+            showFeedback('success', 'Diagnostic mis à jour avec succès.');
+            setEditModal({ open: false, diag: null });
+            fetchData(page);
+        } catch (err) {
+            showFeedback('error', err.response?.data?.message || 'Impossible de modifier ce diagnostic.');
+        } finally { setActionLoading(false); }
+    };
+
+    return (
+        <div>
+            <div className="admin-panel-header">
+                <h2 className="admin-panel-title">Diagnostics des utilisateurs</h2>
+            </div>
+
+            <Feedback feedback={feedback} />
+
+            {loading ? <Spinner /> : error ? (
+                <div className="admin-error-banner">{error}</div>
+            ) : diagnostics.length === 0 ? (
+                <div className="admin-empty">
+                    <ClipboardList className="h-12 w-12 mx-auto mb-4 opacity-40" />
+                    <p className="admin-empty-title">Aucun diagnostic enregistré</p>
+                </div>
+            ) : (
+                <>
+                    <div className="admin-table-wrap">
+                        <table className="admin-table">
+                            <thead className="admin-thead">
+                                <tr>
+                                    <th className="admin-th">Utilisateur</th>
+                                    <th className="admin-th">Date du diagnostic</th>
+                                    <th className="admin-th">Score</th>
+                                    <th className="admin-th">Niveau</th>
+                                    <th className="admin-th">Événements</th>
+                                    <th className="admin-th admin-th--right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody className="admin-tbody">
+                                {diagnostics.map(diag => (
+                                    <tr key={diag.id} className="admin-tr">
+                                        <td className="admin-td--bold">{diag.utilisateur?.name ?? '—'}</td>
+                                        <td className="admin-td">{formatDate(diag.date ?? diag.created_at)}</td>
+                                        <td className="admin-td--bold">{diag.score} pts</td>
+                                        <td className="admin-td"><NiveauBadgeAdmin niveau={diag.niveau_stress} /></td>
+                                        <td className="admin-td">{diag.nombre_evenements ?? (diag.evenements?.length ?? '—')}</td>
+                                        <td className="admin-td--right">
+                                            <div className="admin-td-actions">
+                                                <button
+                                                    onClick={() => setEditModal({ open: true, diag })}
+                                                    className="admin-btn-action admin-btn-action--edit"
+                                                >
+                                                    <Pencil className="h-3.5 w-3.5" /> Modifier
+                                                </button>
+                                                <button
+                                                    onClick={() => setDeleteModal({ open: true, diag })}
+                                                    className="admin-btn-action admin-btn-action--delete"
+                                                >
+                                                    <Trash2 className="h-3.5 w-3.5" /> Supprimer
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {meta.last_page > 1 && (
+                        <div className="admin-pagination">
+                            <nav className="admin-pagination-nav">
+                                <button
+                                    onClick={() => setPage(p => Math.max(1, p - 1))}
+                                    disabled={meta.current_page === 1}
+                                    className="admin-page-btn admin-page-btn--idle admin-page-btn--first"
+                                >←</button>
+                                {Array.from({ length: meta.last_page }, (_, i) => i + 1).map(p => (
+                                    <button
+                                        key={p}
+                                        onClick={() => setPage(p)}
+                                        className={`admin-page-btn ${p === meta.current_page ? 'admin-page-btn--active' : 'admin-page-btn--idle'}`}
+                                    >{p}</button>
+                                ))}
+                                <button
+                                    onClick={() => setPage(p => Math.min(meta.last_page, p + 1))}
+                                    disabled={meta.current_page === meta.last_page}
+                                    className="admin-page-btn admin-page-btn--idle admin-page-btn--last"
+                                >→</button>
+                            </nav>
+                        </div>
+                    )}
+                </>
+            )}
+
+            <ConfirmModal
+                open={deleteModal.open}
+                title="Supprimer le diagnostic"
+                message={`Supprimer le diagnostic du ${deleteModal.diag ? formatDate(deleteModal.diag.date ?? deleteModal.diag.created_at) : ''} de "${deleteModal.diag?.utilisateur?.name}" ? Cette action est irréversible.`}
+                confirmLabel={actionLoading ? 'Suppression...' : 'Supprimer'}
+                confirmVariant="danger"
+                onConfirm={handleDelete}
+                onCancel={() => setDeleteModal({ open: false, diag: null })}
+            />
+            <EditDiagnosticAdminModal
+                open={editModal.open}
+                diagnostic={editModal.diag}
+                loading={actionLoading}
+                onSubmit={handleEdit}
+                onClose={() => setEditModal({ open: false, diag: null })}
+            />
+        </div>
+    );
+};
+
+/* ─────────────────────────────────────────
    Sidebar
 ───────────────────────────────────────── */
 const navItems = [
-    { key: 'users',            label: 'Utilisateurs',  icon: Users },
-    { key: 'informations',     label: 'Informations',   icon: FileText },
-    { key: 'categories',       label: 'Catégories',     icon: Tag },
-    { key: 'evenements',       label: 'Événements',     icon: CalendarDays },
-    { key: 'diagnostic-config', label: 'Diagnostic',   icon: Activity },
-    { key: 'settings',         label: 'Paramètres',     icon: Settings },
+    { key: 'users',              label: 'Utilisateurs',    icon: Users },
+    { key: 'informations',       label: 'Informations',    icon: FileText },
+    { key: 'categories',         label: 'Catégories',      icon: Tag },
+    { key: 'evenements',         label: 'Événements',      icon: CalendarDays },
+    { key: 'diagnostic-config',  label: 'Diagnostic',      icon: Activity },
+    { key: 'diagnostics-users',  label: 'Diagnostics utilisateurs', icon: ClipboardList },
+    { key: 'settings',           label: 'Paramètres',      icon: Settings },
 ];
 
 const Sidebar = ({ active, onChange, user, onLogout }) => (
@@ -1464,6 +1739,7 @@ const AdminDashboard = () => {
             case 'categories':        return <CategoriesPanel />;
             case 'evenements':        return <EvenementsPanel />;
             case 'diagnostic-config': return <DiagnosticConfigPanel />;
+            case 'diagnostics-users': return <DiagnosticsUsersPanel />;
             case 'settings':          return <SettingsPanel user={user} />;
             default:                  return <UsersPanel />;
         }

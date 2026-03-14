@@ -116,11 +116,17 @@ npm install
 
 ## Lancer l'application
 
-Depuis la racine du projet backend, un seul script lance tous les services (serveur Laravel + Vite) :
+Depuis la racine du projet backend :
 
 ```bash
 cd backend
-composer run dev
+php artisan serve
+```
+Depuis la racine du projet frontend et sur un autre terminal :
+
+```bash
+cd frontend
+npm run dev
 ```
 
 L'application est ensuite accessible à l'adresse affichée par Laravel, par défaut :

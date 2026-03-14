@@ -58,6 +58,10 @@ export const diagnosticService = {
     delete: (id) => api.delete(`/diagnostics/${id}`),
     getStats: () => api.get('/diagnostics/statistiques'),
     getRecents: () => api.get('/diagnostics/recents'),
+    // Admin
+    adminGetAll: (page = 1) => api.get(`/admin/diagnostics?page=${page}`),
+    adminUpdate: (id, data) => api.put(`/admin/diagnostics/${id}`, data),
+    adminDelete: (id) => api.delete(`/admin/diagnostics/${id}`),
 };
 
 // Événements de vie

@@ -60,6 +60,11 @@ Route::prefix('v1')->group(function () {
             Route::patch('users/{user}/toggle-active', [UserController::class, 'toggleActive']);
             Route::get('users/statistiques', [UserController::class, 'statistiques']);
             Route::apiResource('users', UserController::class);
+
+            // Diagnostics admin (tous les utilisateurs)
+            Route::get('admin/diagnostics', [DiagnosticStressController::class, 'adminIndex']);
+            Route::put('admin/diagnostics/{id}', [DiagnosticStressController::class, 'adminUpdate']);
+            Route::delete('admin/diagnostics/{id}', [DiagnosticStressController::class, 'adminDestroy']);
         });
 
         // --- Admin API Routes ---
