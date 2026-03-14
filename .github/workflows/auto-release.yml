@@ -4,80 +4,131 @@ on:
   pull_request:
     branches:
       - main
-    types: [closed] 
+    types: [closed]
 
 jobs:
   auto-release:
-    
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 
-      
-      - name: Get latest tag and bump version
-        id: get_tag
+          fetch-depth: 0
+
+      # ─────────────────────────────────────────────────────────
+      # Calcul du prochain tag SemVer (vMAJOR.MINOR.PATCH)
+      # Basé sur les conventional commits depuis le dernier tag :
+      #   BREAKING CHANGE / feat!:  → bump MAJOR
+      #   feat:                     → bump MINOR
+      #   fix: / perf: / autres     → bump PATCH
+      # ─────────────────────────────────────────────────────────
+      - name: Compute next SemVer from conventional commits
+        id: semver
         run: |
-          # Récupère uniquement les tags au format strict V.MAJOR.MINOR (ex: V.2.3)
-          # Ignore tous les autres formats (v0.0.2, V.v0.0.2, V.0.10, etc.)
-          LATEST_TAG=$(git tag --sort=-creatordate | grep -E '^V\.[0-9]+\.[0-9]+$' | head -1 || echo "V.0.0")
+          # Dernier tag en format strict vMAJOR.MINOR.PATCH
+          LATEST_TAG=$(git tag --sort=-creatordate | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -1 || echo "v0.0.0")
           echo "latest_tag=$LATEST_TAG" >> $GITHUB_OUTPUT
 
-          VERSION=$(echo "$LATEST_TAG" | sed 's/^V\.//')
+          VERSION=${LATEST_TAG#v}
           MAJOR=$(echo "$VERSION" | cut -d. -f1)
           MINOR=$(echo "$VERSION" | cut -d. -f2)
-          MAJOR=${MAJOR:-0}
-          MINOR=${MINOR:-0}
+          PATCH=$(echo "$VERSION" | cut -d. -f3)
 
-          # Incrémentation du MINOR
-          MINOR=$((MINOR + 1))
-
-          # Si MINOR dépasse 5 → on incrémente MAJOR et on remet MINOR à 0
-          if [ $MINOR -gt 5 ]; then
-            MINOR=0
-            MAJOR=$((MAJOR + 1))
+          # Récupère les messages de commits depuis le dernier tag
+          if [ "$LATEST_TAG" = "v0.0.0" ]; then
+            COMMITS=$(git log --pretty=format:"%s%n%b" --)
+          else
+            COMMITS=$(git log "$LATEST_TAG"..HEAD --pretty=format:"%s%n%b" --)
           fi
 
-          NEW_VERSION="V.$MAJOR.$MINOR"
+          # Détection du type de bump
+          BREAKING=$(echo "$COMMITS" | grep -cE "BREAKING CHANGE|^[a-z]+(\(.+\))?!:" || true)
+          FEAT=$(echo "$COMMITS" | grep -cE "^feat(\(.+\))?:" || true)
 
-          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
-          echo "Nouvelle version calculée: $NEW_VERSION"
-      
+          if [ "$BREAKING" -gt 0 ]; then
+            MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0
+            BUMP_TYPE="major"
+          elif [ "$FEAT" -gt 0 ]; then
+            MINOR=$((MINOR + 1)); PATCH=0
+            BUMP_TYPE="minor"
+          else
+            PATCH=$((PATCH + 1))
+            BUMP_TYPE="patch"
+          fi
+
+          NEW_TAG="v$MAJOR.$MINOR.$PATCH"
+          echo "new_tag=$NEW_TAG" >> $GITHUB_OUTPUT
+          echo "bump_type=$BUMP_TYPE" >> $GITHUB_OUTPUT
+          echo "Version bump: $BUMP_TYPE → $NEW_TAG"
+
       - name: Create Git Tag
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag -a ${{ steps.get_tag.outputs.new_version }} -m "Auto-release ${{ steps.get_tag.outputs.new_version }}"
-          git push origin ${{ steps.get_tag.outputs.new_version }}
-      
-      - name: Generate Release Notes
-        id: release_notes
+          git tag -a ${{ steps.semver.outputs.new_tag }} -m "Release ${{ steps.semver.outputs.new_tag }}"
+          git push origin ${{ steps.semver.outputs.new_tag }}
+
+      # ─────────────────────────────────────────────────────────
+      # Release notes catégorisées par type de commit
+      # ─────────────────────────────────────────────────────────
+      - name: Generate categorized release notes
         run: |
-          PREVIOUS_TAG="${{ steps.get_tag.outputs.latest_tag }}"
+          PREVIOUS_TAG="${{ steps.semver.outputs.latest_tag }}"
+          NEW_TAG="${{ steps.semver.outputs.new_tag }}"
 
-          echo "##  Changements dans cette Release" > release_notes.md
-          echo "" >> release_notes.md
-
-          # Si c'est le tout premier tag, on prend tous les commits
-          if [ "$PREVIOUS_TAG" = "V.0.0" ]; then
-            git log --pretty=format:"- %s (%h)" >> release_notes.md
+          if [ "$PREVIOUS_TAG" = "v0.0.0" ]; then
+            LOG=$(git log --pretty=format:"%s|%h" --)
           else
-            git log "$PREVIOUS_TAG"..HEAD --pretty=format:"- %s (%h)" >> release_notes.md
+            LOG=$(git log "$PREVIOUS_TAG"..HEAD --pretty=format:"%s|%h" --)
           fi
-          
-          echo "" >> release_notes.md
-          echo -e "\n**Date de release:** $(date +'%Y-%m-%d %H:%M:%S')" >> release_notes.md
-      
+
+          {
+            echo "## Changements dans $NEW_TAG"
+            echo ""
+
+            BREAKING=$(echo "$LOG" | grep -E "BREAKING CHANGE|^[a-z]+(\(.+\))?!:" || true)
+            FEATURES=$(echo "$LOG" | grep -E "^feat(\(.+\))?:" || true)
+            FIXES=$(echo "$LOG"    | grep -E "^fix(\(.+\))?:|^perf(\(.+\))?:" || true)
+            OTHERS=$(echo "$LOG"   | grep -vE "^(feat|fix|perf)(\(.+\))?:|BREAKING CHANGE|^[a-z]+(\(.+\))?!:" || true)
+
+            if [ -n "$BREAKING" ]; then
+              echo "### ⚠️ Breaking Changes"
+              echo "$BREAKING" | while IFS='|' read -r msg hash; do echo "- $msg (\`$hash\`)"; done
+              echo ""
+            fi
+
+            if [ -n "$FEATURES" ]; then
+              echo "### ✨ Nouvelles fonctionnalités"
+              echo "$FEATURES" | while IFS='|' read -r msg hash; do echo "- $msg (\`$hash\`)"; done
+              echo ""
+            fi
+
+            if [ -n "$FIXES" ]; then
+              echo "### 🐛 Corrections"
+              echo "$FIXES" | while IFS='|' read -r msg hash; do echo "- $msg (\`$hash\`)"; done
+              echo ""
+            fi
+
+            if [ -n "$OTHERS" ]; then
+              echo "### 🔧 Autres changements"
+              echo "$OTHERS" | while IFS='|' read -r msg hash; do echo "- $msg (\`$hash\`)"; done
+              echo ""
+            fi
+
+            echo "---"
+            echo "**Date de release :** $(date +'%Y-%m-%d %H:%M:%S UTC')"
+            echo "**Type de bump :** \`${{ steps.semver.outputs.bump_type }}\`"
+          } > release_notes.md
+
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2 
+        uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.get_tag.outputs.new_version }}
-          name: Release ${{ steps.get_tag.outputs.new_version }}
+          tag_name: ${{ steps.semver.outputs.new_tag }}
+          name: Release ${{ steps.semver.outputs.new_tag }}
           body_path: release_notes.md
           draft: false
           prerelease: false
