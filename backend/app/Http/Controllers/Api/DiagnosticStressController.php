@@ -308,4 +308,57 @@ class DiagnosticStressController extends Controller
             'diagnostics' => $diagnostics,
         ]);
     }
+
+    /* ─────────────────────────────────────────────
+       Routes Admin — tous les diagnostics
+    ───────────────────────────────────────────── */
+
+    public function adminIndex(Request $request)
+    {
+        $diagnostics = DiagnosticStress::with(['utilisateur', 'evenements'])
+            ->orderBy('date', 'desc')
+            ->paginate(15);
+
+        return response()->json($diagnostics);
+    }
+
+    public function adminUpdate(Request $request, $id)
+    {
+        $diagnostic = DiagnosticStress::findOrFail($id);
+
+        $request->validate([
+            'date'         => 'sometimes|date',
+            'evenements'   => 'sometimes|array|min:1',
+            'evenements.*' => 'exists:evenement_vies,id',
+        ]);
+
+        if ($request->has('date')) {
+            $diagnostic->date = $request->date;
+            $diagnostic->save();
+        }
+
+        if ($request->has('evenements')) {
+            $syncData = [];
+            foreach ($request->evenements as $evenementId) {
+                $syncData[$evenementId] = ['date_selection' => now()];
+            }
+            $diagnostic->evenements()->sync($syncData);
+            $diagnostic->calculerScore();
+        }
+
+        $diagnostic->load('evenements', 'utilisateur');
+
+        return response()->json([
+            'message'    => 'Diagnostic mis à jour',
+            'diagnostic' => $diagnostic,
+        ]);
+    }
+
+    public function adminDestroy($id)
+    {
+        $diagnostic = DiagnosticStress::findOrFail($id);
+        $diagnostic->delete();
+
+        return response()->json(['message' => 'Diagnostic supprimé avec succès']);
+    }
 }
