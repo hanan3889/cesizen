@@ -6,6 +6,9 @@ on:
       - release
     types: [closed]
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   prerelease:
     if: github.event.pull_request.merged == true
